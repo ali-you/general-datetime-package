@@ -1,4 +1,4 @@
-abstract class CalendarInterface<T> {
+abstract class CalendarInterface {
   CalendarInterface(
     this.year, [
     this.month = 1,
@@ -22,13 +22,7 @@ abstract class CalendarInterface<T> {
 
   String get name;
 
-  DateTime toGregorian(int year, int month, int day);
+  DateTime toDatetime();
 
-  T fromGregorian(DateTime date);
-
-  List<String> getMonths();
-
-  List<int> getDaysInMonth(int year, int month);
-
-  bool isLeapYear(int year);
+  bool get isLeapYear;
 }
