@@ -200,14 +200,14 @@ class JalaliDatetime extends CalendarInterface {
   }
 
   /// **Helper method to get month length**
-  static int _daysInJalaliMonth(int year, int month) {
+  int _daysInJalaliMonth(int year, int month) {
     if (month <= 6) return 31;
     if (month <= 11) return 30;
     return _isJalaliLeapYear(year) ? 30 : 29;
   }
 
   /// **Check if a Jalali year is leap**
-  static bool _isJalaliLeapYear(int year) {
+  bool _isJalaliLeapYear(int year) {
     final List<int> leapYears = [1, 5, 9, 13, 17, 22, 26, 30];
     return leapYears.contains(year % 33);
   }
