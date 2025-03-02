@@ -1,5 +1,5 @@
-name: general_date
-description: "general_date is an package to handle all calendars and dates. The powerful interfece can make any custom calendars"
+name: general_datetime
+description: "general_datetime is an package to handle all calendars and dates. The powerful interfece can make any custom calendars"
 version: 0.0.1
 homepage:
 

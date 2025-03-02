@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:general_date/src/jalali_datetime.dart';
+import 'package:general_datetime/src/jalali_datetime.dart';
 
 void main() {
   test('Convert Gregorian to Jalali - Normal Year', () {
@@ -79,80 +79,86 @@ void main() {
   });
 
   test('Convert Future Gregorian Date (2100-12-31)', () {
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime.utc(2100, 12, 31));
+    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2100, 12, 31));
     expect(j.toString(), "JalaliDatetime: 1479-10-10 0:0:0");
   });
 
   test('Convert Valid Jalali Leap Year Date (Esfand 30)', () {
     JalaliDatetime j = JalaliDatetime(1403, 12, 30); // Leap year
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(2025, 3, 20));
+    expect(g, DateTime(2025, 3, 20));
   });
 
   test('Convert Invalid Jalali Date in Non-Leap Year (Esfand 30 → Farvardin 1)', () {
     JalaliDatetime j = JalaliDatetime(1402, 12, 30); // Non-leap year
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(2024, 3, 20)); // Farvardin 1, 1403
+    expect(g, DateTime(2024, 3, 20)); // Farvardin 1, 1403
   });
 
   test('Convert Farvardin 1 to Gregorian (Nowruz)', () {
     JalaliDatetime j = JalaliDatetime(1403, 1, 1);
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(2024, 3, 20));
+    expect(g, DateTime(2024, 3, 20));
   });
 
   test('Convert Gregorian Dates Around Nowruz Transition', () {
     // Day before Nowruz
-    JalaliDatetime j1 = JalaliDatetime.fromDatetime(DateTime.utc(2024, 3, 19));
+    JalaliDatetime j1 = JalaliDatetime.fromDatetime(DateTime(2024, 3, 19));
     expect(j1.toString(), "JalaliDatetime: 1402-12-29 0:0:0");
 
     // Nowruz
-    JalaliDatetime j2 = JalaliDatetime.fromDatetime(DateTime.utc(2024, 3, 20));
+    JalaliDatetime j2 = JalaliDatetime.fromDatetime(DateTime(2024, 3, 20));
     expect(j2.toString(), "JalaliDatetime: 1403-1-1 0:0:0");
   });
 
   test('Adjust Invalid Jalali Month Day (Mehr 31 → Aban 1)', () {
     JalaliDatetime j = JalaliDatetime(1403, 7, 31); // Mehr has 30 days
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(2024, 10, 22)); // Aban 1, 1403
+    expect(g, DateTime(2024, 10, 22)); // Aban 1, 1403
   });
 
   test('Preserve Time Components with UTC DateTime', () {
-    DateTime gDate = DateTime.utc(2025, 3, 1, 14, 30, 45);
+    DateTime gDate = DateTime(2025, 3, 1, 14, 30, 45);
     JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
     expect(j.hour, 14);
     expect(j.minute, 30);
     expect(j.second, 45);
   });
 
+  test('Convert Shahrivar 30', () {
+    JalaliDatetime j = JalaliDatetime(1402, 6, 30); // Start of Jalali calendar
+    DateTime g = j.toDatetime();
+    expect(g, DateTime(2023, 9, 21)); // Gregorian equivalent
+  });
+
   test('Convert Oldest Jalali Date (Year 1)', () {
     JalaliDatetime j = JalaliDatetime(1, 1, 1); // Start of Jalali calendar
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(622, 3, 22)); // Gregorian equivalent
+    expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
   });
 
   test('Convert Shahrivar 31 (Valid 31-Day Month)', () {
     JalaliDatetime j = JalaliDatetime(1403, 6, 31); // Shahrivar ends on 31
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(2024, 9, 22));
+    expect(g, DateTime(2024, 9, 22));
   });
 
   test('Cross-Check Mid-Year Conversion (1403-04-15)', () {
     JalaliDatetime j = JalaliDatetime(1403, 4, 15); // Tir 15
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(2024, 7, 6));
+    expect(g, DateTime(2024, 7, 6));
   });
 
   test('Convert Gregorian to Jalali in Different Seasons', () {
     // Summer solstice in Gregorian (June 21)
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime.utc(2024, 6, 21));
+    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 6, 21));
     expect(j.toString(), "JalaliDatetime: 1403-4-1 0:0:0"); // Tir 1
   });
 
   test('Handle Large Jalali Year (Year 2000)', () {
     JalaliDatetime j = JalaliDatetime(2000, 1, 1);
     DateTime g = j.toDatetime();
-    expect(g, DateTime.utc(2621, 3, 21)); // Approximate conversion
+    expect(g, DateTime(2621, 3, 21)); // Approximate conversion
   });
 
 }

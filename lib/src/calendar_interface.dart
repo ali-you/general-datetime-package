@@ -1,4 +1,4 @@
-abstract class CalendarInterface {
+abstract class CalendarInterface implements Comparable<CalendarInterface> {
   CalendarInterface(
     this.year, [
     this.month = 1,
@@ -25,4 +25,17 @@ abstract class CalendarInterface {
   DateTime toDatetime();
 
   bool get isLeapYear;
+
+  Duration get time => Duration(
+    hours: hour,
+    minutes: minute,
+    seconds: second,
+    microseconds: microsecond,
+    milliseconds: millisecond,
+  );
+
+  int get weekday;
+
+  int get monthLength;
+
 }
