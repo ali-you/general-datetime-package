@@ -3,27 +3,27 @@ import 'calendar_interface.dart';
 class JalaliDatetime extends CalendarInterface {
   /// **Private constructor**
   JalaliDatetime._(
-      super.year, [
-        super.month,
-        super.day,
-        super.hour,
-        super.minute,
-        super.second,
-        super.millisecond,
-        super.microsecond,
-      ]);
+    super.year, [
+    super.month,
+    super.day,
+    super.hour,
+    super.minute,
+    super.second,
+    super.millisecond,
+    super.microsecond,
+  ]);
 
   /// **Factory constructor with normalization**
   factory JalaliDatetime(
-      int year, [
-        int month = 1,
-        int day = 1,
-        int hour = 0,
-        int minute = 0,
-        int second = 0,
-        int millisecond = 0,
-        int microsecond = 0,
-      ]) {
+    int year, [
+    int month = 1,
+    int day = 1,
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
+  ]) {
     return JalaliDatetime._(
       year,
       month,
@@ -37,16 +37,31 @@ class JalaliDatetime extends CalendarInterface {
   }
 
   /// **Factory constructor for converting from DateTime**
-  factory JalaliDatetime.fromDatetime(DateTime dateTime) {
+  factory JalaliDatetime.fromDatetime(DateTime datetime) {
     return JalaliDatetime._(
-      dateTime.year,
-      dateTime.month,
-      dateTime.day,
-      dateTime.hour,
-      dateTime.minute,
-      dateTime.second,
-      dateTime.millisecond,
-      dateTime.microsecond,
+      datetime.year,
+      datetime.month,
+      datetime.day,
+      datetime.hour,
+      datetime.minute,
+      datetime.second,
+      datetime.millisecond,
+      datetime.microsecond,
+    )._toJalali();
+  }
+
+  /// **Factory constructor for converting from DateTime**
+  factory JalaliDatetime.now() {
+    DateTime datetime = DateTime.now();
+    return JalaliDatetime._(
+      datetime.year,
+      datetime.month,
+      datetime.day,
+      datetime.hour,
+      datetime.minute,
+      datetime.second,
+      datetime.millisecond,
+      datetime.microsecond,
     )._toJalali();
   }
 
@@ -109,11 +124,11 @@ class JalaliDatetime extends CalendarInterface {
     int gy2 = (gm > 2) ? (gy + 1) : gy;
     int days =
         (365 * gy) +
-            ((gy2 + 3) ~/ 4) -
-            ((gy2 + 99) ~/ 100) +
-            ((gy2 + 399) ~/ 400) -
-            80 +
-            gd;
+        ((gy2 + 3) ~/ 4) -
+        ((gy2 + 99) ~/ 100) +
+        ((gy2 + 399) ~/ 400) -
+        80 +
+        gd;
     for (int i = 0; i < gm; ++i) days += gDM[i];
     jy += 33 * (days ~/ 12053);
     days %= 12053;
