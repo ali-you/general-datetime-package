@@ -1,5 +1,6 @@
-abstract class CalendarInterface implements Comparable<CalendarInterface> {
-  CalendarInterface(
+abstract class GeneralDatetimeInterface
+    implements Comparable<GeneralDatetimeInterface> {
+  GeneralDatetimeInterface(
     this.year, [
     this.month = 1,
     this.day = 1,
@@ -37,5 +38,4 @@ abstract class CalendarInterface implements Comparable<CalendarInterface> {
   int get weekday;
 
   int get monthLength;
-
 }

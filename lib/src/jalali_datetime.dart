@@ -1,6 +1,6 @@
-import 'calendar_interface.dart';
+import 'general_datetime_interface.dart';
 
-class JalaliDatetime extends CalendarInterface {
+class JalaliDatetime extends GeneralDatetimeInterface {
   /// **Private constructor**
   JalaliDatetime._(
     super.year, [
@@ -195,7 +195,7 @@ class JalaliDatetime extends CalendarInterface {
 
   /// **Compare Jalali dates**
   @override
-  int compareTo(CalendarInterface other) {
+  int compareTo(GeneralDatetimeInterface other) {
     return toDatetime().compareTo(other.toDatetime());
   }
 
