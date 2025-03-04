@@ -22,6 +22,9 @@
    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/ambient-light-plugin">
 </a>
 
+![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
+
+
 A Flutter plugin to access ambient light sensor data on Android, iOS and macOS. This plugin allows
 you to retrieve the current ambient light level and listen to continuous updates.
 
