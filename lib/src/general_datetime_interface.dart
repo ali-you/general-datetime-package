@@ -38,4 +38,6 @@ abstract class GeneralDatetimeInterface
   int get weekday;
 
   int get monthLength;
+
+  int get dayOfYear;
 }

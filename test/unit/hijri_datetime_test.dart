@@ -68,4 +68,113 @@ void main() {
       expect(hijri.day, inInclusiveRange(1, 3));
     });
   });
+  group('Time Normalization and Microsecond Overflow', () {
+    test('Extreme microsecond cascading overflow', () {
+      final dt = HijriDatetime(1444, 1, 1, 23, 59, 59, 999, 999999);
+      expect(dt.hour, equals(0));
+      expect(dt.minute, equals(0));
+      expect(dt.second, equals(0));
+      expect(dt.millisecond, equals(999));
+      expect(dt.microsecond, equals(999));
+    });
+
+    test('Negative time normalization', () {
+      final dt = HijriDatetime(1444, 1, 2, -2, -70, -125, -2000, -3000);
+      DateTime temp = DateTime(2025, 10, 5, -2, -30);
+      print(dt.toString());
+      print(temp.toString());
+      expect(dt.hour, inInclusiveRange(0, 23));
+      expect(dt.minute, inInclusiveRange(0, 59));
+      expect(dt.second, inInclusiveRange(0, 59));
+    });
+  });
+
+  group('Day/Month Boundary Stress Tests', () {
+    test('30-day month overflow with leap year impact', () {
+      final leapDay = HijriDatetime(1442, 12, 30);  // 1442 is leap year
+      final nonLeapDay = HijriDatetime(1443, 12, 30); // Non-leap year
+      expect(leapDay.month, equals(12));
+      expect(nonLeapDay.month, equals(1));
+      expect(nonLeapDay.year, equals(1444));
+    });
+
+    test('Multi-month cascading overflow', () {
+      final dt = HijriDatetime(1444, 1, 60);
+      expect(dt.month, equals(3));
+      expect(dt.day, inInclusiveRange(1, 2));
+    });
+  });
+
+  group('Leap Year Edge Cases', () {
+    test('Boundary condition ((11*year +14) %30 == 10)', () {
+      final edgeYear = ((30 * 5) - 14) ~/ 11; // Calculate exact boundary year
+      final dt = HijriDatetime(edgeYear);
+      expect(dt.isLeapYear, isTrue);
+    });
+
+    test('Year 1400 sequence verification', () {
+      final leapYears = [1442, 1475, 1508].map((y) => HijriDatetime(y));
+      expect(leapYears.every((dt) => dt.isLeapYear), isTrue);
+    });
+  });
+
+  group('Conversion Fidelity Tests', () {
+    test('Millisecond precision round-trip', () {
+      final original = DateTime.now().copyWith(microsecond: 456789);
+      final hijri = HijriDatetime.fromDatetime(original);
+      final roundTrip = hijri.toDatetime();
+      expect(roundTrip.difference(original).inMicroseconds.abs(), lessThan(2000));
+    });
+
+    test('Epoch boundary conversion', () {
+      final unixEpoch = DateTime.utc(1970);
+      final hijriEpoch = HijriDatetime.fromDatetime(unixEpoch);
+      expect(hijriEpoch.year, inInclusiveRange(1389, 1391));
+      expect(hijriEpoch.toDatetime().isAtSameMomentAs(unixEpoch), isTrue);
+    });
+  });
+
+  group('Historical Date Verification', () {
+    test('Gregorian 2023-03-23 → Ramadan 1, 1444', () {
+      final greg = DateTime(2023, 3, 23);
+      final hijri = HijriDatetime.fromDatetime(greg);
+      expect(hijri.month, equals(9));
+      expect(hijri.day, inInclusiveRange(1, 2));
+    });
+
+    test('Hijri 1400-1-1 → Gregorian crossover', () {
+      final hijri = HijriDatetime(1400, 1, 1);
+      final greg = hijri.toDatetime();
+      expect(greg.year, inInclusiveRange(1979, 1980));
+    });
+  });
+
+  group('Extreme Value Handling', () {
+    test('Year 35000 normalization', () {
+      final dt = HijriDatetime(35000, 13, 60, 25, 70, 70, 5000, 5000);
+      expect(dt.year, greaterThan(35000)); // Testing integer overflow protection
+      expect(dt.month, inInclusiveRange(1, 12));
+    });
+
+    test('Negative year calculation', () {
+      final dt = HijriDatetime(-500, 1, 1);
+      expect(dt.toDatetime(), isNotNull);
+    });
+  });
+
+  group('Calendar Consistency Checks', () {
+    test('Month length validation', () {
+      final oddMonth = HijriDatetime(1444, 1); // Muharram (30 days)
+      final evenMonth = HijriDatetime(1444, 2); // Safar (29 days)
+      expect(oddMonth.monthLength, equals(30));
+      expect(evenMonth.monthLength, equals(29));
+    });
+
+    // test('Day of year calculation', () {
+    //   final firstDay = HijriDatetime(1444, 1, 1);
+    //   final lastDay = HijriDatetime(1444, 12, 30);
+    //   expect(firstDay.dayOfYear, equals(1));
+    //   expect(lastDay.dayOfYear, equals(354)); // Standard non-leap year
+    // });
+  });
 }

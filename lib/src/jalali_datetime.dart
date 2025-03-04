@@ -217,4 +217,8 @@ class JalaliDatetime extends GeneralDatetimeInterface {
   String toString() {
     return "JalaliDatetime: $year-$month-$day $hour:$minute:$second";
   }
+
+  @override
+  // TODO: implement dayOfYear
+  int get dayOfYear => throw UnimplementedError();
 }

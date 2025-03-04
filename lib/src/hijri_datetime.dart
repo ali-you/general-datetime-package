@@ -105,11 +105,11 @@ class HijriDatetime extends GeneralDatetimeInterface {
       hYear,
       hMonth,
       hDay,
-      this.hour,
-      this.minute,
-      this.second,
-      this.millisecond,
-      this.microsecond,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
     );
   }
 
@@ -223,4 +223,8 @@ class HijriDatetime extends GeneralDatetimeInterface {
   String toString() {
     return "HijriDatetime (Umm al-Qura): $year-$month-$day $hour:$minute:$second";
   }
+
+  @override
+  // TODO: implement dayOfYear
+  int get dayOfYear => throw UnimplementedError();
 }
