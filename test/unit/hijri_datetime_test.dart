@@ -79,9 +79,11 @@ void main() {
     });
 
     test('Negative time normalization', () {
-      final dt = HijriDatetime(1444, 1, 2, -2, -70, -125, -2000, -3000);
+      final dt = HijriDatetime(-100, 1, 2, -2, -70, -125, -2000, -3000);
+      final jt = HijriDatetime.fromDatetime(DateTime(-100));
       DateTime temp = DateTime(2025, 10, 5, -2, -30);
       print(dt.toString());
+      print(jt.toString());
       print(temp.toString());
       expect(dt.hour, inInclusiveRange(0, 23));
       expect(dt.minute, inInclusiveRange(0, 59));

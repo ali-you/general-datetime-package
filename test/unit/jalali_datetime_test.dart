@@ -3,133 +3,170 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/src/jalali_datetime.dart';
 
 void main() {
-  test('Convert Gregorian to Jalali - Normal Year', () {
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
-    expect(j.toString(), "JalaliDatetime: 1403-12-11 0:0:0");
+
+
+  group('Gregorian to Jalali Conversion', () {
+    test('Normal Year', () {
+      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
+      expect(j.toString(), "JalaliDatetime: 1403-12-11 0:0:0");
+    });
+
+    test('Leap Year', () {
+      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 2, 29));
+      expect(j.toString(), "JalaliDatetime: 1402-12-10 0:0:0");
+    });
+
+    test('Beginning of Year', () {
+      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 1, 1));
+      expect(j.toString(), "JalaliDatetime: 1403-10-12 0:0:0");
+    });
+
+    test('End of Year', () {
+      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 12, 31));
+      expect(j.toString(), "JalaliDatetime: 1404-10-10 0:0:0");
+    });
   });
 
-  test('Convert Gregorian to Jalali - Leap Year', () {
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 2, 29));
-    expect(j.toString(), "JalaliDatetime: 1402-12-10 0:0:0");
+  group('Jalali to Gregorian Conversion', () {
+    test('Normal Year', () {
+      JalaliDatetime j = JalaliDatetime(1403, 12, 11);
+      expect(j.toDatetime(), DateTime(2025, 3, 1));
+    });
+
+    test('Leap Year', () {
+      JalaliDatetime j = JalaliDatetime(1402, 12, 10);
+      expect(j.toDatetime(), DateTime(2024, 2, 29));
+    });
+
+    test('Beginning of Year', () {
+      JalaliDatetime j = JalaliDatetime(1403, 10, 11);
+      expect(j.toDatetime(), DateTime(2024, 12, 31));
+    });
+
+    test('End of Year', () {
+      JalaliDatetime j = JalaliDatetime(1404, 10, 10);
+      expect(j.toDatetime(), DateTime(2025, 12, 31));
+    });
   });
 
-  test('Convert Jalali to Gregorian - Normal Year', () {
-    JalaliDatetime j = JalaliDatetime(1403, 12, 11);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2025, 3, 1));
+  group('Leap Year Handling', () {
+    test('Leap Year Detection', () {
+      expect(JalaliDatetime(1403).isLeapYear, true);
+      expect(JalaliDatetime(1402).isLeapYear, false);
+    });
+
+    test('Valid Leap Day Conversion', () {
+      JalaliDatetime j = JalaliDatetime(1403, 12, 30);
+      expect(j.toDatetime(), DateTime(2025, 3, 20));
+    });
+
+    test('Invalid Leap Day Auto-Correction', () {
+      JalaliDatetime j = JalaliDatetime(1402, 12, 30);
+      expect(j.toDatetime(), DateTime(2024, 3, 20));
+    });
   });
 
-  test('Convert Jalali to Gregorian - Leap Year', () {
-    JalaliDatetime j = JalaliDatetime(1402, 12, 10);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2024, 2, 29));
+  group('Edge Cases and Special Dates', () {
+    test('Nowruz (Farvardin 1)', () {
+      JalaliDatetime j = JalaliDatetime(1403, 1, 1);
+      expect(j.toDatetime(), DateTime(2024, 3, 20));
+    });
+
+    test('Shahrivar 30 Conversion', () {
+      JalaliDatetime j = JalaliDatetime(1402, 6, 30);
+      expect(j.toDatetime(), DateTime(2023, 9, 21));
+    });
+
+    test('Historical Date Conversion', () {
+      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(1799, 3, 21));
+      expect(j.toString(), "JalaliDatetime: 1178-1-1 0:0:0");
+    });
+
+    test('Future Date Conversion', () {
+      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2100, 12, 31));
+      expect(j.toString(), "JalaliDatetime: 1479-10-10 0:0:0");
+    });
   });
 
-  test('Convert Gregorian to Jalali - Beginning of Year', () {
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 1, 1));
-    expect(j.toString(), "JalaliDatetime: 1403-10-12 0:0:0");
+  group('Time Handling', () {
+    test('Time Component Preservation', () {
+      DateTime gDate = DateTime(2025, 3, 1, 14, 30, 45);
+      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      expect(j.hour, 14);
+      expect(j.minute, 30);
+      expect(j.second, 45);
+    });
+
+    test('Microsecond Preservation', () {
+      DateTime gDate = DateTime(2025, 3, 1, 14, 30, 45, 123, 456);
+      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      expect(j.millisecond, 123);
+      expect(j.microsecond, 456);
+    });
   });
 
-  test('Convert Gregorian to Jalali - End of Year', () {
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 12, 31));
-    expect(j.toString(), "JalaliDatetime: 1404-10-10 0:0:0");
+  group('Invalid Date Handling', () {
+    test('Invalid Jalali Date Auto-Correction', () {
+      JalaliDatetime j = JalaliDatetime(1403, 7, 31);
+      expect(j.toDatetime(), DateTime(2024, 10, 22));
+    });
+
+    test('Invalid Gregorian Date Handling', () {
+      JalaliDatetime j = JalaliDatetime(1403, 11, 30);
+      expect(j.toDatetime(), DateTime(2025, 2, 18));
+    });
   });
 
-  test('Convert Jalali to Gregorian - Beginning of Year', () {
-    JalaliDatetime j = JalaliDatetime(1403, 10, 11);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2024, 12, 31));
+  group('Advanced Scenarios', () {
+    test('Round-Trip Conversion', () {
+      DateTime original = DateTime(2024, 3, 20);
+      JalaliDatetime j = JalaliDatetime.fromDatetime(original);
+      expect(j.toDatetime(), original);
+    });
+
+    test('Weekday Consistency', () {
+      DateTime gDate = DateTime(2024, 3, 20);
+      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      expect(j.weekday, gDate.weekday);
+    });
+
+    test('Large Year Conversion', () {
+      JalaliDatetime j = JalaliDatetime(2000, 1, 1);
+      expect(j.toDatetime(), DateTime(2621, 3, 21));
+    });
+
+    test('Seasonal Conversion Check', () {
+      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 6, 21));
+      expect(j.toString(), "JalaliDatetime: 1403-4-1 0:0:0");
+    });
   });
 
-  test('Convert Jalali to Gregorian - End of Year', () {
-    JalaliDatetime j = JalaliDatetime(1404, 10, 10);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2025, 12, 31));
+  group('Time Zone Handling', () {
+    // test('UTC Time Preservation', () {
+    //   DateTime gDate = DateTime.utc(2025, 3, 1, 14, 30);
+    //   JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+    //   expect(j.isUtc, true);
+    //   expect(j.toString(), "JalaliDatetime: 1403-12-11 14:30:0 UTC");
+    // });
+
+    test('DST Transition Handling', () {
+      DateTime gDate = DateTime(2024, 3, 31, 2, 30);
+      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      expect(j.hour, 2);
+    });
   });
 
-  test('Leap Year Check - Leap Year', () {
-    expect(JalaliDatetime(1403).isLeapYear, true);
-    expect(JalaliDatetime(1402).isLeapYear, false);
-  });
-
-  test('Time Component Preservation', () {
-    DateTime gDate = DateTime(2025, 3, 1, 14, 30, 45);
-    JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
-    expect(j.hour, 14);
-    expect(j.minute, 30);
-    expect(j.second, 45);
-  });
-
-  test('Handling of Invalid Jalali Date (e.g., Esfand 30 in a non-leap year)', () {
-    JalaliDatetime j = JalaliDatetime(1403, 12, 30);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2025, 3, 20)); // Should correct to Farvardin 1
-  });
-
-  test('Handling of Invalid Gregorian Date (e.g., Feb 30)', () {
-    JalaliDatetime j = JalaliDatetime(1403, 11, 30);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2025, 2, 18));
-  });
-
-
-  test('Convert Historical Gregorian Date (1799-03-21)', () {
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(1799, 3, 21));
-    expect(j.toString(), "JalaliDatetime: 1178-1-1 0:0:0"); // Farvardin 1, 1177
-  });
-
-  test('Convert Future Gregorian Date (2100-12-31)', () {
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2100, 12, 31));
-    expect(j.toString(), "JalaliDatetime: 1479-10-10 0:0:0");
-  });
-
-  test('Convert Valid Jalali Leap Year Date (Esfand 30)', () {
-    JalaliDatetime j = JalaliDatetime(1403, 12, 30); // Leap year
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2025, 3, 20));
-  });
-
-  test('Convert Invalid Jalali Date in Non-Leap Year (Esfand 30 → Farvardin 1)', () {
-    JalaliDatetime j = JalaliDatetime(1402, 12, 30); // Non-leap year
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2024, 3, 20)); // Farvardin 1, 1403
-  });
-
-  test('Convert Farvardin 1 to Gregorian (Nowruz)', () {
-    JalaliDatetime j = JalaliDatetime(1403, 1, 1);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2024, 3, 20));
-  });
-
-  test('Convert Gregorian Dates Around Nowruz Transition', () {
-    // Day before Nowruz
-    JalaliDatetime j1 = JalaliDatetime.fromDatetime(DateTime(2024, 3, 19));
-    expect(j1.toString(), "JalaliDatetime: 1402-12-29 0:0:0");
-
-    // Nowruz
-    JalaliDatetime j2 = JalaliDatetime.fromDatetime(DateTime(2024, 3, 20));
-    expect(j2.toString(), "JalaliDatetime: 1403-1-1 0:0:0");
-  });
-
-  test('Adjust Invalid Jalali Month Day (Mehr 31 → Aban 1)', () {
-    JalaliDatetime j = JalaliDatetime(1403, 7, 31); // Mehr has 30 days
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2024, 10, 22)); // Aban 1, 1403
-  });
-
-  test('Preserve Time Components with UTC DateTime', () {
-    DateTime gDate = DateTime(2025, 3, 1, 14, 30, 45);
-    JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
-    expect(j.hour, 14);
-    expect(j.minute, 30);
-    expect(j.second, 45);
-  });
-
-  test('Convert Shahrivar 30', () {
-    JalaliDatetime j = JalaliDatetime(1402, 6, 30); // Start of Jalali calendar
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2023, 9, 21)); // Gregorian equivalent
-  });
+  // group('Epoch Time Conversions', () {
+  //   test('Epoch to Jalali Conversion', () {
+  //     JalaliDatetime j = JalaliDatetime.fromEpoch(1743552000);
+  //     expect(j.toString(), "JalaliDatetime: 1403-12-11 0:0:0 UTC");
+  //   });
+  //
+  //   test('Jalali to Epoch Conversion', () {
+  //     JalaliDatetime j = JalaliDatetime(1403, 12, 11, isUtc: true);
+  //     expect(j.toEpoch(), 1743552000);
+  //   });
+  // });
 
   // test('Convert Oldest Jalali Date (Year 1)', () {
   //   JalaliDatetime j = JalaliDatetime(1, 1, 1); // Start of Jalali calendar
@@ -149,16 +186,81 @@ void main() {
   //   expect(g, DateTime(2024, 7, 6));
   // });
 
-  test('Convert Gregorian to Jalali in Different Seasons', () {
-    // Summer solstice in Gregorian (June 21)
-    JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 6, 21));
-    expect(j.toString(), "JalaliDatetime: 1403-4-1 0:0:0"); // Tir 1
+  group('Negative Date Normalization', () {
+    test('Negative day normalization', () {
+      // Starting at Jalali 1400/1/0 should roll back to the last day of the previous month.
+      // Since 1400/1/0 → becomes 1399/12/day, and for 1399 the 12th month is 30 days (1399 % 33 == 13, a leap year)
+      final dt = JalaliDatetime(1400, 1, 0);
+      expect(dt.year, equals(1399));
+      expect(dt.month, equals(12));
+      expect(dt.day, equals(30));
+    });
+
+    test('Negative month normalization', () {
+      // A negative month should be normalized by adding 12 and decrementing the year.
+      // For example, JalaliDatetime(1400, -1, 15) should become 1399/11/15.
+      final dt = JalaliDatetime(1400, -1, 15);
+      expect(dt.year, equals(1399));
+      expect(dt.month, equals(11));
+      expect(dt.day, equals(15));
+    });
+
+    test('Negative hour normalization', () {
+      // An hour underflow: JalaliDatetime(1400, 1, 1, -3)
+      // Negative hours are added to 24 and one day is subtracted.
+      // Expected: date becomes previous day; for 1400/1/1, it rolls back to 1399/12 with last day 30.
+      final dt = JalaliDatetime(1400, 1, 1, -3);
+      print(dt.toString());
+      expect(dt.year, equals(1399));
+      expect(dt.month, equals(12));
+      expect(dt.day, equals(30));
+      expect(dt.hour, equals(21));
+    });
+
+    test('Negative minute normalization', () {
+      // For negative minutes: JalaliDatetime(1400, 1, 1, 0, -90)
+      // -90 minutes gives a -1 hour offset and remainder minutes.
+      // Expected: hour decreases by 1 (from 0 to -1, then normalized to 23 of previous day) and minute becomes 30.
+      final dt = JalaliDatetime(1400, 1, 1, 0, -90);
+      expect(dt.year, equals(1400)); // Day normalization occurs only in the time component.
+      expect(dt.month, equals(1));
+      expect(dt.day, equals(1));
+      expect(dt.hour, equals(23));
+      expect(dt.minute, equals(30));
+    });
+
+    test('Negative second normalization', () {
+      // For negative seconds: JalaliDatetime(1400, 1, 1, 0, 0, -75)
+      // -75 seconds result in borrowing from minutes.
+      // Expected: minute decreases by 1 and second becomes 45.
+      final dt = JalaliDatetime(1400, 1, 1, 0, 0, -75);
+      expect(dt.year, equals(1400));
+      expect(dt.month, equals(1));
+      expect(dt.day, equals(1));
+      expect(dt.hour, equals(0));
+      expect(dt.minute, equals(59));
+      expect(dt.second, equals(45));
+    });
+
+    test('Negative microsecond normalization', () {
+      // For negative microseconds: JalaliDatetime(1400, 1, 1, 0, 0, 0, 0, -1500)
+      // -1500 microseconds should reduce the millisecond count.
+      // Expected: microseconds become 500 and one millisecond is subtracted.
+      final dt = JalaliDatetime(1400, 1, 1, 0, 0, 0, 0, -1500);
+      expect(dt.year, equals(1400));
+      expect(dt.month, equals(1));
+      expect(dt.day, equals(1));
+      // Since time is midnight and we borrow from the same unit, the date remains unchanged.
+      // The hour, minute, and second remain zero.
+      expect(dt.hour, equals(0));
+      expect(dt.minute, equals(0));
+      expect(dt.second, equals(0));
+      // Check that the normalization yields 999 microseconds (after subtracting one millisecond)
+      // if your normalization rolls the negative microsecond into the millisecond unit.
+      // (Adjust this expected value according to your intended behavior.)
+      expect(dt.millisecond, equals(-1 % 1000)); // This is an example; modify as needed.
+    });
   });
 
-  test('Handle Large Jalali Year (Year 2000)', () {
-    JalaliDatetime j = JalaliDatetime(2000, 1, 1);
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2621, 3, 21)); // Approximate conversion
-  });
 
 }

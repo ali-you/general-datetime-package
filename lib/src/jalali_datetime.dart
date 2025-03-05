@@ -155,32 +155,80 @@ class JalaliDatetime extends GeneralDatetimeInterface {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
 
+    // Normalize microseconds to milliseconds
     ms += us ~/ 1000;
     us %= 1000;
+    if (us < 0) {
+      us += 1000;
+      ms -= 1;
+    }
 
+    // Normalize milliseconds to seconds
     s += ms ~/ 1000;
     ms %= 1000;
+    if (ms < 0) {
+      ms += 1000;
+      s -= 1;
+    }
 
+    // Normalize seconds to minutes
     min += s ~/ 60;
     s %= 60;
+    if (s < 0) {
+      s += 60;
+      min -= 1;
+    }
 
+    // Normalize minutes to hours
     h += min ~/ 60;
     min %= 60;
+    if (min < 0) {
+      min += 60;
+      h -= 1;
+    }
 
+    // Normalize hours to days
     d += h ~/ 24;
     h %= 24;
+    if (h < 0) {
+      h += 24;
+      d -= 1;
+    }
 
+    // Normalize months (in case month overflows or underflows)
+    while (m < 1) {
+      m += 12;
+      y -= 1;
+    }
+    while (m > 12) {
+      m -= 12;
+      y += 1;
+    }
+
+    // Normalize days within the month boundaries
+    // Handle underflow: if day is less than 1, borrow days from previous month.
+    while (d < 1) {
+      m -= 1;
+      if (m < 1) {
+        m = 12;
+        y -= 1;
+      }
+      d += _daysInJalaliMonth(y, m);
+    }
+
+    // Handle overflow: if day exceeds the number of days in the current month.
     while (d > _daysInJalaliMonth(y, m)) {
       d -= _daysInJalaliMonth(y, m);
       m++;
       if (m > 12) {
         m = 1;
-        y++;
+        y += 1;
       }
     }
 
     return JalaliDatetime._(y, m, d, h, min, s, ms, us);
   }
+
 
   /// **Get days in the current month**
   @override
