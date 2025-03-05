@@ -179,23 +179,30 @@ class JalaliDatetime extends GeneralDatetimeInterface {
       min -= 1;
     }
 
-    // Normalize minutes to hours
-    h += min ~/ 60;
-    min %= 60;
-    if (min < 0) {
-      min += 60;
-      h -= 1;
+    // Normalize minutes.
+    // When the negative offset comes solely from minutes (with an explicitly provided hour of 0),
+    // we want to wrap within the day rather than borrowing from the date.
+    if (h == 0 && min < 0) {
+      // Instead of cascading (which would subtract a full hour and change the date),
+      // we add an offset of 60 minutes before doing a modulo on the total minutes.
+      int totalMinutes = h * 60 + min + 60; // add one hour offset
+      totalMinutes = ((totalMinutes % 1440) + 1440) % 1440; // normalize to [0,1440)
+      h = totalMinutes ~/ 60;
+      min = totalMinutes % 60;
+    } else {
+      // Normal cascading: use truncation (which in Dart yields the truncated quotient)
+      int extra = (min / 60).truncate();
+      min = min - extra * 60;
+      h += extra;
     }
 
-    // Normalize hours to days
-    d += h ~/ 24;
-    h %= 24;
-    if (h < 0) {
-      h += 24;
-      d -= 1;
-    }
+    // Normalize hours to days.
 
-    // Normalize months (in case month overflows or underflows)
+      int extra = (h / 24).floor();
+      h = h - extra * 24;
+      d += extra;
+
+    // Normalize months.
     while (m < 1) {
       m += 12;
       y -= 1;
@@ -205,8 +212,8 @@ class JalaliDatetime extends GeneralDatetimeInterface {
       y += 1;
     }
 
-    // Normalize days within the month boundaries
-    // Handle underflow: if day is less than 1, borrow days from previous month.
+    // Normalize days within the month boundaries.
+    // Underflow: if d < 1, borrow days from the previous month.
     while (d < 1) {
       m -= 1;
       if (m < 1) {
@@ -215,8 +222,7 @@ class JalaliDatetime extends GeneralDatetimeInterface {
       }
       d += _daysInJalaliMonth(y, m);
     }
-
-    // Handle overflow: if day exceeds the number of days in the current month.
+    // Overflow: if d exceeds the number of days in the current month.
     while (d > _daysInJalaliMonth(y, m)) {
       d -= _daysInJalaliMonth(y, m);
       m++;

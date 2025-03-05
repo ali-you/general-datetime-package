@@ -3,8 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/src/jalali_datetime.dart';
 
 void main() {
-
-
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
@@ -259,6 +257,15 @@ void main() {
       // if your normalization rolls the negative microsecond into the millisecond unit.
       // (Adjust this expected value according to your intended behavior.)
       expect(dt.millisecond, equals(-1 % 1000)); // This is an example; modify as needed.
+    });
+
+    test('Negative day with hour zero', () {
+      final dt = JalaliDatetime(1402, 9, 2, 0, -90);
+      expect(dt.year, equals(1402));
+      expect(dt.month, equals(9));
+      expect(dt.day, equals(1));
+      expect(dt.hour, equals(22));
+      expect(dt.minute, equals(30));
     });
   });
 

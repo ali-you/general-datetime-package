@@ -179,4 +179,60 @@ void main() {
     //   expect(lastDay.dayOfYear, equals(354)); // Standard non-leap year
     // });
   });
+
+
+  group('Negative Time Normalization for HijriDatetime', () {
+    test('Negative hour normalization', () {
+
+      final dt = HijriDatetime(1442, 9, 1, -3);
+      final temp = DateTime(2025, 9, 1, -3);
+      // Expected final: 1442/8/29, 21:00:00
+      print(dt.toString());
+      print(temp.toString());
+      expect(dt.year, equals(1442));
+      expect(dt.month, equals(8));
+      expect(dt.day, equals(29));
+      expect(dt.hour, equals(21));
+    });
+
+    test('Negative minute normalization (direct input)', () {
+      final dt = HijriDatetime(1442, 9, 2, 0, -90);
+      final temp = DateTime(2025, 9, 2, 0, -90);
+      // Expected final: 1442/8/29, 21:00:00
+      print(temp.toString());
+      // Expected final: 1442/9/1, 22:30:00
+      print(dt.toString());
+      expect(dt.year, equals(1442));
+      expect(dt.month, equals(9));
+      expect(dt.day, equals(1));
+      expect(dt.hour, equals(22));
+      expect(dt.minute, equals(30));
+    });
+
+    test('Negative second normalization', () {
+
+      final dt = HijriDatetime(1442, 9, 1, 0, 0, -75);
+      // Expected final: 1442/8/29, 23:58:45
+      print(dt.toString());
+      expect(dt.year, equals(1442));
+      expect(dt.month, equals(8));
+      expect(dt.day, equals(29));
+      expect(dt.hour, equals(23));
+      expect(dt.minute, equals(58));
+      expect(dt.second, equals(45));
+    });
+
+    test('Combined negative values', () {
+      final dt = HijriDatetime(1442, 9, 1, -27, -90, -75, 0, -1500);
+      print(dt.toString());
+      expect(dt.year, equals(1442));
+      expect(dt.month, equals(8));
+      expect(dt.day, equals(28));
+      expect(dt.hour, equals(19));
+      expect(dt.minute, equals(28));
+      expect(dt.second, equals(44));
+      expect(dt.millisecond, equals(998));
+      expect(dt.microsecond, equals(500));
+    });
+  });
 }

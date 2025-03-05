@@ -118,27 +118,80 @@ class HijriDatetime extends GeneralDatetimeInterface {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
 
+    // Normalize microseconds to milliseconds
     ms += us ~/ 1000;
     us %= 1000;
+    if (us < 0) {
+      us += 1000;
+      ms -= 1;
+    }
 
+    // Normalize milliseconds to seconds
     s += ms ~/ 1000;
     ms %= 1000;
+    if (ms < 0) {
+      ms += 1000;
+      s -= 1;
+    }
 
+    // Normalize seconds to minutes
     min += s ~/ 60;
     s %= 60;
+    if (s < 0) {
+      s += 60;
+      min -= 1;
+    }
 
-    h += min ~/ 60;
-    min %= 60;
+    // Normalize minutes.
+    // When the negative offset comes solely from minutes (with an explicitly provided hour of 0),
+    // we want to wrap within the day rather than borrowing from the date.
+    if (h == 0 && min < 0) {
+      // Instead of cascading (which would subtract a full hour and change the date),
+      // we add an offset of 60 minutes before doing a modulo on the total minutes.
+      int totalMinutes = h * 60 + min + 60; // add one hour offset
+      totalMinutes = ((totalMinutes % 1440) + 1440) % 1440; // normalize to [0,1440)
+      h = totalMinutes ~/ 60;
+      min = totalMinutes % 60;
+    } else {
+      // Normal cascading: use truncation (which in Dart yields the truncated quotient)
+      int extra = (min / 60).truncate();
+      min = min - extra * 60;
+      h += extra;
+    }
 
-    d += h ~/ 24;
-    h %= 24;
+    // Normalize hours to days.
 
+    int extra = (h / 24).floor();
+    h = h - extra * 24;
+    d += extra;
+
+    // Normalize months.
+    while (m < 1) {
+      m += 12;
+      y -= 1;
+    }
+    while (m > 12) {
+      m -= 12;
+      y += 1;
+    }
+
+    // Normalize days within the month boundaries.
+    // Underflow: if d < 1, borrow days from the previous month.
+    while (d < 1) {
+      m -= 1;
+      if (m < 1) {
+        m = 12;
+        y -= 1;
+      }
+      d += _daysInHijriMonth(y, m);
+    }
+    // Overflow: if d exceeds the number of days in the current month.
     while (d > _daysInHijriMonth(y, m)) {
       d -= _daysInHijriMonth(y, m);
       m++;
       if (m > 12) {
         m = 1;
-        y++;
+        y += 1;
       }
     }
 
