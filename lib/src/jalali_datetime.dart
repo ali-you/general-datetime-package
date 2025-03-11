@@ -33,6 +33,7 @@ class JalaliDatetime extends GeneralDatetimeInterface {
       second,
       millisecond,
       microsecond,
+    // ).testNormal();
     )._normalize();
   }
 
@@ -150,59 +151,216 @@ class JalaliDatetime extends GeneralDatetimeInterface {
     );
   }
 
-  /// **Normalize values (overflow handling)**
-  JalaliDatetime _normalize() {
+  JalaliDatetime testNormal() {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
 
-    // Normalize microseconds to milliseconds
+    // Normalize microseconds to milliseconds.
     ms += us ~/ 1000;
-    us %= 1000;
+    // us %= 1000;
+    us = us.remainder(1000);
     if (us < 0) {
       us += 1000;
       ms -= 1;
     }
 
-    // Normalize milliseconds to seconds
+    // Normalize milliseconds to seconds.
     s += ms ~/ 1000;
-    ms %= 1000;
+    // ms %= 1000;
+    ms = ms.remainder(1000);
     if (ms < 0) {
       ms += 1000;
       s -= 1;
     }
 
-    // Normalize seconds to minutes
+    // Normalize seconds to minutes.
     min += s ~/ 60;
-    s %= 60;
+    // s %= 60;
+    s = s.remainder(60);
     if (s < 0) {
       s += 60;
       min -= 1;
     }
 
-    // Normalize minutes.
-    // When the negative offset comes solely from minutes (with an explicitly provided hour of 0),
-    // we want to wrap within the day rather than borrowing from the date.
-    if (h == 0 && min < 0) {
-      // Instead of cascading (which would subtract a full hour and change the date),
-      // we add an offset of 60 minutes before doing a modulo on the total minutes.
-      int totalMinutes = h * 60 + min + 60; // add one hour offset
-      totalMinutes = ((totalMinutes % 1440) + 1440) % 1440; // normalize to [0,1440)
-      h = totalMinutes ~/ 60;
-      min = totalMinutes % 60;
-    } else {
-      // Normal cascading: use truncation (which in Dart yields the truncated quotient)
-      int extra = (min / 60).truncate();
-      min = min - extra * 60;
-      h += extra;
+    // Normalize minute to hour.
+    h += min ~/ 60;
+    // min %= 60;
+    min = min.remainder(60);
+    if (min < 0) {
+      min += 60;
+      h -= 1;
+    }
+
+    // Normalize hour to day.
+    d += h ~/ 24;
+    // h %= 24;
+    h = h.remainder(24);
+    if (h < 0) {
+      h += 24;
+      d -= 1;
+    }
+
+    // Normalize day to month.
+    d += h ~/ 24;
+    // h %= 24;
+    h = h.remainder(24);
+    if (h < 0) {
+      h += 24;
+      d -= 1;
+    }
+
+    // Capture the original provided day.
+    // int initialDay = day;
+    //
+    // // Normalize minutes.
+    // // If the provided day is 1, use ceiling division so that negative minutes
+    // // only adjust the time-of-day without changing the date.
+    // // Otherwise, use floor division to cascade into the date.
+    // if (initialDay == 1 && h == 0) {
+    //   int extra = (min / 60).ceil();
+    //   // For example, for min = -90, (-90/60) = -1.5, ceil gives -1.
+    //   min = min - extra * 60; // -90 - (-1*60) = -30.
+    //   h += extra;            // 0 + (-1) = -1.
+    //   // Now adjust the negative remainder: add 60.
+    //   if (min < 0) {
+    //     min += 60;
+    //     // We don’t cascade a further hour; we want to keep the date.
+    //   }
+    // } else {
+    //   int extra = (min / 60).floor();
+    //   min = min - extra * 60;
+    //   h += extra;
+    // }
+    //
+    // // Normalize seconds.
+    // // If the provided day is 1 and the time-of-day is all zero so far,
+    // // use ceiling division so that negative seconds wrap without borrowing from the date.
+    // if (initialDay == 1 && h == 0 && min == 0) {
+    //   int extra = (s / 60).ceil();
+    //   s = s - extra * 60;
+    //   min += extra;
+    //   if (s < 0) {
+    //     s += 60;
+    //   }
+    // } else {
+    //   int extra = (s / 60).floor();
+    //   s = s - extra * 60;
+    //   min += extra;
+    // }
+    //
+    // // Now cascade minutes to hours (if any change occurred from seconds normalization).
+    //     {
+    //   int extra = (min / 60).floor();
+    //   min = min - extra * 60;
+    //   h += extra;
+    // }
+    //
+    // // Cascade hours to days normally.
+    //     {
+    //   int extra = (h / 24).floor();
+    //   h = h - extra * 24;
+    //   d += extra;
+    // }
+    //
+    // // Normalize months.
+    // while (m < 1) {
+    //   m += 12;
+    //   y -= 1;
+    // }
+    // while (m > 12) {
+    //   m -= 12;
+    //   y += 1;
+    // }
+    //
+    // // Normalize days within the month boundaries.
+    // // Underflow: if day < 1, borrow days from the previous month.
+    // while (d < 1) {
+    //   m -= 1;
+    //   if (m < 1) {
+    //     m = 12;
+    //     y -= 1;
+    //   }
+    //   d += _daysInJalaliMonth(y, m);
+    // }
+    // // Overflow: if day exceeds the number of days in the current month.
+    // while (d > _daysInJalaliMonth(y, m)) {
+    //   d -= _daysInJalaliMonth(y, m);
+    //   m++;
+    //   if (m > 12) {
+    //     m = 1;
+    //     y += 1;
+    //   }
+    // }
+
+    final temp = DateTime(year, month, day, hour, minute, second, millisecond, microsecond);
+    return JalaliDatetime._(y, m, d, h, min, s, ms, us);
+  }
+
+
+  /// **Normalize values (overflow handling)**
+  JalaliDatetime _normalize() {
+    int y = year, m = month, d = day;
+    int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
+
+    // Normalize microseconds to milliseconds.
+    ms += us ~/ 1000;
+    us = us.remainder(1000);
+    if (us < 0) {
+      us += 1000;
+      ms -= 1;
+    }
+
+    // Normalize milliseconds to seconds.
+    s += ms ~/ 1000;
+    ms = ms.remainder(1000);
+    if (ms < 0) {
+      ms += 1000;
+      s -= 1;
+    }
+
+    // Normalize seconds to minutes.
+    min += s ~/ 60;
+    s = s.remainder(60);
+    if (s < 0) {
+      s += 60;
+      min -= 1;
+    }
+
+    // Normalize minutes to hours.
+    h += min ~/ 60;
+    min = min.remainder(60);
+    if (min < 0) {
+      min += 60;
+      h -= 1;
     }
 
     // Normalize hours to days.
+    d += h ~/ 24;
+    h = h.remainder(24);
+    if (h < 0) {
+      h += 24;
+      d -= 1;
+    }
 
-      int extra = (h / 24).floor();
-      h = h - extra * 24;
-      d += extra;
+    // Normalize days to months.
+    while (d < 1) {
+      m -= 1;
+      if (m < 1) {
+        m = 12;
+        y -= 1;
+      }
+      d += _daysInJalaliMonth(y, m);
+    }
+    while (d > _daysInJalaliMonth(y, m)) {
+      d -= _daysInJalaliMonth(y, m);
+      m += 1;
+      if (m > 12) {
+        m = 1;
+        y += 1;
+      }
+    }
 
-    // Normalize months.
+    // Normalize months to years.
     while (m < 1) {
       m += 12;
       y -= 1;
@@ -212,28 +370,9 @@ class JalaliDatetime extends GeneralDatetimeInterface {
       y += 1;
     }
 
-    // Normalize days within the month boundaries.
-    // Underflow: if d < 1, borrow days from the previous month.
-    while (d < 1) {
-      m -= 1;
-      if (m < 1) {
-        m = 12;
-        y -= 1;
-      }
-      d += _daysInJalaliMonth(y, m);
-    }
-    // Overflow: if d exceeds the number of days in the current month.
-    while (d > _daysInJalaliMonth(y, m)) {
-      d -= _daysInJalaliMonth(y, m);
-      m++;
-      if (m > 12) {
-        m = 1;
-        y += 1;
-      }
-    }
-
     return JalaliDatetime._(y, m, d, h, min, s, ms, us);
   }
+
 
 
   /// **Get days in the current month**

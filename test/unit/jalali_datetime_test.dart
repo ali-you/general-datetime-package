@@ -220,11 +220,12 @@ void main() {
       // -90 minutes gives a -1 hour offset and remainder minutes.
       // Expected: hour decreases by 1 (from 0 to -1, then normalized to 23 of previous day) and minute becomes 30.
       final dt = JalaliDatetime(1400, 1, 1, 0, -90);
-      expect(dt.year, equals(1400)); // Day normalization occurs only in the time component.
-      expect(dt.month, equals(1));
-      expect(dt.day, equals(1));
-      expect(dt.hour, equals(23));
-      expect(dt.minute, equals(30));
+      final gt = DateTime(2025, 1, 1, 0, -90);
+      expect(dt.year, equals(1399)); // Day normalization occurs only in the time component.
+      expect(dt.month, equals(12));
+      expect(dt.day, equals(30));
+      expect(dt.hour, gt.hour);
+      expect(dt.minute, gt.minute);
     });
 
     test('Negative second normalization', () {
@@ -232,11 +233,14 @@ void main() {
       // -75 seconds result in borrowing from minutes.
       // Expected: minute decreases by 1 and second becomes 45.
       final dt = JalaliDatetime(1400, 1, 1, 0, 0, -75);
-      expect(dt.year, equals(1400));
-      expect(dt.month, equals(1));
-      expect(dt.day, equals(1));
-      expect(dt.hour, equals(0));
-      expect(dt.minute, equals(59));
+      final gt = DateTime(1400, 1, 1, 0, 0, -75);
+      print(dt.toString());
+      print(gt.toString());
+      expect(dt.year, equals(1399));
+      expect(dt.month, equals(12));
+      expect(dt.day, equals(30));
+      expect(dt.hour, equals(23));
+      expect(dt.minute, equals(58));
       expect(dt.second, equals(45));
     });
 
@@ -261,11 +265,29 @@ void main() {
 
     test('Negative day with hour zero', () {
       final dt = JalaliDatetime(1402, 9, 2, 0, -90);
+      print(DateTime(2025, 8, -1, 0));
+      print(dt.toString());
       expect(dt.year, equals(1402));
       expect(dt.month, equals(9));
       expect(dt.day, equals(1));
       expect(dt.hour, equals(22));
       expect(dt.minute, equals(30));
+    });
+
+    test('test normal', () {
+      final dt = JalaliDatetime(1402, 9, 1, 0, -90);
+      final gt = DateTime(2025, 9, 1, 0, -90);
+      final test = DateTime(2025, 10, 10, 10, -70);
+
+      print("test$test");
+      print(gt.toString());
+      print(dt.toString());
+      // expect(dt.month, gt.month);
+      // expect(dt.day, gt.day);
+      expect(dt.hour, gt.hour);
+      expect(dt.minute, gt.minute);
+      expect(dt.second, gt.second);
+      expect(dt.millisecond, gt.millisecond);
     });
   });
 
