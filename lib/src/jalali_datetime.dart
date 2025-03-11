@@ -33,7 +33,7 @@ class JalaliDatetime extends GeneralDatetimeInterface {
       second,
       millisecond,
       microsecond,
-    // ).testNormal();
+      // ).testNormal();
     )._normalize();
   }
 
@@ -226,8 +226,6 @@ class JalaliDatetime extends GeneralDatetimeInterface {
 
     return JalaliDatetime._(y, m, d, h, min, s, ms, us);
   }
-
-
 
   /// **Get days in the current month**
   @override
