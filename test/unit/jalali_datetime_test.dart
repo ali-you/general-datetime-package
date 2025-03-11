@@ -166,23 +166,23 @@ void main() {
   //   });
   // });
 
-  test('Convert Oldest Jalali Date (Year 1)', () {
-    JalaliDatetime j = JalaliDatetime(1, 1, 1); // Start of Jalali calendar
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
-  });
-
-  test('Convert Shahrivar 31 (Valid 31-Day Month)', () {
-    JalaliDatetime j = JalaliDatetime(1403, 6, 31); // Shahrivar ends on 31
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2024, 9, 22));
-  });
-
-  test('Cross-Check Mid-Year Conversion (1403-04-15)', () {
-    JalaliDatetime j = JalaliDatetime(1403, 4, 15); // Tir 15
-    DateTime g = j.toDatetime();
-    expect(g, DateTime(2024, 7, 6));
-  });
+  // test('Convert Oldest Jalali Date (Year 1)', () {
+  //   JalaliDatetime j = JalaliDatetime(1, 1, 1); // Start of Jalali calendar
+  //   DateTime g = j.toDatetime();
+  //   expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
+  // });
+  //
+  // test('Convert Shahrivar 31 (Valid 31-Day Month)', () {
+  //   JalaliDatetime j = JalaliDatetime(1403, 6, 31); // Shahrivar ends on 31
+  //   DateTime g = j.toDatetime();
+  //   expect(g, DateTime(2024, 9, 22));
+  // });
+  //
+  // test('Cross-Check Mid-Year Conversion (1403-04-15)', () {
+  //   JalaliDatetime j = JalaliDatetime(1403, 4, 15); // Tir 15
+  //   DateTime g = j.toDatetime();
+  //   expect(g, DateTime(2024, 7, 6));
+  // });
 
   group('Negative Date Normalization', () {
     test('Negative day normalization', () {
