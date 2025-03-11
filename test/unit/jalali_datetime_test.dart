@@ -6,22 +6,22 @@ void main() {
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
-      expect(j.toString(), "JalaliDatetime: 1403-12-11 0:0:0");
+      expect(j.toString(), "1403-12-11 00:00:00.000");
     });
 
     test('Leap Year', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 2, 29));
-      expect(j.toString(), "JalaliDatetime: 1402-12-10 0:0:0");
+      expect(j.toString(), "1402-12-10 00:00:00.000");
     });
 
     test('Beginning of Year', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 1, 1));
-      expect(j.toString(), "JalaliDatetime: 1403-10-12 0:0:0");
+      expect(j.toString(), "1403-10-12 00:00:00.000");
     });
 
     test('End of Year', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 12, 31));
-      expect(j.toString(), "JalaliDatetime: 1404-10-10 0:0:0");
+      expect(j.toString(), "1404-10-10 00:00:00.000");
     });
   });
 
@@ -77,12 +77,12 @@ void main() {
 
     test('Historical Date Conversion', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(1799, 3, 21));
-      expect(j.toString(), "JalaliDatetime: 1178-1-1 0:0:0");
+      expect(j.toString(), "1178-01-01 00:00:00.000");
     });
 
     test('Future Date Conversion', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2100, 12, 31));
-      expect(j.toString(), "JalaliDatetime: 1479-10-10 0:0:0");
+      expect(j.toString(), "1479-10-10 00:00:00.000");
     });
   });
 
@@ -135,7 +135,7 @@ void main() {
 
     test('Seasonal Conversion Check', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 6, 21));
-      expect(j.toString(), "JalaliDatetime: 1403-4-1 0:0:0");
+      expect(j.toString(), "1403-04-01 00:00:00.000");
     });
   });
 
@@ -249,18 +249,22 @@ void main() {
       // -1500 microseconds should reduce the millisecond count.
       // Expected: microseconds become 500 and one millisecond is subtracted.
       final dt = JalaliDatetime(1400, 1, 1, 0, 0, 0, 0, -1500);
-      expect(dt.year, equals(1400));
-      expect(dt.month, equals(1));
-      expect(dt.day, equals(1));
+      final gt = DateTime(1400, 1, 1, 0, 0, 0, 0, -1500);
+      print(dt.toString());
+      print(gt.toString());
+      expect(dt.year, equals(1399));
+      expect(dt.month, equals(12));
+      expect(dt.day, equals(30));
       // Since time is midnight and we borrow from the same unit, the date remains unchanged.
       // The hour, minute, and second remain zero.
-      expect(dt.hour, equals(0));
-      expect(dt.minute, equals(0));
-      expect(dt.second, equals(0));
+      expect(dt.hour, equals(23));
+      expect(dt.minute, equals(59));
+      expect(dt.second, equals(59));
       // Check that the normalization yields 999 microseconds (after subtracting one millisecond)
       // if your normalization rolls the negative microsecond into the millisecond unit.
       // (Adjust this expected value according to your intended behavior.)
-      expect(dt.millisecond, equals(-1 % 1000)); // This is an example; modify as needed.
+      expect(dt.millisecond, equals(998)); // This is an example; modify as needed.
+      expect(dt.microsecond, equals(500)); // This is an example; modify as needed.
     });
 
     test('Negative day with hour zero', () {
