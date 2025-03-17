@@ -41,6 +41,8 @@ abstract class GeneralDatetimeInterface
 
   int get dayOfYear;
 
+  int get julianDay;
+
   String _twoDigits(int n) {
     if (n >= 10) return "$n";
     return "0$n";
