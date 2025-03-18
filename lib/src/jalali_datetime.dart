@@ -72,55 +72,9 @@ class JalaliDatetime extends GeneralDatetimeInterface {
 
   /// **Convert Jalali date to DateTime**
   @override
-  // DateTime toDatetime() {
-  //   int jy = year;
-  //   int jm = month;
-  //   int jd = day;
-  //
-  //   jy += 1595;
-  //   int days =
-  //       -355668 + (365 * jy) + ((jy ~/ 33) * 8) + (((jy % 33) + 3) ~/ 4) + jd;
-  //   days += (jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186;
-  //   int gy = 400 * (days ~/ 146097);
-  //   days %= 146097;
-  //   if (days > 36524) {
-  //     days--;
-  //     gy += 100 * (days ~/ 36524);
-  //     days %= 36524;
-  //     if (days >= 365) days++;
-  //   }
-  //   gy += 4 * (days ~/ 1461);
-  //   days %= 1461;
-  //   gy += (days - 1) ~/ 365;
-  //   if (days > 365) days = (days - 1) % 365;
-  //   int gd = days + 1;
-  //   List<int> gm = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  //   if ((gy % 4 == 0 && gy % 100 != 0) || (gy % 400 == 0)) gm[2] = 29;
-  //   int i = 1;
-  //   while (gd > gm[i]) gd -= gm[i++];
-  //   return DateTime(gy, i, gd, hour, minute, second, millisecond, microsecond);
-  // }
-
   DateTime toDatetime() {
-    int jy = year;
-    int jm = month;
-    int jd = day;
-
-    // Step 1: Convert Jalali to Julian Day Number (JDN)
-    int epbase = jy - (jy >= 0 ? 474 : 473);
-    int epyear = 474 + (epbase % 2820);
-    // Use double arithmetic to incorporate the fractional part of the epoch.
-    double jdn = jd +
-        ((jm <= 7) ? ((jm - 1) * 31) : (((jm - 1) * 30) + 6)) +
-        ((epyear * 682 - 110) / 2816).floor() +
-        (epyear - 1) * 365 +
-        (epbase / 2820).floor() * 1029983 +
-        (1948320.5 - 1);
-    // Round to the nearest whole number.
-    int jdnInt = jdn.round();
-
-    // Step 2: Convert JDN to Gregorian using the Fliegel–Van Flandern algorithm.
-    int a = jdnInt + 32044;
+    // Convert JDN to Gregorian using the Fliegel–Van Flandern algorithm.
+    int a = julianDay + 32044;
     int b = ((4 * a) + 3) ~/ 146097;
     int c = a - ((146097 * b) ~/ 4);
     int d = ((4 * c) + 3) ~/ 1461;
@@ -130,9 +84,17 @@ class JalaliDatetime extends GeneralDatetimeInterface {
     int monthG = m + 3 - 12 * (m ~/ 10);
     int yearG = 100 * b + d - 4800 + (m ~/ 10);
 
-    return DateTime(yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
+    return DateTime(
+      yearG,
+      monthG,
+      dayG,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+    );
   }
-
 
   /// **Check if the year is a leap year**
   @override
@@ -295,6 +257,25 @@ class JalaliDatetime extends GeneralDatetimeInterface {
   int get dayOfYear => throw UnimplementedError();
 
   @override
-  // TODO: implement julianDay
-  int get julianDay => throw UnimplementedError();
+  int get julianDay {
+    int jy = year;
+    int jm = month;
+    int jd = day;
+
+    // Step 1: Convert Jalali to Julian Day Number (JDN)
+    int epbase = jy - (jy >= 0 ? 474 : 473);
+    int epyear = 474 + (epbase % 2820);
+    // Use double arithmetic to incorporate the fractional part of the epoch.
+    double jdn =
+        jd +
+        ((jm <= 7) ? ((jm - 1) * 31) : (((jm - 1) * 30) + 6)) +
+        ((epyear * 682 - 110) / 2816).floor() +
+        (epyear - 1) * 365 +
+        (epbase / 2820).floor() * 1029983 +
+        (1948320.5 - 1);
+    // Round to the nearest whole number.
+    int jdnInt = jdn.round();
+
+    return jdnInt;
+  }
 }
