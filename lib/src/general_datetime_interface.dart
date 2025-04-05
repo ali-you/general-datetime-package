@@ -115,12 +115,12 @@ abstract class GeneralDatetimeInterface<T>
   // }
 
   Duration get time => Duration(
-    hours: hour,
-    minutes: minute,
-    seconds: second,
-    microseconds: microsecond,
-    milliseconds: millisecond,
-  );
+        hours: hour,
+        minutes: minute,
+        seconds: second,
+        microseconds: microsecond,
+        milliseconds: millisecond,
+      );
 
   String toIso8601String() {
     String y =

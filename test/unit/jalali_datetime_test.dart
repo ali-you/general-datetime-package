@@ -222,7 +222,8 @@ void main() {
       // Expected: hour decreases by 1 (from 0 to -1, then normalized to 23 of previous day) and minute becomes 30.
       final dt = JalaliDatetime(1400, 1, 1, 0, -90);
       final gt = DateTime(2025, 1, 1, 0, -90);
-      expect(dt.year, equals(1399)); // Day normalization occurs only in the time component.
+      expect(dt.year,
+          equals(1399)); // Day normalization occurs only in the time component.
       expect(dt.month, equals(12));
       expect(dt.day, equals(30));
       expect(dt.hour, gt.hour);
@@ -264,8 +265,10 @@ void main() {
       // Check that the normalization yields 999 microseconds (after subtracting one millisecond)
       // if your normalization rolls the negative microsecond into the millisecond unit.
       // (Adjust this expected value according to your intended behavior.)
-      expect(dt.millisecond, equals(998)); // This is an example; modify as needed.
-      expect(dt.microsecond, equals(500)); // This is an example; modify as needed.
+      expect(
+          dt.millisecond, equals(998)); // This is an example; modify as needed.
+      expect(
+          dt.microsecond, equals(500)); // This is an example; modify as needed.
     });
 
     test('Negative day with hour zero', () {
@@ -295,6 +298,4 @@ void main() {
       expect(dt.millisecond, gt.millisecond);
     });
   });
-
-
 }

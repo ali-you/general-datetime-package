@@ -437,16 +437,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int jm = (days < 186) ? 1 + (days ~/ 31) : 7 + ((days - 186) ~/ 30);
     int jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
     return JalaliDatetime._raw(
-      jy,
-      jm,
-      jd,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-      isUtc
-    );
+        jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
   }
 
   /// Normalize values (overflow handling)

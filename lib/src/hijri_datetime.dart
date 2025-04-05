@@ -242,23 +242,23 @@ class HijriDatetime extends GeneralDatetimeInterface {
       d -= 1;
     }
 
-      while (d < 1) {
-        m -= 1;
-        if (m < 1) {
-          m = 12;
-          y -= 1;
-        }
-        d += _daysInHijriMonth(y, m);
+    while (d < 1) {
+      m -= 1;
+      if (m < 1) {
+        m = 12;
+        y -= 1;
       }
-      // Overflow: if d exceeds the number of days in the current month.
-      while (d > _daysInHijriMonth(y, m)) {
-        d -= _daysInHijriMonth(y, m);
-        m++;
-        if (m > 12) {
-          m = 1;
-          y += 1;
-        }
+      d += _daysInHijriMonth(y, m);
+    }
+    // Overflow: if d exceeds the number of days in the current month.
+    while (d > _daysInHijriMonth(y, m)) {
+      d -= _daysInHijriMonth(y, m);
+      m++;
+      if (m > 12) {
+        m = 1;
+        y += 1;
       }
+    }
 
     // Normalize months to years.
     while (m < 1) {
@@ -353,9 +353,6 @@ class HijriDatetime extends GeneralDatetimeInterface {
   @override
   // TODO: implement julianDay
   int get julianDay => throw UnimplementedError();
-
-
-
 
   @override
   // TODO: implement timeZoneName

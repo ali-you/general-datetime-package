@@ -39,7 +39,8 @@ void main() {
       // Using the leap year rule:
       // if (((11 * year) + 14) % 30) < 11 then it is a leap year.
       // These tests use years known (approximately) to be leap or non-leap.
-      final leapYear = 1442;  // Expected to be a leap year in some approximations.
+      final leapYear =
+          1442; // Expected to be a leap year in some approximations.
       final nonLeapYear = 1443; // Expected non-leap year.
       final dtLeap = HijriDatetime(leapYear);
       final dtNonLeap = HijriDatetime(nonLeapYear);
@@ -88,7 +89,7 @@ void main() {
 
   group('Day/Month Boundary Stress Tests', () {
     test('30-day month overflow with leap year impact', () {
-      final leapDay = HijriDatetime(1442, 12, 30);  // 1442 is leap year
+      final leapDay = HijriDatetime(1442, 12, 30); // 1442 is leap year
       final nonLeapDay = HijriDatetime(1443, 12, 30); // Non-leap year
       expect(leapDay.month, equals(12));
       expect(nonLeapDay.month, equals(1));
@@ -149,7 +150,8 @@ void main() {
   group('Extreme Value Handling', () {
     test('Year 35000 normalization', () {
       final dt = HijriDatetime(35000, 13, 60, 25, 70, 70, 5000, 5000);
-      expect(dt.year, greaterThan(35000)); // Testing integer overflow protection
+      expect(
+          dt.year, greaterThan(35000)); // Testing integer overflow protection
       expect(dt.month, inInclusiveRange(1, 12));
     });
 
@@ -175,10 +177,8 @@ void main() {
     // });
   });
 
-
   group('Negative Time Normalization for HijriDatetime', () {
     test('Negative hour normalization', () {
-
       final dt = HijriDatetime(1442, 9, 1, -3);
       final temp = DateTime(2025, 9, 1, -3);
       // Expected final: 1442/8/29, 21:00:00
@@ -205,7 +205,6 @@ void main() {
     });
 
     test('Negative second normalization', () {
-
       final dt = HijriDatetime(1442, 9, 1, 0, 0, -75);
       // Expected final: 1442/8/29, 23:58:45
       print(dt.toString());
