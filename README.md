@@ -1,28 +1,29 @@
-# Ambient Light for iOS and android
+# General Datetime (Dynamic Calendar)
 
-<a href="https://pub.dev/packages/ambient_light">
-   <img src="https://img.shields.io/pub/v/ambient_light?label=pub.dev&labelColor=333940&logo=dart">
+![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
+
+<a href="https://pub.dev/packages/general_datetime">
+   <img src="https://img.shields.io/pub/v/general_datetime?label=pub.dev&labelColor=333940&logo=dart">
 </a>
-<a href="https://github.com/ali-you/ambient-light-plugin/issues">
-   <img alt="Issues" src="https://img.shields.io/github/issues/ali-you/ambient-light-plugin?color=0088ff" />
+<a href="https://github.com/ali-you/general-datetime-package/issues">
+   <img alt="Issues" src="https://img.shields.io/github/issues/ali-you/general-datetime-package?color=0088ff" />
 </a>
-<a href="https://github.com/ali-you/ambient-light-plugin/issues?q=is%3Aclosed">
-   <img alt="Issues" src="https://img.shields.io/github/issues-closed/ali-you/ambient-light-plugin?color=0088ff" />
+<a href="https://github.com/ali-you/general-datetime-package/issues?q=is%3Aclosed">
+   <img alt="Issues" src="https://img.shields.io/github/issues-closed/ali-you/general-datetime-package?color=0088ff" />
 </a>
 <!-- <a href="https://github.com/ali-you/ambient-light-plugin/pulls">
    <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/ali-you/ambient-light-plugin?color=0088ff" />
 </a> -->
-<a href="https://github.com/ali-you/ambient-light-plugin/pulls">
-   <img alt="GitHub Pull Requests" src="https://badgen.net/github/prs/ali-you/ambient-light-plugin" />
+<a href="https://github.com/ali-you/general-datetime-package/pulls">
+   <img alt="GitHub Pull Requests" src="https://badgen.net/github/prs/ali-you/general-datetime-package" />
 </a>
-<a href="https://github.com/ali-you/ambient-light-plugin/blob/main/LICENSE" rel="ugc">
-   <img src="https://img.shields.io/github/license/ali-you/ambient-light-plugin?color=#007A88&amp;labelColor=333940;" alt="GitHub">
+<a href="https://github.com/ali-you/general-datetime-package/blob/main/LICENSE" rel="ugc">
+   <img src="https://img.shields.io/github/license/ali-you/general-datetime-package?color=#007A88&amp;labelColor=333940;" alt="GitHub">
 </a>
-<a href="https://github.com/ali-you/ambient-light-plugin">
-   <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/ambient-light-plugin">
+<a href="https://github.com/ali-you/general-datetime-package">
+   <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/general-datetime-package">
 </a>
 
-![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
 
 
 A Flutter plugin to access ambient light sensor data on Android, iOS and macOS. This plugin allows
