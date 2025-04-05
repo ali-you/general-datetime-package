@@ -372,7 +372,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
   }
 
   @override
-  GeneralDatetimeInterface difference(GeneralDatetimeInterface other) {
+  Duration difference(GeneralDatetimeInterface other) {
     // TODO: implement difference
     throw UnimplementedError();
   }

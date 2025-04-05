@@ -1,18 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:general_datetime/general_datetime.dart';
 
-import 'package:general_datetime/src/jalali_datetime.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
       DateTime now = DateTime.now();
-      print(DateTime.timestamp());
-      print(now);
-      print(now.isUtc);
-      print(now.timeZoneName);
-      print(now.timeZoneOffset);
-
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
       expect(j.toString(), "1403-12-11 00:00:00.000");
     });
@@ -148,12 +142,15 @@ void main() {
   });
 
   group('Time Zone Handling', () {
-    // test('UTC Time Preservation', () {
-    //   DateTime gDate = DateTime.utc(2025, 3, 1, 14, 30);
-    //   JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
-    //   // expect(j.isUtc, true);
-    //   expect(j.toString(), "JalaliDatetime: 1403-12-11 14:30:0 UTC");
-    // });
+    test('UTC Time Preservation', () {
+      DateTime gDate = DateTime.utc(2025, 3, 1, 14, 30);
+      print(gDate.toString());
+      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      print(j.isUtc);
+      print(j.toString());
+      // expect(j.isUtc, true);
+      expect(j.toString(), "1403-12-11 14:30:00.000Z");
+    });
 
     test('DST Transition Handling', () {
       DateTime gDate = DateTime(2024, 3, 31, 2, 30);
@@ -161,18 +158,6 @@ void main() {
       expect(j.hour, 2);
     });
   });
-
-  // group('Epoch Time Conversions', () {
-  //   test('Epoch to Jalali Conversion', () {
-  //     JalaliDatetime j = JalaliDatetime.fromEpoch(1743552000);
-  //     expect(j.toString(), "JalaliDatetime: 1403-12-11 0:0:0 UTC");
-  //   });
-  //
-  //   test('Jalali to Epoch Conversion', () {
-  //     JalaliDatetime j = JalaliDatetime(1403, 12, 11, isUtc: true);
-  //     expect(j.toEpoch(), 1743552000);
-  //   });
-  // });
 
   test('Convert Oldest Jalali Date (Year 1)', () {
     Jalali jalali = Jalali(1, 12, 1);

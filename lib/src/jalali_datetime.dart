@@ -1,3 +1,5 @@
+import 'package:general_datetime/src/constants.dart';
+
 import 'general_datetime_interface.dart';
 
 class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
@@ -172,7 +174,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   }
 
   factory JalaliDatetime.parse(String formattedString) {
-    Match? match = _parseFormat.firstMatch(formattedString);
+    Match? match = Constants.parseFormat.firstMatch(formattedString);
     if (match != null) {
       int parseIntOrZero(String? matched) {
         if (matched == null) return 0;
@@ -255,13 +257,11 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// The time zone name
   @override
-  // TODO: implement timeZoneName
-  String get timeZoneName => throw UnimplementedError();
+  String get timeZoneName => toDatetime().timeZoneName;
 
   /// The time zone offset
   @override
-  // TODO: implement timeZoneOffset
-  Duration get timeZoneOffset => throw UnimplementedError();
+  Duration get timeZoneOffset => toDatetime().timeZoneOffset;
 
   /// Calculate weekday (0=Saturday, 6=Friday)
   @override
@@ -275,8 +275,13 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   int get monthLength => _monthLength(year, month);
 
   @override
-  // TODO: implement dayOfYear
-  int get dayOfYear => throw UnimplementedError();
+  int get dayOfYear {
+    int dayCount = 0;
+    for (int m = 1; m < month; m++) {
+      dayCount += _monthLength(year, m);
+    }
+    return dayCount + day;
+  }
 
   /// Check if the year is a leap year
   @override
@@ -298,16 +303,13 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   }
 
   @override
-  // TODO: implement secondsSinceEpoch
-  int get secondsSinceEpoch => throw UnimplementedError();
+  int get secondsSinceEpoch => toDatetime().millisecondsSinceEpoch ~/ 1000;
 
   @override
-  // TODO: implement millisecondsSinceEpoch
-  int get millisecondsSinceEpoch => throw UnimplementedError();
+  int get millisecondsSinceEpoch => toDatetime().millisecondsSinceEpoch;
 
   @override
-  // TODO: implement microsecondsSinceEpoch
-  int get microsecondsSinceEpoch => throw UnimplementedError();
+  int get microsecondsSinceEpoch => toDatetime().microsecondsSinceEpoch;
 
   /// Convert Jalali date to DateTime
   @override
@@ -336,44 +338,70 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Compare Jalali dates
   @override
-  int compareTo(GeneralDatetimeInterface other) {
-    return toDatetime().compareTo(other.toDatetime());
+  int compareTo(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.compareTo(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.compareTo(other);
+    throw ArgumentError(
+        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
   }
 
   @override
-  bool isBefore(GeneralDatetimeInterface other) {
-    // TODO: implement isBefore
-    throw UnimplementedError();
+  bool isBefore(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.isBefore(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.isBefore(other);
+    throw ArgumentError(
+        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
   }
 
   @override
-  bool isAfter(GeneralDatetimeInterface other) {
-    // TODO: implement isAfter
-    throw UnimplementedError();
+  bool isAfter(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.isAfter(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.isAfter(other);
+    throw ArgumentError(
+        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
   }
 
   @override
-  bool isAtSameMomentAs(GeneralDatetimeInterface other) {
-    // TODO: implement isAtSameMomentAs
-    throw UnimplementedError();
+  bool isAtSameMomentAs(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.isAtSameMomentAs(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.isAtSameMomentAs(other);
+    throw ArgumentError(
+        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
   }
 
   @override
   JalaliDatetime add(Duration duration) {
-    // TODO: implement add
-    throw UnimplementedError();
+    final DateTime result = toDatetime().add(duration);
+    return JalaliDatetime.fromDatetime(result);
   }
 
   @override
   JalaliDatetime subtract(Duration duration) {
-    // TODO: implement subtract
-    throw UnimplementedError();
+    final DateTime result = toDatetime().subtract(duration);
+    return JalaliDatetime.fromDatetime(result);
   }
 
   @override
-  JalaliDatetime difference(GeneralDatetimeInterface other) {
-    // TODO: implement difference
-    throw UnimplementedError();
+  Duration difference(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.difference(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.difference(other);
+    throw ArgumentError(
+        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
   }
 
   /// Convert from Gregorian to Jalali
@@ -391,8 +419,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       gy -= 621;
     }
     int gy2 = (gm > 2) ? (gy + 1) : gy;
-    int days =
-        (365 * gy) +
+    int days = (365 * gy) +
         ((gy2 + 3) ~/ 4) -
         ((gy2 + 99) ~/ 100) +
         ((gy2 + 399) ~/ 400) -
@@ -418,6 +445,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       second,
       millisecond,
       microsecond,
+      isUtc
     );
   }
 
@@ -518,28 +546,4 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
     return leapRemainders.contains(r);
   }
-
-  /*
-   * date ::= yeardate time_opt timezone_opt
-   * yeardate ::= year colon_opt month colon_opt day
-   * year ::= sign_opt digit{4,6}
-   * colon_opt ::= <empty> | ':'
-   * sign ::= '+' | '-'
-   * sign_opt ::=  <empty> | sign
-   * month ::= digit{2}
-   * day ::= digit{2}
-   * time_opt ::= <empty> | (' ' | 'T') hour minutes_opt
-   * minutes_opt ::= <empty> | colon_opt digit{2} seconds_opt
-   * seconds_opt ::= <empty> | colon_opt digit{2} millis_opt
-   * micros_opt ::= <empty> | ('.' | ',') digit+
-   * timezone_opt ::= <empty> | space_opt timezone
-   * space_opt ::= ' ' | <empty>
-   * timezone ::= 'z' | 'Z' | sign digit{2} timezonemins_opt
-   * timezonemins_opt ::= <empty> | colon_opt digit{2}
-   */
-  static final RegExp _parseFormat = RegExp(
-    r'^([+-]?\d{4,6})-?(\d\d)-?(\d\d)' // Day part.
-    r'(?:[ T](\d\d)(?::?(\d\d)(?::?(\d\d)(?:[.,](\d+))?)?)?' // Time part.
-    r'( ?[zZ]| ?([-+])(\d\d)(?::?(\d\d))?)?)?$',
-  );
 }
