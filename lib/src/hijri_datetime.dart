@@ -353,4 +353,60 @@ class HijriDatetime extends GeneralDatetimeInterface {
   @override
   // TODO: implement julianDay
   int get julianDay => throw UnimplementedError();
+
+  @override
+  DateTime add(Duration duration) {
+    // TODO: implement add
+    throw UnimplementedError();
+  }
+
+  @override
+  Duration difference(GeneralDatetimeInterface other) {
+    // TODO: implement difference
+    throw UnimplementedError();
+  }
+
+  @override
+  bool isAfter(DateTime other) {
+    // TODO: implement isAfter
+    throw UnimplementedError();
+  }
+
+  @override
+  bool isAtSameMomentAs(DateTime other) {
+    // TODO: implement isAtSameMomentAs
+    throw UnimplementedError();
+  }
+
+  @override
+  bool isBefore(DateTime other) {
+    // TODO: implement isBefore
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement microsecondsSinceEpoch
+  int get microsecondsSinceEpoch => throw UnimplementedError();
+
+  @override
+  // TODO: implement millisecondsSinceEpoch
+  int get millisecondsSinceEpoch => throw UnimplementedError();
+
+  @override
+  // TODO: implement secondsSinceEpoch
+  int get secondsSinceEpoch => throw UnimplementedError();
+
+  @override
+  DateTime subtract(Duration duration) {
+    // TODO: implement subtract
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement timeZoneName
+  String get timeZoneName => throw UnimplementedError();
+
+  @override
+  // TODO: implement timeZoneOffset
+  Duration get timeZoneOffset => throw UnimplementedError();
 }

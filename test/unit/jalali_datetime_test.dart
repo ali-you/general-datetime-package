@@ -1,10 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:general_datetime/src/jalali_datetime.dart';
+import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
+      DateTime now = DateTime.now();
+      print(DateTime.timestamp());
+      print(now);
+      print(now.isUtc);
+      print(now.timeZoneName);
+      print(now.timeZoneOffset);
+
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
       expect(j.toString(), "1403-12-11 00:00:00.000");
     });
@@ -167,9 +175,16 @@ void main() {
   // });
 
   test('Convert Oldest Jalali Date (Year 1)', () {
-    JalaliDatetime j = JalaliDatetime(1, 1, 1); // Start of Jalali calendar
+    Jalali jalali = Jalali(1, 12, 1);
+    JalaliDatetime j = JalaliDatetime(1, 12, 1); // Start of Jalali calendar
     DateTime g = j.toDatetime();
-    expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
+    print(j.julianDay);
+    print(j.daysInJalaliMonth(1, 12));
+    print(jalali.julianDayNumber);
+    print(jalali.monthLength);
+    expect(j.julianDay, jalali.julianDayNumber);
+    expect(g, jalali.toDateTime());
+    // expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
   });
 
   test('Convert Shahrivar 31 (Valid 31-Day Month)', () {
@@ -208,7 +223,8 @@ void main() {
       // Negative hours are added to 24 and one day is subtracted.
       // Expected: date becomes previous day; for 1400/1/1, it rolls back to 1399/12 with last day 30.
       final dt = JalaliDatetime(1400, 1, 1, -3);
-      print(dt.toString());
+      print(dt.monthLength);
+      print(Jalali(1399, 12, 29).monthLength);
       expect(dt.year, equals(1399));
       expect(dt.month, equals(12));
       expect(dt.day, equals(30));
