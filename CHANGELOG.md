@@ -1,3 +1,7 @@
-## 0.0.1
+## [0.0.2]
+- Updated `README.md`
+- Jalali Datetime completed (Persian calendar)
+- New testcases added
 
-* TODO: Describe initial release.
+## [0.0.1]
+- Initial release with support for all platforms
