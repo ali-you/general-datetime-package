@@ -1,7 +1,7 @@
 import 'general_datetime_interface.dart';
 
-class JalaliDatetime extends GeneralDatetimeInterface {
-  /// Private constructor
+class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
+  /// Private constructor for raw inputs
   JalaliDatetime._raw(
     super.year, [
     super.month,
@@ -14,6 +14,7 @@ class JalaliDatetime extends GeneralDatetimeInterface {
     super.isUtc,
   ]);
 
+  /// Start: Factories section
   /// Factory constructor with normalization
   factory JalaliDatetime(
     int year, [
@@ -171,9 +172,7 @@ class JalaliDatetime extends GeneralDatetimeInterface {
   }
 
   factory JalaliDatetime.parse(String formattedString) {
-    final re = _parseFormat; // Define your regex pattern elsewhere
-    Match? match = re.firstMatch(formattedString);
-
+    Match? match = _parseFormat.firstMatch(formattedString);
     if (match != null) {
       int parseIntOrZero(String? matched) {
         if (matched == null) return 0;
@@ -224,7 +223,7 @@ class JalaliDatetime extends GeneralDatetimeInterface {
         }
       }
 
-      return JalaliDatetime(
+      return JalaliDatetime._raw(
         year,
         month,
         day,
@@ -233,11 +232,14 @@ class JalaliDatetime extends GeneralDatetimeInterface {
         second,
         millisecond,
         microsecond,
+        isUtc,
       );
     } else {
       throw FormatException("Invalid date format", formattedString);
     }
   }
+
+  /// End: Factories section
 
   static JalaliDatetime? tryParse(String formattedString) {
     try {
@@ -247,9 +249,65 @@ class JalaliDatetime extends GeneralDatetimeInterface {
     }
   }
 
-  /// Calendar name
+  /// The calendar name
   @override
   String get name => "Jalali";
+
+  /// The time zone name
+  @override
+  // TODO: implement timeZoneName
+  String get timeZoneName => throw UnimplementedError();
+
+  /// The time zone offset
+  @override
+  // TODO: implement timeZoneOffset
+  Duration get timeZoneOffset => throw UnimplementedError();
+
+  /// Calculate weekday (0=Saturday, 6=Friday)
+  @override
+  int get weekday {
+    DateTime gd = toDatetime();
+    return (gd.weekday) % 7;
+  }
+
+  /// Get days in the current month
+  @override
+  int get monthLength => _monthLength(year, month);
+
+  @override
+  // TODO: implement dayOfYear
+  int get dayOfYear => throw UnimplementedError();
+
+  /// Check if the year is a leap year
+  @override
+  bool get isLeapYear => _isLeapYear(year);
+
+  /// Julian Day Number getter
+  @override
+  int get julianDay {
+    int totalDays = 0;
+    for (int k = 1; k < year; k++) {
+      totalDays += 365;
+      if (_isLeapYear(k)) totalDays += 1;
+    }
+    for (int m = 1; m < month; m++) {
+      totalDays += _monthLength(year, m);
+    }
+    totalDays += day - 1;
+    return 1948321 + totalDays;
+  }
+
+  @override
+  // TODO: implement secondsSinceEpoch
+  int get secondsSinceEpoch => throw UnimplementedError();
+
+  @override
+  // TODO: implement millisecondsSinceEpoch
+  int get millisecondsSinceEpoch => throw UnimplementedError();
+
+  @override
+  // TODO: implement microsecondsSinceEpoch
+  int get microsecondsSinceEpoch => throw UnimplementedError();
 
   /// Convert Jalali date to DateTime
   @override
@@ -276,11 +334,46 @@ class JalaliDatetime extends GeneralDatetimeInterface {
     );
   }
 
-  /// Check if the year is a leap year
+  /// Compare Jalali dates
   @override
-  bool get isLeapYear {
-    final List<int> leapYears = [1, 5, 9, 13, 17, 22, 26, 30];
-    return leapYears.contains(year % 33);
+  int compareTo(GeneralDatetimeInterface other) {
+    return toDatetime().compareTo(other.toDatetime());
+  }
+
+  @override
+  bool isBefore(GeneralDatetimeInterface other) {
+    // TODO: implement isBefore
+    throw UnimplementedError();
+  }
+
+  @override
+  bool isAfter(GeneralDatetimeInterface other) {
+    // TODO: implement isAfter
+    throw UnimplementedError();
+  }
+
+  @override
+  bool isAtSameMomentAs(GeneralDatetimeInterface other) {
+    // TODO: implement isAtSameMomentAs
+    throw UnimplementedError();
+  }
+
+  @override
+  JalaliDatetime add(Duration duration) {
+    // TODO: implement add
+    throw UnimplementedError();
+  }
+
+  @override
+  JalaliDatetime subtract(Duration duration) {
+    // TODO: implement subtract
+    throw UnimplementedError();
+  }
+
+  @override
+  JalaliDatetime difference(GeneralDatetimeInterface other) {
+    // TODO: implement difference
+    throw UnimplementedError();
   }
 
   /// Convert from Gregorian to Jalali
@@ -305,7 +398,9 @@ class JalaliDatetime extends GeneralDatetimeInterface {
         ((gy2 + 399) ~/ 400) -
         80 +
         gd;
-    for (int i = 0; i < gm; ++i) days += gDM[i];
+    for (int i = 0; i < gm; ++i) {
+      days += gDM[i];
+    }
     jy += 33 * (days ~/ 12053);
     days %= 12053;
     jy += 4 * (days ~/ 1461);
@@ -378,10 +473,10 @@ class JalaliDatetime extends GeneralDatetimeInterface {
         m = 12;
         y -= 1;
       }
-      d += daysInJalaliMonth(y, m);
+      d += _monthLength(y, m);
     }
-    while (d > daysInJalaliMonth(y, m)) {
-      d -= daysInJalaliMonth(y, m);
+    while (d > _monthLength(y, m)) {
+      d -= _monthLength(y, m);
       m += 1;
       if (m > 12) {
         m = 1;
@@ -399,42 +494,24 @@ class JalaliDatetime extends GeneralDatetimeInterface {
       y += 1;
     }
 
-    return JalaliDatetime._raw(y, m, d, h, min, s, ms, us);
-  }
-
-  /// Get days in the current month
-  @override
-  int get monthLength => daysInJalaliMonth(year, month);
-
-  /// Calculate weekday (0=Saturday, 6=Friday)
-  @override
-  int get weekday {
-    DateTime gregorian = toDatetime();
-    return (gregorian.weekday) % 7;
-  }
-
-  /// Compare Jalali dates
-  @override
-  int compareTo(GeneralDatetimeInterface other) {
-    return toDatetime().compareTo(other.toDatetime());
+    return JalaliDatetime._raw(y, m, d, h, min, s, ms, us, isUtc);
   }
 
   /// Helper method to get month length
-  int daysInJalaliMonth(int year, int month) {
+  int _monthLength(int year, int month) {
     if (month <= 6) return 31;
     if (month <= 11) return 30;
-    return _isJalaliLeapYear(year) ? 30 : 29;
+    return _isLeapYear(year) ? 30 : 29;
   }
 
-  /// Check if a Jalali year is leap
-  // Helper: Check if a Jalali year is leap.
-  bool _isJalaliLeapYear(int jy) {
+  /// Helper method to check if a Jalali year is leap
+  bool _isLeapYear(int jy) {
     // Special case: Year 1 is not a leap year.
     if (jy == 1) return false;
 
     // Calculate the remainder in the 33-year cycle.
-    int r = jy % 33;
     // Make sure we have a positive remainder.
+    int r = jy % 33;
     if (r < 0) r += 33;
 
     // Leap years in the 33-year cycle occur in these remainders.
@@ -442,86 +519,27 @@ class JalaliDatetime extends GeneralDatetimeInterface {
     return leapRemainders.contains(r);
   }
 
-  /// Julian Day Number getter
-  @override
-  int get julianDay {
-    int totalDays = 0;
-    for (int k = 1; k < year; k++) {
-      totalDays += 365;
-      if (_isJalaliLeapYear(k)) totalDays += 1;
-    }
-    for (int m = 1; m < month; m++) {
-      totalDays += daysInJalaliMonth(year, m);
-    }
-    totalDays += day - 1;
-    return 1948321 + totalDays;
-  }
-
-  @override
-  // TODO: implement dayOfYear
-  int get dayOfYear => throw UnimplementedError();
-
-  @override
-  DateTime add(Duration duration) {
-    // TODO: implement add
-    throw UnimplementedError();
-  }
-
-  @override
-  Duration difference(GeneralDatetimeInterface other) {
-    // TODO: implement difference
-    throw UnimplementedError();
-  }
-
-  @override
-  bool isAfter(DateTime other) {
-    // TODO: implement isAfter
-    throw UnimplementedError();
-  }
-
-  @override
-  bool isAtSameMomentAs(DateTime other) {
-    // TODO: implement isAtSameMomentAs
-    throw UnimplementedError();
-  }
-
-  @override
-  bool isBefore(DateTime other) {
-    // TODO: implement isBefore
-    throw UnimplementedError();
-  }
-
-  @override
-  // TODO: implement microsecondsSinceEpoch
-  int get microsecondsSinceEpoch => throw UnimplementedError();
-
-  @override
-  // TODO: implement millisecondsSinceEpoch
-  int get millisecondsSinceEpoch => throw UnimplementedError();
-
-  @override
-  // TODO: implement secondsSinceEpoch
-  int get secondsSinceEpoch => throw UnimplementedError();
-
-  @override
-  DateTime subtract(Duration duration) {
-    // TODO: implement subtract
-    throw UnimplementedError();
-  }
-
-  @override
-  // TODO: implement timeZoneName
-  String get timeZoneName => throw UnimplementedError();
-
-  @override
-  // TODO: implement timeZoneOffset
-  Duration get timeZoneOffset => throw UnimplementedError();
-
-
+  /*
+   * date ::= yeardate time_opt timezone_opt
+   * yeardate ::= year colon_opt month colon_opt day
+   * year ::= sign_opt digit{4,6}
+   * colon_opt ::= <empty> | ':'
+   * sign ::= '+' | '-'
+   * sign_opt ::=  <empty> | sign
+   * month ::= digit{2}
+   * day ::= digit{2}
+   * time_opt ::= <empty> | (' ' | 'T') hour minutes_opt
+   * minutes_opt ::= <empty> | colon_opt digit{2} seconds_opt
+   * seconds_opt ::= <empty> | colon_opt digit{2} millis_opt
+   * micros_opt ::= <empty> | ('.' | ',') digit+
+   * timezone_opt ::= <empty> | space_opt timezone
+   * space_opt ::= ' ' | <empty>
+   * timezone ::= 'z' | 'Z' | sign digit{2} timezonemins_opt
+   * timezonemins_opt ::= <empty> | colon_opt digit{2}
+   */
   static final RegExp _parseFormat = RegExp(
     r'^([+-]?\d{4,6})-?(\d\d)-?(\d\d)' // Day part.
     r'(?:[ T](\d\d)(?::?(\d\d)(?::?(\d\d)(?:[.,](\d+))?)?)?' // Time part.
     r'( ?[zZ]| ?([-+])(\d\d)(?::?(\d\d))?)?)?$',
-  ); // Timezone part.
-
+  );
 }

@@ -179,7 +179,7 @@ void main() {
     JalaliDatetime j = JalaliDatetime(1, 12, 1); // Start of Jalali calendar
     DateTime g = j.toDatetime();
     print(j.julianDay);
-    print(j.daysInJalaliMonth(1, 12));
+    print(j.monthLength);
     print(jalali.julianDayNumber);
     print(jalali.monthLength);
     expect(j.julianDay, jalali.julianDayNumber);
