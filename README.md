@@ -1,7 +1,5 @@
 # General Datetime (Dynamic Calendar)
 
-![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
-
 <a href="https://pub.dev/packages/general_datetime">
    <img src="https://img.shields.io/pub/v/general_datetime?label=pub.dev&labelColor=333940&logo=dart">
 </a>
@@ -24,6 +22,7 @@
    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/general-datetime-package">
 </a>
 
+![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
 
 
 A Flutter plugin to access ambient light sensor data on Android, iOS and macOS. This plugin allows
