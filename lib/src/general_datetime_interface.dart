@@ -140,6 +140,33 @@ abstract class GeneralDatetimeInterface<T>
   }
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GeneralDatetimeInterface &&
+          runtimeType == other.runtimeType &&
+          year == other.year &&
+          month == other.month &&
+          day == other.day &&
+          hour == other.hour &&
+          minute == other.minute &&
+          second == other.second &&
+          millisecond == other.millisecond &&
+          microsecond == other.microsecond &&
+          isUtc == other.isUtc;
+
+  @override
+  int get hashCode =>
+      year.hashCode ^
+      month.hashCode ^
+      day.hashCode ^
+      hour.hashCode ^
+      minute.hashCode ^
+      second.hashCode ^
+      millisecond.hashCode ^
+      microsecond.hashCode ^
+      isUtc.hashCode;
+
+  @override
   String toString() {
     String y = _fourDigits(year);
     String m = _twoDigits(month);

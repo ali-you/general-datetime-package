@@ -24,100 +24,143 @@
 
 ![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
 
-
-A Flutter plugin to access ambient light sensor data on Android, iOS and macOS. This plugin allows
-you to retrieve the current ambient light level and listen to continuous updates.
+A Flutter/Dart Package for working with dates across several calendar systems. Using a unified
+interface, you can convert, manipulate, and compare dates in Gregorian, Jalali (Persian Calendar),
+Hijri (Umm Al-Qura Calendar), and other
+calendar systems—all while preserving time components and handling timezone, leap year, and negative
+value normalization gracefully.
 
 ## Features
 
-- **Android:** Uses the `SensorManager` to access the device's ambient light sensor.
-- **iOS:** Uses `CoreMotion` to access the ambient light sensor data on compatible iOS devices.
-- **macOS:** Uses `IOKit` to access the ambient light sensor data on compatible macOS devices.
-- **Retrieve Current Light Level:** Get the current ambient light level as a single value.
-- **Stream Light Level:** Listen to continuous updates of the ambient light level.
+- **Gregorian ↔ other calendars:** Convert between Gregorian and other dates with high precision,
+  preserving time components (hours, minutes, seconds, milliseconds, and microseconds).
+
+- **Leap Year Handling:** Detect and correctly handle leap years and leap days, including automatic
+  correction of invalid leap dates.
+
+- **Custom Arithmetic:** Perform date arithmetic using custom implementations of add, subtract, and
+  difference that work directly on calendar fields.
+
+- **Negative Normalization:** Automatically normalize negative values in day, month, hour, minute,
+  second, millisecond and microsecond components.
+
+- **Time Zone Support:** Retrieve the time zone name and offset matching Flutter’s DateTime behavior
+  for both local and UTC dates.
+
+- **Parsing and Formatting:** Create JalaliDatetime instances from formatted strings and output a
+  consistent string representation.
 
 ## Installation
 
 To use this plugin, you can add it to your Flutter project in one of two ways:
 
 ### 1. Add to `pubspec.yaml`
+
 Include the following dependency in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  ambient_light: ^0.1.2
-  
+  jalali_datetime: ^0.1.1
+
 ```
 
 ### 2. Add directly from the terminal
+
 Run the following command to add the plugin directly to your project:
 
 ```bash
-flutter pub add ambient_light
+flutter pub add jalali_datetime
 ```
 
 ## Usage
 
-Import the package and use the provided methods to get ambient light sensor data.
+Import the package into your Dart code. The library exposes a unified interface for working with
+dates across multiple calendar systems. For example, you can work with the Jalali calendar using the
+provided implementation:
 
 ```dart
-import 'package:ambient_light/ambient_light.dart';
+import 'package:general_datetime/general_datetime.dart';
+import 'package:shamsi_date/shamsi_date.dart'; // Your concrete implementation
 
-void main() async {
-  final AmbientLight _ambientLight = AmbientLight(frontCamera: true);
-  
-  // Get ambient light value
-  double? lightLevel = await _ambientLight.currentAmbientLight();
-  print('Ambient light level: $lightLevel');
+void main() {
+  // Create a Gregorian date and convert it to Jalali:
+  JalaliDatetime jDate = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
+  print('Converted to Jalali: ${jDate.toString()}'); // e.g. "1403-12-11 00:00:00.000"
 
-  // Listen to ambient light sensor data stream
-  _ambientLight.ambientLightStream.listen((double lightLevel) {
-    print('Ambient light level: $lightLevel');
-  });
+  // Create a Jalali date directly (auto-normalization applies):
+  JalaliDatetime directDate = JalaliDatetime(1403, 12, 11, 14, 30);
+  print('Direct Jalali: ${directDate.toString()}');
+
+  // Perform arithmetic:
+  JalaliDatetime futureDate = jDate.add(Duration(days: 5, hours: 3));
+  print('Future Date: ${futureDate.toString()}');
+
+  // Compare dates:
+  bool isBefore = jDate.isBefore(JalaliDatetime(1403, 12, 12));
+  print('Is jDate before 1403-12-12? $isBefore');
+
+  // Parse a date string:
+  JalaliDatetime parsed = JalaliDatetime.parse("1403-12-11 14:30:45.123456Z");
+  print('Parsed Date: ${parsed.toString()}');
+
+  // Time zone information:
+  print('Time Zone Name: ${jDate.timeZoneName}');
+  print('Time Zone Offset: ${jDate.timeZoneOffset}');
 }
-```
-
-**Note:**
-
-- The frontCamera parameter is iOS only and allows you to specify whether to use the front or back camera for measuring ambient light. For other platforms, you can initialize with the default:
-    ```dart
-    final AmbientLight _ambientLight = AmbientLight();
-    ```
-- Checkout [Example](https://pub.dev/packages/ambient_light/example) for complete explanation
-
-## Methods
-
-```dart
-Future<double?> currentAmbientLight();
-```
-
-Returns the current ambient light level as a double. Returns null if the sensor is not available.
-
-```dart
-Stream<double> get ambientLightStream;
-```
-
-Returns a stream of ambient light sensor data as double.
-
-## iOS
-
-For iOS, the plugin uses CoreMotion to access ambient light sensor data. You need to add the
-following key to your `Info.plist` to request access to the camera, which is required for measuring
-ambient light.
-
-```xml
-
-<key>NSCameraUsageDescription</key>
-<string>We need access to the camera to measure ambient light.</string>
 
 ```
+
+- Checkout [Example](https://pub.dev/packages/general_datetime/example) for complete explanation
+
+## API Overview
+
+**Factory Constructors**
+
+- `fromDatetime(DateTime datetime)`
+Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
+
+- `now()`
+Returns the current date and time in the default calendar.
+
+- `utc(...)`
+Creates a UTC date with normalization.
+
+- `fromSecondsSinceEpoch(...)`
+Creates an instance from Unix seconds.
+
+- `fromMillisecondsSinceEpoch(...)`
+Creates an instance from Unix milliseconds.
+
+- `fromMicrosecondsSinceEpoch(...)`
+Creates an instance from Unix microseconds.
+
+- `parse(String formattedString)` and `tryParse(String formattedString)`
+Parse ISO-like formatted strings into a calendar date.
+
+**Core Properties**
+
+Date Components:
+year, month, day, hour, minute, second, millisecond, microsecond
+
+Time Zone Information:
+timeZoneName and timeZoneOffset behave similar to Flutter’s DateTime.
+
+isLeapYear
+Returns true if the current year is a leap year in the current calendar system.
+
+dayOfYear
+Returns the day of the year (1-based).
+
+julianDay
+The calculated Julian day number for the date.
 
 ## Contributions
 
-Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
+Contributions are welcome! If you have suggestions, fixes, or new features, please submit a pull
+request or open an issue on GitHub.
 
 ## Licence
 
 This project is licensed under the BSD 3-Clause License. See
-the [LICENSE](https://github.com/ali-you/ambient-light-plugin?tab=BSD-3-Clause-1-ov-file)  file for
-details.
+the [LICENSE](https://github.com/ali-you/general-datetime-package?tab=BSD-3-Clause-1-ov-file)  file
+for details.

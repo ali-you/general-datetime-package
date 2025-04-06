@@ -1,6 +1,6 @@
 name: general_datetime
 description: "general_datetime is an package to handle all calendars and dates. The powerful interface can make any custom calendars"
-version: 0.0.2
+version: 0.1.1
 homepage: https://github.com/ali-you
 repository: https://github.com/ali-you/general-datetime-package
 documentation: https://github.com/ali-you/general-datetime-package
@@ -24,4 +24,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  shamsi_date: ^1.0.4

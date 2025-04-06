@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
 
-import 'package:shamsi_date/shamsi_date.dart';
-
 void main() {
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
@@ -144,11 +142,7 @@ void main() {
   group('Time Zone Handling', () {
     test('UTC Time Preservation', () {
       DateTime gDate = DateTime.utc(2025, 3, 1, 14, 30);
-      print(gDate.toString());
       JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
-      print(j.isUtc);
-      print(j.toString());
-      // expect(j.isUtc, true);
       expect(j.toString(), "1403-12-11 14:30:00.000Z");
     });
 
@@ -160,16 +154,9 @@ void main() {
   });
 
   test('Convert Oldest Jalali Date (Year 1)', () {
-    Jalali jalali = Jalali(1, 12, 1);
-    JalaliDatetime j = JalaliDatetime(1, 12, 1); // Start of Jalali calendar
+    JalaliDatetime j = JalaliDatetime(1, 1, 1); // Start of Jalali calendar
     DateTime g = j.toDatetime();
-    print(j.julianDay);
-    print(j.monthLength);
-    print(jalali.julianDayNumber);
-    print(jalali.monthLength);
-    expect(j.julianDay, jalali.julianDayNumber);
-    expect(g, jalali.toDateTime());
-    // expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
+    expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
   });
 
   test('Convert Shahrivar 31 (Valid 31-Day Month)', () {
@@ -208,8 +195,6 @@ void main() {
       // Negative hours are added to 24 and one day is subtracted.
       // Expected: date becomes previous day; for 1400/1/1, it rolls back to 1399/12 with last day 30.
       final dt = JalaliDatetime(1400, 1, 1, -3);
-      print(dt.monthLength);
-      print(Jalali(1399, 12, 29).monthLength);
       expect(dt.year, equals(1399));
       expect(dt.month, equals(12));
       expect(dt.day, equals(30));
@@ -236,8 +221,6 @@ void main() {
       // Expected: minute decreases by 1 and second becomes 45.
       final dt = JalaliDatetime(1400, 1, 1, 0, 0, -75);
       final gt = DateTime(1400, 1, 1, 0, 0, -75);
-      print(dt.toString());
-      print(gt.toString());
       expect(dt.year, equals(1399));
       expect(dt.month, equals(12));
       expect(dt.day, equals(30));
@@ -252,8 +235,6 @@ void main() {
       // Expected: microseconds become 500 and one millisecond is subtracted.
       final dt = JalaliDatetime(1400, 1, 1, 0, 0, 0, 0, -1500);
       final gt = DateTime(1400, 1, 1, 0, 0, 0, 0, -1500);
-      print(dt.toString());
-      print(gt.toString());
       expect(dt.year, equals(1399));
       expect(dt.month, equals(12));
       expect(dt.day, equals(30));
@@ -273,8 +254,6 @@ void main() {
 
     test('Negative day with hour zero', () {
       final dt = JalaliDatetime(1402, 9, 2, 0, -90);
-      print(DateTime(2025, 8, -1, 0));
-      print(dt.toString());
       expect(dt.year, equals(1402));
       expect(dt.month, equals(9));
       expect(dt.day, equals(1));
@@ -285,17 +264,188 @@ void main() {
     test('test normal', () {
       final dt = JalaliDatetime(1402, 9, 1, 0, -90);
       final gt = DateTime(2025, 9, 1, 0, -90);
-      final test = DateTime(2025, 10, 10, 10, -70);
-
-      print("test$test");
-      print(gt.toString());
-      print(dt.toString());
-      // expect(dt.month, gt.month);
-      // expect(dt.day, gt.day);
       expect(dt.hour, gt.hour);
       expect(dt.minute, gt.minute);
       expect(dt.second, gt.second);
       expect(dt.millisecond, gt.millisecond);
+    });
+  });
+  group('Factory Constructors', () {
+    test('fromDatetime conversion', () {
+      final DateTime dt = DateTime(2025, 3, 1, 14, 30, 45, 123, 456);
+      final JalaliDatetime j = JalaliDatetime.fromDatetime(dt);
+      // Expected output from your conversion logic.
+      expect(j.toString(), equals("1403-12-11 14:30:45.123456"));
+    });
+
+    test('now returns valid JalaliDatetime', () {
+      final JalaliDatetime jNow = JalaliDatetime.now();
+      expect(jNow.year, isNotNull);
+      expect(jNow.month, inInclusiveRange(1, 12));
+      expect(jNow.day, inInclusiveRange(1, 31));
+    });
+
+    test('utc factory preserves UTC flag', () {
+      final JalaliDatetime jUtc = JalaliDatetime.utc(1403, 12, 11, 14, 30);
+      expect(jUtc.toDatetime().isUtc, isTrue);
+    });
+
+    test('fromSecondsSinceEpoch', () {
+      final JalaliDatetime j =
+          JalaliDatetime.fromSecondsSinceEpoch(1722782031, isUtc: true);
+      expect(j.toString().endsWith("Z"), isTrue,
+          reason: 'UTC marker expected in string');
+    });
+
+    test('fromMillisecondsSinceEpoch', () {
+      final JalaliDatetime j =
+          JalaliDatetime.fromMillisecondsSinceEpoch(1722782031520);
+      expect(j.year, isNotNull);
+    });
+
+    test('Unix Epoch Conversion', () {
+      final j = JalaliDatetime.fromMillisecondsSinceEpoch(0);
+      expect(j.toString(), "1348-10-11 03:30:00.000");
+    });
+
+    test('fromMicrosecondsSinceEpoch', () {
+      final JalaliDatetime j =
+          JalaliDatetime.fromMicrosecondsSinceEpoch(1722782031520000);
+      expect(j.day, inInclusiveRange(1, 31));
+    });
+
+    test('parse and tryParse', () {
+      final String isoStr = "1403-12-11 14:30:45.123456Z";
+      final JalaliDatetime parsed = JalaliDatetime.parse(isoStr);
+      final JalaliDatetime? tryParsed = JalaliDatetime.tryParse(isoStr);
+      expect(parsed.toString(), equals(tryParsed?.toString()));
+      expect(() => JalaliDatetime.parse("invalid"), throwsFormatException);
+    });
+
+    test('Parse Jalali Date String', () {
+      final j = JalaliDatetime.parse("1403-04-15 14:30:45");
+      final j2 = JalaliDatetime(1403, 4, 15, 14, 30, 45);
+      expect(j, j2);
+    });
+  });
+
+  group('Gregorian to Jalali Conversion', () {
+    test('Normal Year Conversion', () {
+      final JalaliDatetime j =
+          JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
+      expect(j.toString(), equals("1403-12-11 00:00:00.000"));
+    });
+
+    test('Leap Year Conversion', () {
+      final JalaliDatetime j =
+          JalaliDatetime.fromDatetime(DateTime(2024, 2, 29));
+      expect(j.toString(), equals("1402-12-10 00:00:00.000"));
+    });
+
+    test('Beginning of Year Conversion', () {
+      final JalaliDatetime j =
+          JalaliDatetime.fromDatetime(DateTime(2025, 1, 1));
+      expect(j.toString(), equals("1403-10-12 00:00:00.000"));
+    });
+
+    test('End of Year Conversion', () {
+      final JalaliDatetime j =
+          JalaliDatetime.fromDatetime(DateTime(2025, 12, 31));
+      expect(j.toString(), equals("1404-10-10 00:00:00.000"));
+    });
+
+    test('Gregorian/Jalali New Year Alignment', () {
+      // March 20/21 is Farvardin 1
+      final j1 = JalaliDatetime.fromDatetime(DateTime(2024, 3, 20));
+      expect(j1.toString(), startsWith("1403-01-01"));
+
+      final j2 = JalaliDatetime.fromDatetime(DateTime(2025, 3, 21));
+      expect(j2.toString(), startsWith("1404-01-01"));
+    });
+  });
+
+  group('Jalali to Gregorian Conversion', () {
+    test('Normal Year', () {
+      final JalaliDatetime j = JalaliDatetime(1403, 12, 11);
+      expect(j.toDatetime(), equals(DateTime(2025, 3, 1)));
+    });
+
+    test('Leap Year', () {
+      final JalaliDatetime j = JalaliDatetime(1402, 12, 10);
+      expect(j.toDatetime(), equals(DateTime(2024, 2, 29)));
+    });
+
+    test('Beginning of Year', () {
+      final JalaliDatetime j = JalaliDatetime(1403, 10, 11);
+      expect(j.toDatetime(), equals(DateTime(2024, 12, 31)));
+    });
+
+    test('End of Year', () {
+      final JalaliDatetime j = JalaliDatetime(1404, 10, 10);
+      expect(j.toDatetime(), equals(DateTime(2025, 12, 31)));
+    });
+  });
+
+  group('Time Handling', () {
+    test('Time Component Preservation', () {
+      final DateTime g = DateTime(2025, 3, 1, 14, 30, 45, 123, 456);
+      final JalaliDatetime j = JalaliDatetime.fromDatetime(g);
+      expect(j.hour, equals(14));
+      expect(j.minute, equals(30));
+      expect(j.second, equals(45));
+      expect(j.millisecond, equals(123));
+      expect(j.microsecond, equals(456));
+    });
+  });
+
+  group('Date Arithmetic', () {
+    test('Add Duration Across Months', () {
+      final j = JalaliDatetime(1403, 6, 31).add(const Duration(days: 2));
+      expect(j.toString(), "1403-07-02 00:00:00.000");
+    });
+
+    test('Subtract Months with Year Rollover', () {
+      final j = JalaliDatetime(1403, 1, 1).subtract(Duration(days: 89));
+      expect(j.toString(), "1402-10-01 00:00:00.000");
+    });
+  });
+
+  group('Negative Normalization', () {
+    test('Negative Day', () {
+      final JalaliDatetime j = JalaliDatetime(1400, 1, 0);
+      expect(j.year, equals(1399));
+      expect(j.month, equals(12));
+      expect(j.day, equals(30));
+    });
+    test('Negative Month', () {
+      final JalaliDatetime j = JalaliDatetime(1400, -1, 15);
+      expect(j.year, equals(1399));
+      expect(j.month, equals(11));
+      expect(j.day, equals(15));
+    });
+    test('Negative Hour', () {
+      final JalaliDatetime j = JalaliDatetime(1400, 1, 1, -3);
+      expect(j.year, equals(1399));
+      expect(j.month, equals(12));
+      expect(j.day, equals(30));
+      expect(j.hour, equals(21));
+    });
+    test('Negative Minute', () {
+      final JalaliDatetime j = JalaliDatetime(1400, 1, 1, 0, -90);
+      expect(j.year, equals(1399));
+      expect(j.month, equals(12));
+      expect(j.day, equals(30));
+      expect(j.hour, equals(22));
+      expect(j.minute, equals(30));
+    });
+    test('Negative Second', () {
+      final JalaliDatetime j = JalaliDatetime(1400, 1, 1, 0, 0, -75);
+      expect(j.year, equals(1399));
+      expect(j.month, equals(12));
+      expect(j.day, equals(30));
+      expect(j.hour, equals(23));
+      expect(j.minute, equals(58));
+      expect(j.second, equals(45));
     });
   });
 }

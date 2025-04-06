@@ -324,6 +324,11 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int monthG = m + 3 - 12 * (m ~/ 10);
     int yearG = 100 * b + d - 4800 + (m ~/ 10);
 
+    if (isUtc) {
+      return DateTime.utc(
+          yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
+    }
+
     return DateTime(
       yearG,
       monthG,
