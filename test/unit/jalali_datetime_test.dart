@@ -304,8 +304,11 @@ void main() {
     });
 
     test('Unix Epoch Conversion', () {
-      final j = JalaliDatetime.fromMillisecondsSinceEpoch(0);
-      expect(j.toString(), "1348-10-11 03:30:00.000");
+      final j = JalaliDatetime.fromMillisecondsSinceEpoch(0, isUtc: true);
+      expect(j.year, 1348);
+      expect(j.month, 10);
+      expect(j.day, 11);
+      expect(j.toString(), "1348-10-11 00:00:00.000Z");
     });
 
     test('fromMicrosecondsSinceEpoch', () {
