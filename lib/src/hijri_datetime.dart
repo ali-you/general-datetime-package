@@ -409,4 +409,16 @@ class HijriDatetime extends GeneralDatetimeInterface {
     // TODO: implement subtract
     throw UnimplementedError();
   }
+
+  @override
+  toLocal() {
+    // TODO: implement toLocal
+    throw UnimplementedError();
+  }
+
+  @override
+  toUtc() {
+    // TODO: implement toUtc
+    throw UnimplementedError();
+  }
 }

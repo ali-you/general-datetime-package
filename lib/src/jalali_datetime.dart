@@ -409,6 +409,20 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
         'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
   }
 
+  @override
+  JalaliDatetime toLocal() {
+    if (!isUtc) return this;
+    final localDt = toDatetime().toLocal();
+    return JalaliDatetime.fromDatetime(localDt);
+  }
+
+  @override
+  JalaliDatetime toUtc() {
+    if (isUtc) return this;
+    final utcDt = toDatetime().toUtc();
+    return JalaliDatetime.fromDatetime(utcDt);
+  }
+
   /// Convert from Gregorian to Jalali
   JalaliDatetime _toJalali() {
     int gy = year;

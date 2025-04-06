@@ -102,17 +102,9 @@ abstract class GeneralDatetimeInterface<T>
 
   Duration difference(GeneralDatetimeInterface other);
 
-  // DateTime toLocal() {
-  //   if (isUtc) {
-  //     return _withUtc(isUtc: false);
-  //   }
-  //   return this;
-  // }
-  //
-  // DateTime toUtc() {
-  //   if (isUtc) return this;
-  //   return _withUtc(isUtc: true);
-  // }
+  T toLocal();
+
+  T toUtc();
 
   Duration get time => Duration(
         hours: hour,
