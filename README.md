@@ -32,7 +32,7 @@ value normalization gracefully.
 
 ## Features
 
-- **Gregorian ↔ other calendars:**
+- **Gregorian ↔ Other calendars:**
   Convert between Gregorian and other dates with high precision, preserving time components (hours,
   minutes, seconds, milliseconds, and microseconds).
 
