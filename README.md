@@ -32,23 +32,29 @@ value normalization gracefully.
 
 ## Features
 
-- **Gregorian ↔ other calendars:** Convert between Gregorian and other dates with high precision,
-  preserving time components (hours, minutes, seconds, milliseconds, and microseconds).
+- **Gregorian ↔ other calendars:**
+  Convert between Gregorian and other dates with high precision, preserving time components (hours,
+  minutes, seconds, milliseconds, and microseconds).
 
-- **Leap Year Handling:** Detect and correctly handle leap years and leap days, including automatic
-  correction of invalid leap dates.
+- **Leap Year Handling:**
+  Detect and correctly handle leap years and leap days, including automatic correction of invalid
+  leap dates.
 
-- **Custom Arithmetic:** Perform date arithmetic using custom implementations of add, subtract, and
-  difference that work directly on calendar fields.
+- **Custom Arithmetic:**
+  Perform date arithmetic using custom implementations of add, subtract, and difference that work
+  directly on calendar fields.
 
-- **Negative Normalization:** Automatically normalize negative values in day, month, hour, minute,
-  second, millisecond and microsecond components.
+- **Negative Normalization:**
+  Automatically normalize negative values in day, month, hour, minute, second, millisecond and
+  microsecond components.
 
-- **Time Zone Support:** Retrieve the time zone name and offset matching Flutter’s DateTime behavior
-  for both local and UTC dates.
+- **Time Zone Support:**
+  Retrieve the time zone name and offset matching Flutter’s DateTime behavior for both local and UTC
+  dates.
 
-- **Parsing and Formatting:** Create JalaliDatetime instances from formatted strings and output a
-  consistent string representation.
+- **Parsing and Formatting:**
+  Create JalaliDatetime instances from formatted strings and output a consistent string
+  representation.
 
 ## Installation
 
