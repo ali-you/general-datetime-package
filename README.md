@@ -178,14 +178,14 @@ void main() {
 Since this plugin is based on a general date interface, you can extend its functionality to support
 additional calendar systems.
 
-> [!IMPORTANT] Always Normalize and Convert Internally:
+> [!IMPORTANT]
 > It’s critical that you implement a robust _normalize() method to ensure that any invalid date or
 > time input is adjusted to a valid state, avoiding exceptions. Additionally, provide a private
 > conversion function (e.g., _toCustomCalendar()) that converts from the base calendar (usually
 > Gregorian) to your custom calendar. These helper functions must be private and only used within
 > the factory constructors so that users always receive a fully normalized, valid date instance.
 
-> [!TIP] Separate Raw Construction from Normalization:
+> [!TIP]
 > When adding support for a new calendar, it’s recommended to implement factory constructors that
 > use a private “raw” constructor. This raw factory should create an instance with unmodified input
 > data. Then, call private helper methods (e.g., _normalize() and a conversion method such as
