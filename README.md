@@ -114,45 +114,63 @@ void main() {
 
 ## API Overview
 
-**Factory Constructors**
+### Factory Constructors
 
 - `fromDatetime(DateTime datetime)`
-Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
+  Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
 
 - `now()`
-Returns the current date and time in the default calendar.
+  Returns the current date and time in the default calendar.
 
 - `utc(...)`
-Creates a UTC date with normalization.
+  Creates a UTC date with normalization.
 
 - `fromSecondsSinceEpoch(...)`
-Creates an instance from Unix seconds.
+  Creates an instance from Unix seconds.
 
 - `fromMillisecondsSinceEpoch(...)`
-Creates an instance from Unix milliseconds.
+  Creates an instance from Unix milliseconds.
 
 - `fromMicrosecondsSinceEpoch(...)`
-Creates an instance from Unix microseconds.
+  Creates an instance from Unix microseconds.
 
 - `parse(String formattedString)` and `tryParse(String formattedString)`
-Parse ISO-like formatted strings into a calendar date.
+  Parse ISO-like formatted strings into a calendar date.
 
-**Core Properties**
+### Core Properties
 
-Date Components:
-year, month, day, hour, minute, second, millisecond, microsecond
+- **Date Components:**
+  `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `microsecond`
 
-Time Zone Information:
-timeZoneName and timeZoneOffset behave similar to Flutter’s DateTime.
+- **Time Zone Information:**
+  `timeZoneName` and `timeZoneOffset` behave similar to Flutter’s DateTime.
 
-isLeapYear
-Returns true if the current year is a leap year in the current calendar system.
+- `isLeapYear`
+  Returns true if the current year is a leap year in the current calendar system.
 
-dayOfYear
-Returns the day of the year (1-based).
+- `dayOfYear`
+  Returns the day of the year (1-based).
 
-julianDay
-The calculated Julian day number for the date.
+- `julianDay`
+  The calculated Julian day number for the date.
+
+### Arithmetic & Comparison
+
+- **Arithmetic Methods:**
+  `add(Duration duration)`, `subtract(Duration duration)` Implemented independently (without relying
+  on native DateTime arithmetic).
+
+- **Difference:**
+  `difference(dynamic other)` returns a Duration representing the difference between two dates.
+
+- **Comparison:**
+  `compareTo(dynamic other)`, `isBefore`, `isAfter`, `isAtSameMomentAs` Compare calendar dates
+  across systems.
+
+## Customization
+
+Since this plugin is based on a general date interface, you can extend its functionality to support
+additional calendar systems.
 
 ## Contributions
 
