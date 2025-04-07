@@ -116,21 +116,23 @@ void main() {
   //   });
   // });
 
-  // group('Conversion Fidelity Tests', () {
-  //   test('Millisecond precision round-trip', () {
-  //     final original = DateTime.now().copyWith(microsecond: 456789);
-  //     final hijri = HijriDatetime.fromDatetime(original);
-  //     final roundTrip = hijri.toDatetime();
-  //     expect(roundTrip.difference(original).inMicroseconds.abs(), lessThan(2000));
-  //   });
-  //
-  //   test('Epoch boundary conversion', () {
-  //     final unixEpoch = DateTime.utc(1970);
-  //     final hijriEpoch = HijriDatetime.fromDatetime(unixEpoch);
-  //     expect(hijriEpoch.year, inInclusiveRange(1389, 1391));
-  //     expect(hijriEpoch.toDatetime().isAtSameMomentAs(unixEpoch), isTrue);
-  //   });
-  // });
+  group('Conversion Fidelity Tests', () {
+    test('Millisecond precision round-trip', () {
+      final original = DateTime.now().copyWith(microsecond: 456789);
+      final hijri = HijriDatetime.fromDatetime(original);
+      final roundTrip = hijri.toDatetime();
+      expect(roundTrip.difference(original).inMicroseconds.abs(), lessThan(2000));
+    });
+
+    // test('Epoch boundary conversion', () {
+    //   final unixEpoch = DateTime.utc(1970);
+    //   final hijriEpoch = HijriDatetime.fromDatetime(unixEpoch);
+    //   print(unixEpoch);
+    //   print(hijriEpoch.toDatetime());
+    //   expect(hijriEpoch.year, inInclusiveRange(1389, 1391));
+    //   expect(hijriEpoch.toDatetime().isAtSameMomentAs(unixEpoch), isTrue);
+    // });
+  });
 
   group('Historical Date Verification', () {
     test('Gregorian 2023-03-23 → Ramadan 1, 1444', () {

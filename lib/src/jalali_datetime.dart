@@ -2,6 +2,33 @@ import 'package:general_datetime/src/constants.dart';
 
 import 'general_datetime_interface.dart';
 
+/// Represents a date and time in the **Jalali (Persian/Iranian)** calendar system.
+///
+/// This class provides conversion between Gregorian and Jalali dates,
+/// along with time component support (hour, minute, second, etc).
+///
+/// It extends the [GeneralDatetimeInterface] to support consistent behavior
+/// across multiple calendar types.
+///
+/// ### Features:
+/// - Supports Jalali <-> Gregorian conversion.
+/// - Time components (hour, minute, second, etc.) are supported.
+/// - Supports normalization of overflow values (e.g., 90 seconds becomes 1 minute 30 seconds).
+/// - Provides leap year check and weekday calculation.
+/// - Offers a consistent interface across calendars (Gregorian, Jalali, Hijri).
+///
+/// ### Example:
+/// ```dart
+/// var now = JalaliDatetime.now(); // Get current Jalali date and time
+/// print(now); // 1403/1/19
+///
+/// var jDate = JalaliDatetime(1402, 12, 30);
+/// print(jDate.toDatetime()); // Converts to equivalent Gregorian date
+/// ```
+///
+/// ### Calendar Notes:
+/// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
+/// with highly accurate leap year rules and month lengths.
 class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   /// Private constructor for raw inputs
   JalaliDatetime._raw(
@@ -57,33 +84,14 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Factory constructor for current date and time
   factory JalaliDatetime.now() {
-    final DateTime datetime = DateTime.now();
-    return JalaliDatetime._raw(
-      datetime.year,
-      datetime.month,
-      datetime.day,
-      datetime.hour,
-      datetime.minute,
-      datetime.second,
-      datetime.millisecond,
-      datetime.microsecond,
-    )._toJalali();
+    final DateTime dt = DateTime.now();
+    return JalaliDatetime.fromDatetime(dt);
   }
 
   /// Factory constructor for current date and time in UTC
   factory JalaliDatetime.timestamp() {
-    final DateTime datetime = DateTime.now().toUtc();
-    return JalaliDatetime._raw(
-      datetime.year,
-      datetime.month,
-      datetime.day,
-      datetime.hour,
-      datetime.minute,
-      datetime.second,
-      datetime.millisecond,
-      datetime.microsecond,
-      true,
-    )._toJalali();
+    final DateTime dt = DateTime.now().toUtc();
+    return JalaliDatetime.fromDatetime(dt);
   }
 
   /// Factory constructor in UTC with normalization
@@ -96,81 +104,41 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int second = 0,
     int millisecond = 0,
     int microsecond = 0,
-  ]) {
-    return JalaliDatetime._raw(
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-      true,
-    )._normalize();
+  ]) =>
+      JalaliDatetime._raw(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        true,
+      )._normalize();
+
+  factory JalaliDatetime.fromSecondsSinceEpoch(int secondsSinceEpoch,
+      {bool isUtc = false}) {
+    final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
+        secondsSinceEpoch * 1000,
+        isUtc: isUtc);
+    return JalaliDatetime.fromDatetime(dt);
   }
 
-  factory JalaliDatetime.fromSecondsSinceEpoch(
-    int secondsSinceEpoch, {
-    bool isUtc = false,
-  }) {
-    final DateTime datetime = DateTime.fromMillisecondsSinceEpoch(
-      secondsSinceEpoch * 1000,
-      isUtc: isUtc,
-    );
-    return JalaliDatetime._raw(
-      datetime.year,
-      datetime.month,
-      datetime.day,
-      datetime.hour,
-      datetime.minute,
-      datetime.second,
-      datetime.millisecond,
-      datetime.microsecond,
-      datetime.isUtc,
-    )._toJalali();
+  factory JalaliDatetime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
+      {bool isUtc = false}) {
+    final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
+        millisecondsSinceEpoch,
+        isUtc: isUtc);
+    return JalaliDatetime.fromDatetime(dt);
   }
 
-  factory JalaliDatetime.fromMillisecondsSinceEpoch(
-    int millisecondsSinceEpoch, {
-    bool isUtc = false,
-  }) {
-    final DateTime datetime = DateTime.fromMillisecondsSinceEpoch(
-      millisecondsSinceEpoch,
-      isUtc: isUtc,
-    );
-    return JalaliDatetime._raw(
-      datetime.year,
-      datetime.month,
-      datetime.day,
-      datetime.hour,
-      datetime.minute,
-      datetime.second,
-      datetime.millisecond,
-      datetime.microsecond,
-      datetime.isUtc,
-    )._toJalali();
-  }
-
-  factory JalaliDatetime.fromMicrosecondsSinceEpoch(
-    int microsecondsSinceEpoch, {
-    bool isUtc = false,
-  }) {
-    final DateTime datetime = DateTime.fromMicrosecondsSinceEpoch(
-      microsecondsSinceEpoch,
-      isUtc: isUtc,
-    );
-    return JalaliDatetime._raw(
-      datetime.year,
-      datetime.month,
-      datetime.day,
-      datetime.hour,
-      datetime.minute,
-      datetime.second,
-      datetime.millisecond,
-      datetime.microsecond,
-      datetime.isUtc,
-    )._toJalali();
+  factory JalaliDatetime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
+      {bool isUtc = false}) {
+    final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
+        microsecondsSinceEpoch,
+        isUtc: isUtc);
+    return JalaliDatetime.fromDatetime(dt);
   }
 
   factory JalaliDatetime.parse(String formattedString) {
@@ -255,14 +223,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   @override
   String get name => "Jalali";
 
-  /// The time zone name
-  @override
-  String get timeZoneName => toDatetime().timeZoneName;
-
-  /// The time zone offset
-  @override
-  Duration get timeZoneOffset => toDatetime().timeZoneOffset;
-
   /// Calculate weekday (0=Saturday, 6=Friday)
   @override
   int get weekday {
@@ -274,6 +234,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   @override
   int get monthLength => _monthLength(year, month);
 
+  /// This computes the day count within the Jalali year.
   @override
   int get dayOfYear {
     int dayCount = 0;
@@ -302,16 +263,10 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     return 1948321 + totalDays;
   }
 
-  @override
-  int get secondsSinceEpoch => toDatetime().millisecondsSinceEpoch ~/ 1000;
-
-  @override
-  int get millisecondsSinceEpoch => toDatetime().millisecondsSinceEpoch;
-
-  @override
-  int get microsecondsSinceEpoch => toDatetime().microsecondsSinceEpoch;
-
-  /// Convert Jalali date to DateTime
+  /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
+  /// This method uses an approximate conversion via Julian day calculations.
+  /// For a given Jalali date, we compute its Julian Day Number (JD) using
+  /// an approximation formula and then convert the JD to the Gregorian date.
   @override
   DateTime toDatetime() {
     int a = julianDay + 32044;

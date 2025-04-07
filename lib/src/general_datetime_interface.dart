@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 abstract class GeneralDatetimeInterface<T>
     implements Comparable<GeneralDatetimeInterface> {
   GeneralDatetimeInterface(
@@ -36,7 +38,7 @@ abstract class GeneralDatetimeInterface<T>
   /// In the browser or on Unix-like systems commonly returns abbreviations,
   /// such as "CET" or "CEST". On Windows returns the full name, for example
   /// "Pacific Standard Time".
-  String get timeZoneName;
+  String get timeZoneName => toDatetime().timeZoneName;
 
   /// The time zone offset, which is the difference between local time and UTC.
   /// The offset is positive for time zones east of UTC.
@@ -62,7 +64,7 @@ abstract class GeneralDatetimeInterface<T>
   /// print(dateAus.timeZoneOffset.inHours); // 11
   /// print(dateAus.timeZoneOffset.inMinutes); // 660
   /// ```
-  Duration get timeZoneOffset;
+  Duration get timeZoneOffset => toDatetime().timeZoneOffset;
 
   /// Calculate weekday according to the calendar type
   int get weekday;
@@ -78,11 +80,14 @@ abstract class GeneralDatetimeInterface<T>
   /// Julian Day Number getter
   int get julianDay;
 
-  int get secondsSinceEpoch;
+  /// Seconds since epoch
+  int get secondsSinceEpoch => toDatetime().millisecondsSinceEpoch ~/ 1000;
 
-  int get millisecondsSinceEpoch;
+  /// Milliseconds since epoch
+  int get millisecondsSinceEpoch => toDatetime().millisecondsSinceEpoch;
 
-  int get microsecondsSinceEpoch;
+  /// Microseconds since epoch
+  int get microsecondsSinceEpoch => toDatetime().microsecondsSinceEpoch;
 
   /// Convert T calendar type to DateTime
   DateTime toDatetime();

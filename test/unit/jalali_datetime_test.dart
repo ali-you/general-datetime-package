@@ -4,7 +4,6 @@ import 'package:general_datetime/general_datetime.dart';
 void main() {
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
-      DateTime now = DateTime.now();
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
       expect(j.toString(), "1403-12-11 00:00:00.000");
     });
