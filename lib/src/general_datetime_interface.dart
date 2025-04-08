@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 abstract class GeneralDatetimeInterface<T>
     implements Comparable<GeneralDatetimeInterface> {
   GeneralDatetimeInterface(
@@ -80,6 +78,21 @@ abstract class GeneralDatetimeInterface<T>
   /// Julian Day Number getter
   int get julianDay;
 
+  /// Convert T calendar type to DateTime
+  DateTime toDatetime();
+
+  /// Add a Duration to the custom date
+  T add(Duration duration);
+
+  /// Subtract a Duration from the custom date
+  T subtract(Duration duration);
+
+  /// Convert to local time
+  T toLocal();
+
+  /// Convert to UTC time
+  T toUtc();
+
   /// Seconds since epoch
   int get secondsSinceEpoch => toDatetime().millisecondsSinceEpoch ~/ 1000;
 
@@ -89,27 +102,136 @@ abstract class GeneralDatetimeInterface<T>
   /// Microseconds since epoch
   int get microsecondsSinceEpoch => toDatetime().microsecondsSinceEpoch;
 
-  /// Convert T calendar type to DateTime
-  DateTime toDatetime();
-
+  /// Compares this datetime instance to another.
+  /// This method allows comparison between different types that implement
+  /// [GeneralDatetimeInterface] as well as native [DateTime] objects.
+  /// Returns:
+  /// - A negative integer if `this` occurs before [other]
+  /// - Zero if `this` and [other] represent the same moment in time
+  /// - A positive integer if `this` occurs after [other]
+  /// Example:
+  /// ```dart
+  /// final a = JalaliDatetime(1403, 4, 15, 10);
+  /// final b = JalaliDatetime(1403, 4, 15, 12);
+  /// final c = DateTime(2024, 7, 5, 12);
+  ///
+  /// a.compareTo(b); // < 0
+  /// b.compareTo(a); // > 0
+  /// b.compareTo(b); // == 0
+  /// b.compareTo(c); // works if toDatetime() maps them to the same moment
+  /// ```
+  /// Throws [ArgumentError] if [other] is not a [GeneralDatetimeInterface] or [DateTime].
   @override
-  int compareTo(GeneralDatetimeInterface other);
+  int compareTo(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.compareTo(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.compareTo(other);
+    throw ArgumentError(
+        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
+  }
 
-  bool isBefore(GeneralDatetimeInterface other);
+  /// Checks whether this datetime occurs before another.
+  /// This method compares this instance with [other], which can be either:
+  /// - Another object implementing [GeneralDatetimeInterface], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if this datetime is before [other], otherwise `false`.
+  /// Example:
+  /// ```dart
+  /// final a = JalaliDatetime(1403, 4, 15, 10);
+  /// final b = JalaliDatetime(1403, 4, 15, 12);
+  ///
+  /// a.isBefore(b); // true
+  /// b.isBefore(a); // false
+  ///
+  /// final native = DateTime(2025, 7, 6, 14);
+  /// b.isBefore(native); // true or false depending on internal conversion
+  /// ```
+  /// Throws [ArgumentError] if [other] is not a [GeneralDatetimeInterface] or [DateTime].
+  bool isBefore(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.isBefore(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.isBefore(other);
+    throw ArgumentError(
+        'isBefore function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
+  }
 
-  bool isAfter(GeneralDatetimeInterface other);
+  /// Checks whether this datetime occurs after another.
+  /// Compares this instance with [other], which can be either:
+  /// - An object implementing [GeneralDatetimeInterface], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if this datetime is after [other], otherwise `false`.
+  /// Example:
+  /// ```dart
+  /// final a = JalaliDatetime(1403, 4, 15, 12);
+  /// final b = JalaliDatetime(1403, 4, 15, 10);
+  ///
+  /// a.isAfter(b); // true
+  /// b.isAfter(a); // false
+  /// ```
+  /// Throws an [ArgumentError] if [other] is not a [GeneralDatetimeInterface] or [DateTime].
+  bool isAfter(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.isAfter(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.isAfter(other);
+    throw ArgumentError(
+        'isAfter function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
+  }
 
-  bool isAtSameMomentAs(GeneralDatetimeInterface other);
+  /// Checks whether this datetime represents the same moment as another.
+  /// Compares this instance with [other], which can be either:
+  /// - An object implementing [GeneralDatetimeInterface], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if both datetimes represent the same point in time.
+  /// Example:
+  /// ```dart
+  /// final a = JalaliDatetime(1403, 4, 15, 12, 30);
+  /// final b = JalaliDatetime(1403, 4, 15, 12, 30);
+  ///
+  /// a.isAtSameMomentAs(b); // true
+  ///
+  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
+  /// ```
+  /// Throws an [ArgumentError] if [other] is not a [GeneralDatetimeInterface] or [DateTime].
+  bool isAtSameMomentAs(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.isAtSameMomentAs(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.isAtSameMomentAs(other);
+    throw ArgumentError(
+        'isAtSameMomentAs function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
+  }
 
-  T add(Duration duration);
-
-  T subtract(Duration duration);
-
-  Duration difference(GeneralDatetimeInterface other);
-
-  T toLocal();
-
-  T toUtc();
+  /// Returns the difference between this datetime and another.
+  /// Computes the [Duration] between this instance and [other], which can be either:
+  /// - An object implementing [GeneralDatetimeInterface], or
+  /// - A native [DateTime] instance.
+  /// The result is positive if this datetime is after [other], and negative if before.
+  /// Example:
+  /// ```dart
+  /// final a = JalaliDatetime(1403, 4, 15, 12, 30);
+  /// final b = JalaliDatetime(1403, 4, 15, 11, 0);
+  ///
+  /// final duration = a.difference(b); // 1 hour 30 minutes
+  /// duration.inMinutes; // 90
+  /// ```
+  /// Throws an [ArgumentError] if [other] is not a [GeneralDatetimeInterface] or [DateTime].
+  Duration difference(dynamic other) {
+    final DateTime selfDate = toDatetime();
+    if (other is GeneralDatetimeInterface) {
+      return selfDate.difference(other.toDatetime());
+    }
+    if (other is DateTime) return selfDate.difference(other);
+    throw ArgumentError(
+        'difference function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
+  }
 
   Duration get time => Duration(
         hours: hour,

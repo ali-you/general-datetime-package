@@ -53,7 +53,7 @@ value normalization gracefully.
   dates.
 
 - **Parsing and Formatting:**
-  Create JalaliDatetime instances from formatted strings and output a consistent string
+  Create custom datetime (JalaliDatetime, HijriDatetime) instances from formatted strings and output a consistent string
   representation.
 
 ## Installation
@@ -66,7 +66,7 @@ Include the following dependency in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  jalali_datetime: ^0.1.1
+  general_datetime: ^1.0.1
 
 ```
 
@@ -75,7 +75,7 @@ dependencies:
 Run the following command to add the plugin directly to your project:
 
 ```bash
-flutter pub add jalali_datetime
+flutter pub add general_datetime
 ```
 
 ## Usage
@@ -86,7 +86,6 @@ provided implementation:
 
 ```dart
 import 'package:general_datetime/general_datetime.dart';
-import 'package:shamsi_date/shamsi_date.dart'; // Your concrete implementation
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:
@@ -113,7 +112,6 @@ void main() {
   print('Time Zone Name: ${jDate.timeZoneName}');
   print('Time Zone Offset: ${jDate.timeZoneOffset}');
 }
-
 ```
 
 - Checkout [Example](https://pub.dev/packages/general_datetime/example) for complete explanation

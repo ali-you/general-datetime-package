@@ -278,12 +278,10 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int dayG = e - ((153 * m + 2) ~/ 5) + 1;
     int monthG = m + 3 - 12 * (m ~/ 10);
     int yearG = 100 * b + d - 4800 + (m ~/ 10);
-
     if (isUtc) {
       return DateTime.utc(
           yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
     }
-
     return DateTime(
       yearG,
       monthG,
@@ -296,74 +294,21 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     );
   }
 
-  /// Compare Jalali dates
-  @override
-  int compareTo(dynamic other) {
-    final DateTime selfDate = toDatetime();
-    if (other is GeneralDatetimeInterface) {
-      return selfDate.compareTo(other.toDatetime());
-    }
-    if (other is DateTime) return selfDate.compareTo(other);
-    throw ArgumentError(
-        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
-  @override
-  bool isBefore(dynamic other) {
-    final DateTime selfDate = toDatetime();
-    if (other is GeneralDatetimeInterface) {
-      return selfDate.isBefore(other.toDatetime());
-    }
-    if (other is DateTime) return selfDate.isBefore(other);
-    throw ArgumentError(
-        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
-  @override
-  bool isAfter(dynamic other) {
-    final DateTime selfDate = toDatetime();
-    if (other is GeneralDatetimeInterface) {
-      return selfDate.isAfter(other.toDatetime());
-    }
-    if (other is DateTime) return selfDate.isAfter(other);
-    throw ArgumentError(
-        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
-  @override
-  bool isAtSameMomentAs(dynamic other) {
-    final DateTime selfDate = toDatetime();
-    if (other is GeneralDatetimeInterface) {
-      return selfDate.isAtSameMomentAs(other.toDatetime());
-    }
-    if (other is DateTime) return selfDate.isAtSameMomentAs(other);
-    throw ArgumentError(
-        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
+  /// Add a Duration to the Jalali date
   @override
   JalaliDatetime add(Duration duration) {
     final DateTime result = toDatetime().add(duration);
     return JalaliDatetime.fromDatetime(result);
   }
 
+  /// Subtract a Duration from the Jalali date
   @override
   JalaliDatetime subtract(Duration duration) {
     final DateTime result = toDatetime().subtract(duration);
     return JalaliDatetime.fromDatetime(result);
   }
 
-  @override
-  Duration difference(dynamic other) {
-    final DateTime selfDate = toDatetime();
-    if (other is GeneralDatetimeInterface) {
-      return selfDate.difference(other.toDatetime());
-    }
-    if (other is DateTime) return selfDate.difference(other);
-    throw ArgumentError(
-        'compareTo function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
+  /// Convert to local time
   @override
   JalaliDatetime toLocal() {
     if (!isUtc) return this;
@@ -371,6 +316,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     return JalaliDatetime.fromDatetime(localDt);
   }
 
+  /// Convert to UTC time
   @override
   JalaliDatetime toUtc() {
     if (isUtc) return this;
@@ -418,7 +364,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   JalaliDatetime _normalize() {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
-
     // Normalize microseconds to milliseconds
     ms += us ~/ 1000;
     us = us.remainder(1000);
@@ -426,7 +371,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       us += 1000;
       ms -= 1;
     }
-
     // Normalize milliseconds to seconds
     s += ms ~/ 1000;
     ms = ms.remainder(1000);
@@ -434,7 +378,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       ms += 1000;
       s -= 1;
     }
-
     // Normalize seconds to minutes
     min += s ~/ 60;
     s = s.remainder(60);
@@ -442,7 +385,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       s += 60;
       min -= 1;
     }
-
     // Normalize minutes to hours
     h += min ~/ 60;
     min = min.remainder(60);
@@ -450,7 +392,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       min += 60;
       h -= 1;
     }
-
     // Normalize hours to days
     d += h ~/ 24;
     h = h.remainder(24);
@@ -458,7 +399,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       h += 24;
       d -= 1;
     }
-
     // Normalize days to months
     while (d < 1) {
       m -= 1;
@@ -476,7 +416,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
         y += 1;
       }
     }
-
     // Normalize months to years
     while (m < 1) {
       m += 12;
@@ -486,7 +425,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       m -= 12;
       y += 1;
     }
-
     return JalaliDatetime._raw(y, m, d, h, min, s, ms, us, isUtc);
   }
 
@@ -501,12 +439,10 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   bool _isLeapYear(int jy) {
     // Special case: Year 1 is not a leap year.
     if (jy == 1) return false;
-
     // Calculate the remainder in the 33-year cycle.
     // Make sure we have a positive remainder.
     int r = jy % 33;
     if (r < 0) r += 33;
-
     // Leap years in the 33-year cycle occur in these remainders.
     const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
     return leapRemainders.contains(r);

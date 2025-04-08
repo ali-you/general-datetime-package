@@ -268,10 +268,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
   /// This method uses the Fliegel-Van Flandern algorithm.
   @override
   DateTime toDatetime() {
-    double jd = _hijriToJD(year, month, day);
-
-    int j = jd.floor();
-    int l = j + 68569;
+    int l = julianDay + 68569;
     int n = (4 * l) ~/ 146097;
     l = l - ((146097 * n + 3) ~/ 4);
     int i = (4000 * (l + 1)) ~/ 1461001;
@@ -299,13 +296,53 @@ class HijriDatetime extends GeneralDatetimeInterface {
     );
   }
 
-  /// ### Conversion from Gregorian to Hijri (Umm al-Qura)
-  ///
+  /// Add a Duration to the Hijri date
+  @override
+  GeneralDatetimeInterface add(Duration duration) {
+    DateTime result = toDatetime().add(duration);
+    return HijriDatetime.fromDatetime(result);
+  }
+
+  /// Subtract a Duration from the Hijri date
+  @override
+  GeneralDatetimeInterface subtract(Duration duration) {
+    DateTime result = toDatetime().subtract(duration);
+    return HijriDatetime.fromDatetime(result);
+  }
+
+  /// Convert to local time
+  @override
+  GeneralDatetimeInterface toLocal() {
+    DateTime localDt = toDatetime().toLocal();
+    return HijriDatetime.fromDatetime(localDt);
+  }
+
+  /// Convert to UTC time
+  @override
+  GeneralDatetimeInterface toUtc() {
+    DateTime utcDt = toDatetime().toUtc();
+    return HijriDatetime.fromDatetime(utcDt);
+  }
+
+  /// Conversion from Gregorian to Hijri (Umm al-Qura)
   /// This method converts the current Gregorian date (stored in the instance)
   /// to a Hijri date according to an approximate algorithm. It computes the
   /// Julian Day Number (JD) of the Gregorian date and then derives the Hijri date.
   HijriDatetime _toHijri() {
-    double jd = _gregorianToJD(year, month, day);
+    int gy = year;
+    int gm = month;
+    int gd = day;
+    // Convert Gregorian date to Julian Day Number (JD)
+    int a = ((14 - gm) ~/ 12);
+    int y = gy + 4800 - a;
+    int m = gm + 12 * a - 3;
+    double jd = gd +
+        ((153 * m + 2) ~/ 5) +
+        365 * y +
+        (y ~/ 4) -
+        (y ~/ 100) +
+        (y ~/ 400) -
+        32045;
     // Adjust JD to align with Islamic epoch.
     // The following formula is an approximation.
     int hYear = ((30 * (jd - 1948439.5) + 10646) / 10631).floor();
@@ -314,23 +351,14 @@ class HijriDatetime extends GeneralDatetimeInterface {
     double firstDayOfHijriMonth = _hijriToJD(hYear, hMonth, 1);
     int hDay = (jd - firstDayOfHijriMonth).floor() + 1;
 
-    return HijriDatetime._raw(
-      hYear,
-      hMonth,
-      hDay,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-    );
+    return HijriDatetime._raw(hYear, hMonth, hDay, hour, minute, second,
+        millisecond, microsecond, isUtc);
   }
 
   /// **Normalize values (overflow handling)**
   HijriDatetime _normalize() {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
-
     // Normalize microseconds to milliseconds.
     ms += us ~/ 1000;
     us = us.remainder(1000);
@@ -338,7 +366,6 @@ class HijriDatetime extends GeneralDatetimeInterface {
       us += 1000;
       ms -= 1;
     }
-
     // Normalize milliseconds to seconds.
     s += ms ~/ 1000;
     ms = ms.remainder(1000);
@@ -346,7 +373,6 @@ class HijriDatetime extends GeneralDatetimeInterface {
       ms += 1000;
       s -= 1;
     }
-
     // Normalize seconds to minutes.
     min += s ~/ 60;
     s = s.remainder(60);
@@ -354,7 +380,6 @@ class HijriDatetime extends GeneralDatetimeInterface {
       s += 60;
       min -= 1;
     }
-
     // Normalize minutes to hours.
     h += min ~/ 60;
     min = min.remainder(60);
@@ -362,7 +387,6 @@ class HijriDatetime extends GeneralDatetimeInterface {
       min += 60;
       h -= 1;
     }
-
     // Normalize hours to days.
     d += h ~/ 24;
     h = h.remainder(24);
@@ -370,7 +394,6 @@ class HijriDatetime extends GeneralDatetimeInterface {
       h += 24;
       d -= 1;
     }
-
     // Normalize days within Hijri month boundaries.
     while (d < 1) {
       m -= 1;
@@ -388,7 +411,6 @@ class HijriDatetime extends GeneralDatetimeInterface {
         y += 1;
       }
     }
-
     // Normalize months to years.
     while (m < 1) {
       m += 12;
@@ -398,18 +420,10 @@ class HijriDatetime extends GeneralDatetimeInterface {
       m -= 12;
       y += 1;
     }
-
     return HijriDatetime._raw(y, m, d, h, min, s, ms, us);
   }
 
-  /// **Compare Hijri dates**
-  @override
-  int compareTo(GeneralDatetimeInterface other) {
-    return toDatetime().compareTo(other.toDatetime());
-  }
-
-  /// **Helper method to get month length**
-  ///
+  /// Helper method to get month length
   /// In the Umm al-Qura calendar, months are typically alternately 30 and 29 days,
   /// with the last month having 30 days in a leap year.
   int _monthLength(int year, int month) {
@@ -417,8 +431,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
     return (month % 2 == 1) ? 30 : 29;
   }
 
-  /// **Convert Hijri date to Julian Day Number (JD)**
-  ///
+  /// Helper method to convert Hijri date to Julian Day Number (JD)
   /// The following formula is an approximation adapted for the Umm al-Qura system.
   double _hijriToJD(int year, int month, int day) {
     // Using an approximation formula for the Islamic calendar:
@@ -430,71 +443,5 @@ class HijriDatetime extends GeneralDatetimeInterface {
         ((3 + (11 * year)) / 30).floor() +
         1948440 -
         1;
-  }
-
-  /// **Convert Gregorian date to Julian Day Number (JD)**
-  double _gregorianToJD(int year, int month, int day) {
-    int a = ((14 - month) ~/ 12);
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    return day +
-        ((153 * m + 2) ~/ 5) +
-        365 * y +
-        (y ~/ 4) -
-        (y ~/ 100) +
-        (y ~/ 400) -
-        32045;
-  }
-
-  /// **Add a Duration to the Hijri date**
-  @override
-  GeneralDatetimeInterface add(Duration duration) {
-    DateTime result = toDatetime().add(duration);
-    return HijriDatetime.fromDatetime(result);
-  }
-
-  /// **Difference between two Hijri dates**
-  @override
-  Duration difference(GeneralDatetimeInterface other) {
-    return toDatetime().difference(other.toDatetime());
-  }
-
-  /// **Check if this Hijri date is after [other]**
-  @override
-  bool isAfter(GeneralDatetimeInterface other) {
-    return toDatetime().isAfter(other.toDatetime());
-  }
-
-  /// **Check if this Hijri date is before [other]**
-  @override
-  bool isBefore(GeneralDatetimeInterface other) {
-    return toDatetime().isBefore(other.toDatetime());
-  }
-
-  /// **Check if this Hijri date is at the same moment as [other]**
-  @override
-  bool isAtSameMomentAs(GeneralDatetimeInterface other) {
-    return toDatetime().isAtSameMomentAs(other.toDatetime());
-  }
-
-  /// **Subtract a Duration from the Hijri date**
-  @override
-  GeneralDatetimeInterface subtract(Duration duration) {
-    DateTime result = toDatetime().subtract(duration);
-    return HijriDatetime.fromDatetime(result);
-  }
-
-  /// **Convert to local time**
-  @override
-  GeneralDatetimeInterface toLocal() {
-    DateTime localDt = toDatetime().toLocal();
-    return HijriDatetime.fromDatetime(localDt);
-  }
-
-  /// **Convert to UTC time**
-  @override
-  GeneralDatetimeInterface toUtc() {
-    DateTime utcDt = toDatetime().toUtc();
-    return HijriDatetime.fromDatetime(utcDt);
   }
 }
