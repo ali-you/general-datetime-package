@@ -436,15 +436,87 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   }
 
   /// Helper method to check if a Jalali year is leap
+  // bool _isLeapYear(int jy) {
+  //   // Special case: Year 1 is not a leap year.
+  //   if (jy == 1) return false;
+  //   // Calculate the remainder in the 33-year cycle.
+  //   // Make sure we have a positive remainder.
+  //   int r = jy % 33;
+  //   if (r < 0) r += 33;
+  //   // Leap years in the 33-year cycle occur in these remainders.
+  //   const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
+  //   return leapRemainders.contains(r);
+  // }
+
+  // bool _isLeapYear(int year) {
+  //   // Persian leap year calculation using 2820-year cycle (683 leap years per cycle)
+  //   int a = year >= 0 ? year - 474 : year - 473;
+  //   int b = (a % 2820) + 474;
+  //   return ((b + 38) * 682) % 2816 < 682;
+  // }
+
+  // bool _isLeapYear(int year) {
+  //   // Use the same algorithm as shamsi_date/jalaali-js for Jalali leap years.
+  //   // This accounts for the 33-year cycles with occasional 29 or 37-year adjustments
+  //   // (e.g. year 1209 is common because the cycle breaks at 1210)&#8203;:contentReference[oaicite:6]{index=6}.
+  //   // Convert to cycle year with proper offset (474) before applying the leap formula.
+  //   final int epBase = year - ((year >= 0) ? 474 : 473);
+  //   final int epYear = 474 + (epBase % 2820);
+  //   return (epYear * 682 % 2816) < 682;
+  // }
+
   bool _isLeapYear(int jy) {
-    // Special case: Year 1 is not a leap year.
-    if (jy == 1) return false;
-    // Calculate the remainder in the 33-year cycle.
-    // Make sure we have a positive remainder.
-    int r = jy % 33;
-    if (r < 0) r += 33;
-    // Leap years in the 33-year cycle occur in these remainders.
-    const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
-    return leapRemainders.contains(r);
+    final List<int> breaks = [
+      -61,
+      9,
+      38,
+      199,
+      426,
+      686,
+      756,
+      818,
+      1111,
+      1181,
+      1210,
+      1635,
+      2060,
+      2097,
+      2192,
+      2262,
+      2324,
+      2394,
+      2456,
+      3178,
+    ];
+
+    int leapJ = -14;
+    int jp = breaks[0];
+    int jump = 0;
+
+    for (int i = 1; i < breaks.length; i += 1) {
+      final int jm = breaks[i];
+      jump = jm - jp;
+      if (jy < jm) {
+        break;
+      }
+      leapJ = leapJ + (jump ~/ 33) * 8 + (((jump % 33)) ~/ 4);
+      jp = jm;
+    }
+    int n = jy - jp;
+
+    leapJ = leapJ + ((n) ~/ 33) * 8 + (((n % 33) + 3) ~/ 4);
+    if ((jump % 33) == 4 && jump - n == 4) {
+      leapJ += 1;
+    }
+
+    if (jump - n < 6) {
+      n = n - jump + ((jump + 4) ~/ 33) * 33;
+    }
+    int leap = ((((n + 1) % 33) - 1) % 4);
+    if (leap == -1) {
+      leap = 4;
+    }
+
+    return leap == 0;
   }
 }

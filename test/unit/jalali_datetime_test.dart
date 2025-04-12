@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
+import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
   group('Gregorian to Jalali Conversion', () {
@@ -449,5 +450,56 @@ void main() {
       expect(j.minute, equals(58));
       expect(j.second, equals(45));
     });
+  });
+  group('Compare with another package', () {
+
+    test('compare leap year', () {
+      final Jalali another = Jalali(1176);
+      final JalaliDatetime own = JalaliDatetime(1176);
+      expect(own.isLeapYear, another.isLeapYear());
+    });
+
+    test('compare leap year in list', () {
+      for (int year = 1178; year <= 1500; year++) {
+        final Jalali another = Jalali(year);
+        final JalaliDatetime own = JalaliDatetime(year);
+          expect(own.isLeapYear, another.isLeapYear(), reason: 'Year mismatch on $year');
+          // expect(own, another, reason: 'Year mismatch on $year,$month => ');
+        }
+    });
+
+    // test('compare months', () {
+    //   final Jalali another = Jalali(1176);
+    //   final JalaliDatetime own = JalaliDatetime(1176);
+    //   expect(own.isLeapYear, another.isLeapYear());
+    //   // for (int year = 1178; year <= 1500; year++) {
+    //   //   for (int month = 1; month <= 12; month++) {
+    //   //     final int another = Jalali(year, month).monthLength;
+    //   //     final int own = JalaliDatetime(year, month).monthLength;
+    //   //     expect(own, another, reason: 'Year mismatch on $year,$month => ');
+    //   //   }
+    //   // }
+    // });
+
+      // test('Validate JalaliDatetime against shamsi_date package for years 1390–1410', () {
+      //   for (int year = 1390; year <= 1410; year++) {
+      //     for (int month = 1; month <= 12; month++) {
+      //       final int daysInMonth = ShamsiDate.Jalali(year, month).monthLength;
+      //       // expect(j2.year, j1.year, reason: 'Year mismatch on $g');
+      //       for (int day = 1; day <= daysInMonth; day++) {
+      //         final ShamsiDate.Jalali j1 = ShamsiDate.Jalali(year, month, day);
+      //         final DateTime g = j1.toDateTime(); // Gregorian
+      //
+      //         final j2 = JalaliDatetime.fromDatetime(g); // Your implementation
+      //
+      //         expect(j2.year, j1.year, reason: 'Year mismatch on $g');
+      //         expect(j2.month, j1.month, reason: 'Month mismatch on $g');
+      //         expect(j2.day, j1.day, reason: 'Day mismatch on $g');
+      //       }
+      //     }
+      //   }
+      // });
+
+
   });
 }
