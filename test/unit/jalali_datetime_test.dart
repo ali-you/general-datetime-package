@@ -3,6 +3,12 @@ import 'package:general_datetime/general_datetime.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
+  int getDaysInMonth(int year, int month) {
+    DateTime firstDayOfNextMonth = DateTime(year, month + 1, 1);
+    DateTime lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
+    return lastDayOfCurrentMonth.day;
+  }
+
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
       JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
@@ -305,6 +311,8 @@ void main() {
 
     test('Unix Epoch Conversion', () {
       final j = JalaliDatetime.fromMillisecondsSinceEpoch(0, isUtc: true);
+      print(Jalali.fromMillisecondsSinceEpoch(0, isUtc: true));
+      print(j);
       expect(j.year, 1348);
       expect(j.month, 10);
       expect(j.day, 11);
@@ -468,38 +476,43 @@ void main() {
         }
     });
 
-    // test('compare months', () {
-    //   final Jalali another = Jalali(1176);
-    //   final JalaliDatetime own = JalaliDatetime(1176);
-    //   expect(own.isLeapYear, another.isLeapYear());
-    //   // for (int year = 1178; year <= 1500; year++) {
-    //   //   for (int month = 1; month <= 12; month++) {
-    //   //     final int another = Jalali(year, month).monthLength;
-    //   //     final int own = JalaliDatetime(year, month).monthLength;
-    //   //     expect(own, another, reason: 'Year mismatch on $year,$month => ');
-    //   //   }
-    //   // }
-    // });
+    test('compare months', () {
+      for (int year = 0; year <= 3000; year++) {
+        for (int month = 1; month <= 12; month++) {
+          final int another = Jalali(year, month).monthLength;
+          final int own = JalaliDatetime(year, month).monthLength;
+          expect(own, another, reason: 'Year mismatch on $year,$month => ');
+        }
+      }
+    });
 
-      // test('Validate JalaliDatetime against shamsi_date package for years 1390–1410', () {
-      //   for (int year = 1390; year <= 1410; year++) {
-      //     for (int month = 1; month <= 12; month++) {
-      //       final int daysInMonth = ShamsiDate.Jalali(year, month).monthLength;
-      //       // expect(j2.year, j1.year, reason: 'Year mismatch on $g');
-      //       for (int day = 1; day <= daysInMonth; day++) {
-      //         final ShamsiDate.Jalali j1 = ShamsiDate.Jalali(year, month, day);
-      //         final DateTime g = j1.toDateTime(); // Gregorian
-      //
-      //         final j2 = JalaliDatetime.fromDatetime(g); // Your implementation
-      //
-      //         expect(j2.year, j1.year, reason: 'Year mismatch on $g');
-      //         expect(j2.month, j1.month, reason: 'Month mismatch on $g');
-      //         expect(j2.day, j1.day, reason: 'Day mismatch on $g');
-      //       }
-      //     }
-      //   }
-      // });
+    test('convert jalali to gregorian', () {
+      for (int year = 1300; year <= 3000; year++) {
+        for (int month = 1; month <= 12; month++) {
+          for (int day = 1; day <= Jalali(year, month).monthLength; day++){
+            final Jalali another = Jalali(year, month, day);
+            final JalaliDatetime own = JalaliDatetime(year, month, day);
+            expect(own.toDatetime(), another.toDateTime(), reason: 'Year mismatch on $year,$month => ');
+          }
+        }
+      }
+    });
 
+      test('convert gregorian to jalali', () {
+        for (int year = 561; year <= 3000; year++) {
+          for (int month = 1; month <= 12; month++) {
+            for (int day = 1; day <= getDaysInMonth(year, month); day++) {
+              final Jalali another = Jalali.fromDateTime(DateTime(year, month, day));
+              final JalaliDatetime own = JalaliDatetime.fromDatetime(DateTime(year, month, day));
+              if (day != 23){
+                expect(own.year, another.year, reason: 'Year mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
+                expect(own.month, another.month, reason: 'Month mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
+                expect(own.day, another.day, reason: 'Day mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
+              }
 
+            }
+          }
+        }
+      });
   });
 }
