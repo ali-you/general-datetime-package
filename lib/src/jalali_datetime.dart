@@ -286,29 +286,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     return 1948321 + totalDays;
   }
 
-  // /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
-  // /// This method uses an approximate conversion via Julian day calculations.
-  // /// For a given Jalali date, we compute its Julian Day Number (JD) using
-  // /// an approximation formula and then convert the JD to the Gregorian date.
-  // @override
-  // DateTime toDatetime() {
-  //   int gDayNo = DateTime(_gregorianYear(year), 3, _startYearMarch(year))
-  //       .difference(DateTime(0))
-  //       .inDays;
-  //   int jDayNo = day - 1;
-  //   for (int i = 1; i < month; ++i) {
-  //     jDayNo += _monthLength(year, i);
-  //   }
-  //
-  //   final int totalDays = gDayNo + jDayNo;
-  //   final DateTime base = DateTime(0).add(Duration(days: totalDays));
-  //   return isUtc
-  //       ? DateTime.utc(base.year, base.month, base.day, hour, minute, second,
-  //           millisecond, microsecond)
-  //       : DateTime(base.year, base.month, base.day, hour, minute, second,
-  //           millisecond, microsecond);
-  // }
-
   /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
   /// This method uses an approximate conversion via Julian day calculations.
   /// For a given Jalali date, we compute its Julian Day Number (JD) using
@@ -531,7 +508,13 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   //   return leapRemainders.contains(r);
   // }
 
-  bool _isLeapYear(int jy) => _leapAndCycle(jy) == 0;
+  bool _isLeapYear(int jy) {
+      int base = year > 0 ? 474 : 473;
+      int cycleYear = ((year - base) % 2820 + 2820) % 2820; // ensures positive mod
+      return (((cycleYear + 474 + 38) * 682) % 2816) < 682;
+
+
+  }
 
   /// Shared internal helper to calculate leap status from Jalali logic.
   int _leapAndCycle(int jy) {
