@@ -2,7 +2,7 @@ import 'package:general_datetime/general_datetime.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:
-  JalaliDatetime jDate = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
+  JalaliDatetime jDate = JalaliDatetime.fromDateTime(DateTime(2025, 3, 1));
   print(
       'Converted to Jalali: ${jDate.toString()}'); // e.g. "1403-12-11 00:00:00.000"
 

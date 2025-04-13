@@ -74,7 +74,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
   }
 
   /// Factory constructor for converting from DateTime
-  factory HijriDatetime.fromDatetime(DateTime datetime) {
+  factory HijriDatetime.fromDateTime(DateTime datetime) {
     return HijriDatetime._raw(
       datetime.year,
       datetime.month,
@@ -91,13 +91,13 @@ class HijriDatetime extends GeneralDatetimeInterface {
   /// Factory constructor for current date and time
   factory HijriDatetime.now() {
     DateTime dt = DateTime.now();
-    return HijriDatetime.fromDatetime(dt);
+    return HijriDatetime.fromDateTime(dt);
   }
 
   /// Factory constructor for current date and time in UTC
   factory HijriDatetime.timestamp() {
     final DateTime dt = DateTime.now().toUtc();
-    return HijriDatetime.fromDatetime(dt);
+    return HijriDatetime.fromDateTime(dt);
   }
 
   /// Factory constructor in UTC with normalization
@@ -128,7 +128,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         secondsSinceEpoch * 1000,
         isUtc: isUtc);
-    return HijriDatetime.fromDatetime(dt);
+    return HijriDatetime.fromDateTime(dt);
   }
 
   factory HijriDatetime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
@@ -136,7 +136,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         millisecondsSinceEpoch,
         isUtc: isUtc);
-    return HijriDatetime.fromDatetime(dt);
+    return HijriDatetime.fromDateTime(dt);
   }
 
   factory HijriDatetime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
@@ -144,7 +144,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
     final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
         microsecondsSinceEpoch,
         isUtc: isUtc);
-    return HijriDatetime.fromDatetime(dt);
+    return HijriDatetime.fromDateTime(dt);
   }
 
   factory HijriDatetime.parse(String formattedString) {
@@ -300,28 +300,28 @@ class HijriDatetime extends GeneralDatetimeInterface {
   @override
   GeneralDatetimeInterface add(Duration duration) {
     DateTime result = toDatetime().add(duration);
-    return HijriDatetime.fromDatetime(result);
+    return HijriDatetime.fromDateTime(result);
   }
 
   /// Subtract a Duration from the Hijri date
   @override
   GeneralDatetimeInterface subtract(Duration duration) {
     DateTime result = toDatetime().subtract(duration);
-    return HijriDatetime.fromDatetime(result);
+    return HijriDatetime.fromDateTime(result);
   }
 
   /// Convert to local time
   @override
   GeneralDatetimeInterface toLocal() {
     DateTime localDt = toDatetime().toLocal();
-    return HijriDatetime.fromDatetime(localDt);
+    return HijriDatetime.fromDateTime(localDt);
   }
 
   /// Convert to UTC time
   @override
   GeneralDatetimeInterface toUtc() {
     DateTime utcDt = toDatetime().toUtc();
-    return HijriDatetime.fromDatetime(utcDt);
+    return HijriDatetime.fromDateTime(utcDt);
   }
 
   /// Conversion from Gregorian to Hijri (Umm al-Qura)

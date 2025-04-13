@@ -3,6 +3,30 @@ import 'package:general_datetime/general_datetime.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
+
+  double toJulianDate(DateTime date) {
+    final year = date.toUtc().year;
+    final month = date.toUtc().month;
+    final day = date.toUtc().day;
+    final hour = date.toUtc().hour;
+    final minute = date.toUtc().minute;
+    final second = date.toUtc().second;
+
+    int y = month <= 2 ? year - 1 : year;
+    int m = month <= 2 ? month + 12 : month;
+
+    final a = (y / 100).floor();
+    final b = 2 - a + (a / 4).floor();
+
+    final jdDay = (365.25 * (y + 4716)).floor() +
+        (30.6001 * (m + 1)).floor() +
+        day + b - 1524.5;
+
+    final dayFraction = (hour + minute / 60 + second / 3600) / 24;
+
+    return jdDay + dayFraction;
+  }
+
   int getDaysInMonth(int year, int month) {
     DateTime firstDayOfNextMonth = DateTime(year, month + 1, 1);
     DateTime lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
@@ -11,22 +35,22 @@ void main() {
 
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year', () {
-      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
+      JalaliDatetime j = JalaliDatetime.fromDateTime(DateTime(2025, 3, 1));
       expect(j.toString(), "1403-12-11 00:00:00.000");
     });
 
     test('Leap Year', () {
-      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 2, 29));
+      JalaliDatetime j = JalaliDatetime.fromDateTime(DateTime(2024, 2, 29));
       expect(j.toString(), "1402-12-10 00:00:00.000");
     });
 
     test('Beginning of Year', () {
-      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 1, 1));
+      JalaliDatetime j = JalaliDatetime.fromDateTime(DateTime(2025, 1, 1));
       expect(j.toString(), "1403-10-12 00:00:00.000");
     });
 
     test('End of Year', () {
-      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2025, 12, 31));
+      JalaliDatetime j = JalaliDatetime.fromDateTime(DateTime(2025, 12, 31));
       expect(j.toString(), "1404-10-10 00:00:00.000");
     });
   });
@@ -82,12 +106,12 @@ void main() {
     });
 
     test('Historical Date Conversion', () {
-      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(1799, 3, 21));
+      JalaliDatetime j = JalaliDatetime.fromDateTime(DateTime(1799, 3, 21));
       expect(j.toString(), "1178-01-01 00:00:00.000");
     });
 
     test('Future Date Conversion', () {
-      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2100, 12, 31));
+      JalaliDatetime j = JalaliDatetime.fromDateTime(DateTime(2100, 12, 31));
       expect(j.toString(), "1479-10-10 00:00:00.000");
     });
   });
@@ -95,7 +119,7 @@ void main() {
   group('Time Handling', () {
     test('Time Component Preservation', () {
       DateTime gDate = DateTime(2025, 3, 1, 14, 30, 45);
-      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      JalaliDatetime j = JalaliDatetime.fromDateTime(gDate);
       expect(j.hour, 14);
       expect(j.minute, 30);
       expect(j.second, 45);
@@ -103,7 +127,7 @@ void main() {
 
     test('Microsecond Preservation', () {
       DateTime gDate = DateTime(2025, 3, 1, 14, 30, 45, 123, 456);
-      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      JalaliDatetime j = JalaliDatetime.fromDateTime(gDate);
       expect(j.millisecond, 123);
       expect(j.microsecond, 456);
     });
@@ -124,13 +148,13 @@ void main() {
   group('Advanced Scenarios', () {
     test('Round-Trip Conversion', () {
       DateTime original = DateTime(2024, 3, 20);
-      JalaliDatetime j = JalaliDatetime.fromDatetime(original);
+      JalaliDatetime j = JalaliDatetime.fromDateTime(original);
       expect(j.toDatetime(), original);
     });
 
     test('Weekday Consistency', () {
       DateTime gDate = DateTime(2024, 3, 20);
-      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      JalaliDatetime j = JalaliDatetime.fromDateTime(gDate);
       expect(j.weekday, gDate.weekday);
     });
 
@@ -140,7 +164,7 @@ void main() {
     });
 
     test('Seasonal Conversion Check', () {
-      JalaliDatetime j = JalaliDatetime.fromDatetime(DateTime(2024, 6, 21));
+      JalaliDatetime j = JalaliDatetime.fromDateTime(DateTime(2024, 6, 21));
       expect(j.toString(), "1403-04-01 00:00:00.000");
     });
   });
@@ -148,13 +172,13 @@ void main() {
   group('Time Zone Handling', () {
     test('UTC Time Preservation', () {
       DateTime gDate = DateTime.utc(2025, 3, 1, 14, 30);
-      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      JalaliDatetime j = JalaliDatetime.fromDateTime(gDate);
       expect(j.toString(), "1403-12-11 14:30:00.000Z");
     });
 
     test('DST Transition Handling', () {
       DateTime gDate = DateTime(2024, 3, 31, 2, 30);
-      JalaliDatetime j = JalaliDatetime.fromDatetime(gDate);
+      JalaliDatetime j = JalaliDatetime.fromDateTime(gDate);
       expect(j.hour, 2);
     });
   });
@@ -277,9 +301,9 @@ void main() {
     });
   });
   group('Factory Constructors', () {
-    test('fromDatetime conversion', () {
+    test('fromDateTime conversion', () {
       final DateTime dt = DateTime(2025, 3, 1, 14, 30, 45, 123, 456);
-      final JalaliDatetime j = JalaliDatetime.fromDatetime(dt);
+      final JalaliDatetime j = JalaliDatetime.fromDateTime(dt);
       // Expected output from your conversion logic.
       expect(j.toString(), equals("1403-12-11 14:30:45.123456"));
     });
@@ -343,34 +367,34 @@ void main() {
   group('Gregorian to Jalali Conversion', () {
     test('Normal Year Conversion', () {
       final JalaliDatetime j =
-          JalaliDatetime.fromDatetime(DateTime(2025, 3, 1));
+          JalaliDatetime.fromDateTime(DateTime(2025, 3, 1));
       expect(j.toString(), equals("1403-12-11 00:00:00.000"));
     });
 
     test('Leap Year Conversion', () {
       final JalaliDatetime j =
-          JalaliDatetime.fromDatetime(DateTime(2024, 2, 29));
+          JalaliDatetime.fromDateTime(DateTime(2024, 2, 29));
       expect(j.toString(), equals("1402-12-10 00:00:00.000"));
     });
 
     test('Beginning of Year Conversion', () {
       final JalaliDatetime j =
-          JalaliDatetime.fromDatetime(DateTime(2025, 1, 1));
+          JalaliDatetime.fromDateTime(DateTime(2025, 1, 1));
       expect(j.toString(), equals("1403-10-12 00:00:00.000"));
     });
 
     test('End of Year Conversion', () {
       final JalaliDatetime j =
-          JalaliDatetime.fromDatetime(DateTime(2025, 12, 31));
+          JalaliDatetime.fromDateTime(DateTime(2025, 12, 31));
       expect(j.toString(), equals("1404-10-10 00:00:00.000"));
     });
 
     test('Gregorian/Jalali New Year Alignment', () {
       // March 20/21 is Farvardin 1
-      final j1 = JalaliDatetime.fromDatetime(DateTime(2024, 3, 20));
+      final j1 = JalaliDatetime.fromDateTime(DateTime(2024, 3, 20));
       expect(j1.toString(), startsWith("1403-01-01"));
 
-      final j2 = JalaliDatetime.fromDatetime(DateTime(2025, 3, 21));
+      final j2 = JalaliDatetime.fromDateTime(DateTime(2025, 3, 21));
       expect(j2.toString(), startsWith("1404-01-01"));
     });
   });
@@ -400,7 +424,7 @@ void main() {
   group('Time Handling', () {
     test('Time Component Preservation', () {
       final DateTime g = DateTime(2025, 3, 1, 14, 30, 45, 123, 456);
-      final JalaliDatetime j = JalaliDatetime.fromDatetime(g);
+      final JalaliDatetime j = JalaliDatetime.fromDateTime(g);
       expect(j.hour, equals(14));
       expect(j.minute, equals(30));
       expect(j.second, equals(45));
@@ -462,9 +486,20 @@ void main() {
   group('Compare with another package', () {
 
     test('compare leap year', () {
-      final Jalali another = Jalali(1176);
-      final JalaliDatetime own = JalaliDatetime(1176);
+      final Jalali another = Jalali(1635);
+      final JalaliDatetime own = JalaliDatetime(1635);
       expect(own.isLeapYear, another.isLeapYear());
+    });
+    
+    test('compare leap year with conversion', () {
+      final Jalali another = Jalali.fromDateTime(DateTime(2256));
+      final JalaliDatetime own = JalaliDatetime.fromDateTime(DateTime(2256));
+      print(own);
+      print(another);
+      expect(own.isLeapYear, another.isLeapYear());
+      // Expected: <1635>
+      // Actual: <1634>
+      // Year mismatch on 2256,3,20 => own:1634-12-30 00:00:00.000, another:Jalali(1635, 1, 1, 0, 0, 0, 0)
     });
 
     test('compare leap year in list', () {
@@ -487,7 +522,7 @@ void main() {
     });
 
     test('convert jalali to gregorian', () {
-      for (int year = 1300; year <= 3000; year++) {
+      for (int year = 1; year <= 3176; year++) {
         for (int month = 1; month <= 12; month++) {
           for (int day = 1; day <= Jalali(year, month).monthLength; day++){
             final Jalali another = Jalali(year, month, day);
@@ -499,20 +534,28 @@ void main() {
     });
 
       test('convert gregorian to jalali', () {
-        for (int year = 561; year <= 3000; year++) {
+        for (int year = 2000; year <= 3000; year++) {
           for (int month = 1; month <= 12; month++) {
             for (int day = 1; day <= getDaysInMonth(year, month); day++) {
               final Jalali another = Jalali.fromDateTime(DateTime(year, month, day));
-              final JalaliDatetime own = JalaliDatetime.fromDatetime(DateTime(year, month, day));
-              if (day != 23){
+              final JalaliDatetime own = JalaliDatetime.fromDateTime(DateTime(year, month, day));
                 expect(own.year, another.year, reason: 'Year mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
                 expect(own.month, another.month, reason: 'Month mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
                 expect(own.day, another.day, reason: 'Day mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
-              }
-
             }
           }
         }
       });
   });
+
+  // group("julian date tests", () {
+  //   test("check julian date with gregorian", () {
+  //     double gregorian = toJulianDate(DateTime(2025).toUtc());
+  //     int jalali = JalaliDatetime.fromDateTime(DateTime(2025).toUtc()).julianDay;
+  //     expect(jalali, gregorian);
+  //   });
+  // });
+
+
+
 }

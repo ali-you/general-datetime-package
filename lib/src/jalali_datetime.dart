@@ -91,7 +91,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   }
 
   /// Factory constructor for converting from DateTime
-  factory JalaliDatetime.fromDatetime(DateTime datetime) {
+  factory JalaliDatetime.fromDateTime(DateTime datetime) {
     return JalaliDatetime._raw(
       datetime.year,
       datetime.month,
@@ -108,13 +108,13 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   /// Factory constructor for current date and time
   factory JalaliDatetime.now() {
     final DateTime dt = DateTime.now();
-    return JalaliDatetime.fromDatetime(dt);
+    return JalaliDatetime.fromDateTime(dt);
   }
 
   /// Factory constructor for current date and time in UTC
   factory JalaliDatetime.timestamp() {
     final DateTime dt = DateTime.now().toUtc();
-    return JalaliDatetime.fromDatetime(dt);
+    return JalaliDatetime.fromDateTime(dt);
   }
 
   /// Factory constructor in UTC with normalization
@@ -145,7 +145,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         secondsSinceEpoch * 1000,
         isUtc: isUtc);
-    return JalaliDatetime.fromDatetime(dt);
+    return JalaliDatetime.fromDateTime(dt);
   }
 
   factory JalaliDatetime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
@@ -153,7 +153,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         millisecondsSinceEpoch,
         isUtc: isUtc);
-    return JalaliDatetime.fromDatetime(dt);
+    return JalaliDatetime.fromDateTime(dt);
   }
 
   factory JalaliDatetime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
@@ -161,7 +161,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
         microsecondsSinceEpoch,
         isUtc: isUtc);
-    return JalaliDatetime.fromDatetime(dt);
+    return JalaliDatetime.fromDateTime(dt);
   }
 
   factory JalaliDatetime.parse(String formattedString) {
@@ -274,15 +274,40 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   /// Julian Day Number getter
   @override
   int get julianDay {
-    int gy = year + 621;
-    final int gDayNo =
-        DateTime(gy, 3, _startYearMarch(year)).difference(DateTime(0)).inDays;
-    int jDayNo = day - 1;
-    for (int i = 1; i < month; ++i) {
-      jDayNo += _monthLength(year, i);
+    int totalDays = 0;
+    for (int k = 1; k < year; k++) {
+      totalDays += 365;
+      if (_isLeapYear(k)) totalDays += 1;
     }
-    return gDayNo + jDayNo;
+    for (int m = 1; m < month; m++) {
+      totalDays += _monthLength(year, m);
+    }
+    totalDays += day - 1;
+    return 1948321 + totalDays;
   }
+
+  // /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
+  // /// This method uses an approximate conversion via Julian day calculations.
+  // /// For a given Jalali date, we compute its Julian Day Number (JD) using
+  // /// an approximation formula and then convert the JD to the Gregorian date.
+  // @override
+  // DateTime toDatetime() {
+  //   int gDayNo = DateTime(_gregorianYear(year), 3, _startYearMarch(year))
+  //       .difference(DateTime(0))
+  //       .inDays;
+  //   int jDayNo = day - 1;
+  //   for (int i = 1; i < month; ++i) {
+  //     jDayNo += _monthLength(year, i);
+  //   }
+  //
+  //   final int totalDays = gDayNo + jDayNo;
+  //   final DateTime base = DateTime(0).add(Duration(days: totalDays));
+  //   return isUtc
+  //       ? DateTime.utc(base.year, base.month, base.day, hour, minute, second,
+  //           millisecond, microsecond)
+  //       : DateTime(base.year, base.month, base.day, hour, minute, second,
+  //           millisecond, microsecond);
+  // }
 
   /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
   /// This method uses an approximate conversion via Julian day calculations.
@@ -290,35 +315,43 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   /// an approximation formula and then convert the JD to the Gregorian date.
   @override
   DateTime toDatetime() {
-    int gDayNo = DateTime(_gregorianYear(year), 3, _startYearMarch(year))
-        .difference(DateTime(0))
-        .inDays;
-    int jDayNo = day - 1;
-    for (int i = 1; i < month; ++i) {
-      jDayNo += _monthLength(year, i);
+    int a = julianDay + 32044;
+    int b = ((4 * a) + 3) ~/ 146097;
+    int c = a - ((146097 * b) ~/ 4);
+    int d = ((4 * c) + 3) ~/ 1461;
+    int e = c - ((1461 * d) ~/ 4);
+    int m = ((5 * e) + 2) ~/ 153;
+    int dayG = e - ((153 * m + 2) ~/ 5) + 1;
+    int monthG = m + 3 - 12 * (m ~/ 10);
+    int yearG = 100 * b + d - 4800 + (m ~/ 10);
+    if (isUtc) {
+      return DateTime.utc(
+          yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
     }
-
-    final int totalDays = gDayNo + jDayNo;
-    final DateTime base = DateTime(0).add(Duration(days: totalDays));
-    return isUtc
-        ? DateTime.utc(base.year, base.month, base.day, hour, minute, second,
-            millisecond, microsecond)
-        : DateTime(base.year, base.month, base.day, hour, minute, second,
-            millisecond, microsecond);
+    return DateTime(
+      yearG,
+      monthG,
+      dayG,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+    );
   }
 
   /// Add a Duration to the Jalali date
   @override
   JalaliDatetime add(Duration duration) {
     final DateTime result = toDatetime().add(duration);
-    return JalaliDatetime.fromDatetime(result);
+    return JalaliDatetime.fromDateTime(result);
   }
 
   /// Subtract a Duration from the Jalali date
   @override
   JalaliDatetime subtract(Duration duration) {
     final DateTime result = toDatetime().subtract(duration);
-    return JalaliDatetime.fromDatetime(result);
+    return JalaliDatetime.fromDateTime(result);
   }
 
   /// Convert to local time
@@ -326,7 +359,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   JalaliDatetime toLocal() {
     if (!isUtc) return this;
     final localDt = toDatetime().toLocal();
-    return JalaliDatetime.fromDatetime(localDt);
+    return JalaliDatetime.fromDateTime(localDt);
   }
 
   /// Convert to UTC time
@@ -334,45 +367,81 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   JalaliDatetime toUtc() {
     if (isUtc) return this;
     final utcDt = toDatetime().toUtc();
-    return JalaliDatetime.fromDatetime(utcDt);
+    return JalaliDatetime.fromDateTime(utcDt);
   }
+
+  // /// Convert from Gregorian to Jalali
+  // JalaliDatetime _toJalali() {
+  //   final int gDayNo =
+  //       DateTime(year, month, day).difference(DateTime(0)).inDays;
+  //
+  //   int jy = year - 621;
+  //   int gDayNo1 = DateTime(_gregorianYear(jy), 3, _startYearMarch(jy))
+  //       .difference(DateTime(0))
+  //       .inDays;
+  //
+  //   int jDayNo = gDayNo - gDayNo1;
+  //
+  //   if (jDayNo >= 0) {
+  //     if (jDayNo <= 185) {
+  //       return JalaliDatetime._raw(jy, 1 + jDayNo ~/ 31, (jDayNo % 31) + 1,
+  //           hour, minute, second, millisecond, microsecond, isUtc);
+  //     } else {
+  //       jDayNo -= 186;
+  //       return JalaliDatetime._raw(jy, 7 + jDayNo ~/ 30, (jDayNo % 30) + 1,
+  //           hour, minute, second, millisecond, microsecond, isUtc);
+  //     }
+  //   } else {
+  //     jy -= 1;
+  //     final int prevDayNo = DateTime(_gregorianYear(jy), 3, _startYearMarch(jy))
+  //         .difference(DateTime(0))
+  //         .inDays;
+  //     jDayNo = gDayNo - prevDayNo;
+  //     if (jDayNo <= 185) {
+  //       return JalaliDatetime._raw(jy, 1 + jDayNo ~/ 31, (jDayNo % 31) + 1,
+  //           hour, minute, second, millisecond, microsecond, isUtc);
+  //     } else {
+  //       jDayNo -= 186;
+  //       return JalaliDatetime._raw(jy, 7 + jDayNo ~/ 30, (jDayNo % 30) + 1,
+  //           hour, minute, second, millisecond, microsecond, isUtc);
+  //     }
+  //   }
+  // }
 
   /// Convert from Gregorian to Jalali
   JalaliDatetime _toJalali() {
-    final int gDayNo =
-        DateTime(year, month, day).difference(DateTime(0)).inDays;
-
-    int jy = year - 621;
-    int gDayNo1 = DateTime(_gregorianYear(jy), 3, _startYearMarch(jy))
-        .difference(DateTime(0))
-        .inDays;
-
-    int jDayNo = gDayNo - gDayNo1;
-
-    if (jDayNo >= 0) {
-      if (jDayNo <= 185) {
-        return JalaliDatetime._raw(jy, 1 + jDayNo ~/ 31, (jDayNo % 31) + 1,
-            hour, minute, second, millisecond, microsecond, isUtc);
-      } else {
-        jDayNo -= 186;
-        return JalaliDatetime._raw(jy, 7 + jDayNo ~/ 30, (jDayNo % 30) + 1,
-            hour, minute, second, millisecond, microsecond, isUtc);
-      }
+    int gy = year;
+    int gm = month;
+    int gd = day;
+    List<int> gDM = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    int jy;
+    if (gy > 1600) {
+      jy = 979;
+      gy -= 1600;
     } else {
-      jy -= 1;
-      final int prevDayNo = DateTime(_gregorianYear(jy), 3, _startYearMarch(jy))
-          .difference(DateTime(0))
-          .inDays;
-      jDayNo = gDayNo - prevDayNo;
-      if (jDayNo <= 185) {
-        return JalaliDatetime._raw(jy, 1 + jDayNo ~/ 31, (jDayNo % 31) + 1,
-            hour, minute, second, millisecond, microsecond, isUtc);
-      } else {
-        jDayNo -= 186;
-        return JalaliDatetime._raw(jy, 7 + jDayNo ~/ 30, (jDayNo % 30) + 1,
-            hour, minute, second, millisecond, microsecond, isUtc);
-      }
+      jy = 0;
+      gy -= 621;
     }
+    int gy2 = (gm > 2) ? (gy + 1) : gy;
+    int days = (365 * gy) +
+        ((gy2 + 3) ~/ 4) -
+        ((gy2 + 99) ~/ 100) +
+        ((gy2 + 399) ~/ 400) -
+        80 +
+        gd;
+    for (int i = 0; i < gm; ++i) {
+      days += gDM[i];
+    }
+    jy += 33 * (days ~/ 12053);
+    days %= 12053;
+    jy += 4 * (days ~/ 1461);
+    days %= 1461;
+    jy += (days - 1) ~/ 365;
+    if (days > 365) days = (days - 1) % 365;
+    int jm = (days < 186) ? 1 + (days ~/ 31) : 7 + ((days - 186) ~/ 30);
+    int jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+    return JalaliDatetime._raw(
+        jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
   }
 
   /// Normalize values (overflow handling)
@@ -449,6 +518,18 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     if (month <= 11) return 30;
     return _isLeapYear(year) ? 30 : 29;
   }
+
+  // bool _isLeapYear(int jy) {
+  //   // Special case: Year 1 is not a leap year.
+  //   if (jy == 1) return false;
+  //   // Calculate the remainder in the 33-year cycle.
+  //   // Make sure we have a positive remainder.
+  //   int r = jy % 33;
+  //   if (r < 0) r += 33;
+  //   // Leap years in the 33-year cycle occur in these remainders.
+  //   const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
+  //   return leapRemainders.contains(r);
+  // }
 
   bool _isLeapYear(int jy) => _leapAndCycle(jy) == 0;
 

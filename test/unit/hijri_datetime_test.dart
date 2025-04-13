@@ -25,7 +25,7 @@ void main() {
       // Choose a representative Gregorian datetime.
       final greg = DateTime(2023, 5, 1, 15, 30);
       // Convert to Hijri using our factory method.
-      final hijri = HijriDatetime.fromDatetime(greg);
+      final hijri = HijriDatetime.fromDateTime(greg);
       // Convert back to Gregorian.
       final gregConverted = hijri.toDatetime();
       // Due to approximation the values might not match exactly,
@@ -56,7 +56,7 @@ void main() {
     test('Known historical date conversion', () {
       // Known conversion: 1 Muharram 1443 is roughly August 10, 2021 in Gregorian.
       final knownGregorian = DateTime(2021, 8, 10);
-      final hijri = HijriDatetime.fromDatetime(knownGregorian);
+      final hijri = HijriDatetime.fromDateTime(knownGregorian);
       // Conversion is approximate, so allow a small margin for the day.
       expect(hijri.year, equals(1443));
       expect(hijri.month, equals(1));
@@ -109,7 +109,7 @@ void main() {
   group('Conversion Fidelity and Epoch Tests', () {
     test('Millisecond precision round-trip', () {
       final original = DateTime.now().copyWith(microsecond: 456789);
-      final hijri = HijriDatetime.fromDatetime(original);
+      final hijri = HijriDatetime.fromDateTime(original);
       final roundTrip = hijri.toDatetime();
       // Accept a small difference due to approximations.
       expect(
@@ -119,7 +119,7 @@ void main() {
     test('Epoch boundary conversion', () {
       // Convert the UNIX epoch and verify that toDatetime produces a valid DateTime.
       final unixEpoch = DateTime.utc(1970);
-      final hijriEpoch = HijriDatetime.fromDatetime(unixEpoch);
+      final hijriEpoch = HijriDatetime.fromDateTime(unixEpoch);
       // We expect the corresponding Gregorian conversion to match the epoch time.
       expect(hijriEpoch.toDatetime().isAtSameMomentAs(unixEpoch), isTrue);
     });
@@ -128,7 +128,7 @@ void main() {
   group('Historical Date Verification', () {
     test('Gregorian 2023-03-23 → Ramadan 1, 1444', () {
       final greg = DateTime(2023, 3, 23);
-      final hijri = HijriDatetime.fromDatetime(greg);
+      final hijri = HijriDatetime.fromDateTime(greg);
       // Expect Ramadan (the 9th month) to start around this conversion.
       expect(hijri.month, equals(9));
       expect(hijri.day, inInclusiveRange(1, 2));
