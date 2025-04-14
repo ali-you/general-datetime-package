@@ -43,29 +43,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     super.isUtc,
   ]);
 
-  final List<int> _breaks = [
-    -61,
-    9,
-    38,
-    199,
-    426,
-    686,
-    756,
-    818,
-    1111,
-    1181,
-    1210,
-    1635,
-    2060,
-    2097,
-    2192,
-    2262,
-    2324,
-    2394,
-    2456,
-    3178
-  ];
-
   /// Start: Factories section
   /// Factory constructor with normalization
   factory JalaliDatetime(
@@ -496,85 +473,10 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     return _isLeapYear(year) ? 30 : 29;
   }
 
-  // bool _isLeapYear(int jy) {
-  //   // Special case: Year 1 is not a leap year.
-  //   if (jy == 1) return false;
-  //   // Calculate the remainder in the 33-year cycle.
-  //   // Make sure we have a positive remainder.
-  //   int r = jy % 33;
-  //   if (r < 0) r += 33;
-  //   // Leap years in the 33-year cycle occur in these remainders.
-  //   const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
-  //   return leapRemainders.contains(r);
-  // }
-
-  bool _isLeapYear(int jy) {
-      int base = year > 0 ? 474 : 473;
-      int cycleYear = ((year - base) % 2820 + 2820) % 2820; // ensures positive mod
-      return (((cycleYear + 474 + 38) * 682) % 2816) < 682;
-
-
+  /// Helper method to check if a Jalali year is leap
+  bool _isLeapYear(int year) {
+    final adjustedYear = (year > 0 ? year - 474 : year - 473);
+    final cycleYear = (adjustedYear % 2820) + 474;
+    return (((cycleYear + 38) * 682) % 2816) < 682;
   }
-
-  /// Shared internal helper to calculate leap status from Jalali logic.
-  int _leapAndCycle(int jy) {
-    final _CycleStats stats = _cycleStats(jy);
-    int n = jy - stats.lastBreak; // n = years since last break point (jp)
-    if (stats.jump - n < 6) {
-      n = n - stats.jump + ((stats.jump + 4) ~/ 33) * 33;
-    }
-    int leap = ((n + 1) % 33 - 1) % 4;
-    if (leap == -1) leap = 4;
-    return leap;
-  }
-
-  int _gregorianYear(int jy) => jy + 621;
-
-  /// Gets the Gregorian March day when Farvardin 1st (Nowruz) starts
-  int _startYearMarch(int jy) {
-    final int gy = _gregorianYear(jy);
-    final _CycleStats stats = _cycleStats(jy);
-    final int leapG = gy ~/ 4 - ((gy ~/ 100 + 1) * 3 ~/ 4) - 150;
-    return 20 + stats.leapCount - leapG;
-  }
-
-  _CycleStats _cycleStats(int jy) {
-    if (jy < -61 || jy >= 3178) {
-      throw StateError('Year out of range');
-    }
-    // leap year count
-    int leapCount = -14;
-    // last break year
-    int lastBreak = _breaks[0];
-    // jump period
-    int jump = 0;
-    for (int i = 1; i < _breaks.length; i++) {
-      // current break year
-      int currentBreak = _breaks[i];
-      jump = currentBreak - lastBreak;
-      if (jy < currentBreak) break;
-      leapCount += (jump ~/ 33) * 8 + ((jump % 33) ~/ 4);
-      lastBreak = currentBreak;
-    }
-    // years since the last break
-    int fromBreak = jy - lastBreak;
-    leapCount += (fromBreak ~/ 33) * 8 + ((fromBreak % 33 + 3) ~/ 4);
-    if ((jump % 33) == 4 && jump - fromBreak == 4) leapCount++;
-    return _CycleStats(leapCount: leapCount, lastBreak: lastBreak, jump: jump);
-  }
-}
-
-/// Helper private class to return results from cycle calculation
-class _CycleStats {
-  _CycleStats(
-      {required this.leapCount, required this.lastBreak, required this.jump});
-
-  /// number of leap years since cycle start
-  final int leapCount;
-
-  /// last break year from breaks list
-  final int lastBreak;
-
-  /// interval between two break points in the cycle
-  final int jump;
 }

@@ -485,9 +485,13 @@ void main() {
   });
   group('Compare with another package', () {
 
+
+
     test('compare leap year', () {
       final Jalali another = Jalali(1635);
       final JalaliDatetime own = JalaliDatetime(1635);
+      print(own.isLeapYear);
+      print(another.isLeapYear());
       expect(own.isLeapYear, another.isLeapYear());
     });
     
@@ -507,7 +511,7 @@ void main() {
         final Jalali another = Jalali(year);
         final JalaliDatetime own = JalaliDatetime(year);
 
-        if (another.isLeapYear()) print("$year => ${year+4}" );
+        if (own.isLeapYear != another.isLeapYear()) print("$year => own:${own.isLeapYear}, another:${another.isLeapYear()}");
 
           // expect(own.isLeapYear, another.isLeapYear(), reason: 'Year mismatch on $year');
           // expect(own, another, reason: 'Year mismatch on $year,$month => ');
@@ -548,6 +552,15 @@ void main() {
             }
           }
         }
+      });
+      
+      test('julian test', () {
+        DateTime g = DateTime(626, 3, 22);
+        print(toJulianDate(g));
+        print(JalaliDatetime.fromDateTime(g).julianDay);
+        print(Jalali.fromDateTime(g).julianDayNumber);
+        print(JalaliDatetime.fromDateTime(g).isLeapYear);
+        print(Jalali.fromDateTime(g).isLeapYear());
       });
   });
 
