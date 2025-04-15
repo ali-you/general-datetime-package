@@ -488,8 +488,8 @@ void main() {
 
 
     test('compare leap year', () {
-      final Jalali another = Jalali(1635);
-      final JalaliDatetime own = JalaliDatetime(1635);
+      final Jalali another = Jalali(1403);
+      final JalaliDatetime own = JalaliDatetime(1403);
       print(own.isLeapYear);
       print(another.isLeapYear());
       expect(own.isLeapYear, another.isLeapYear());
@@ -555,12 +555,17 @@ void main() {
       });
       
       test('julian test', () {
-        DateTime g = DateTime(626, 3, 22);
-        print(toJulianDate(g));
-        print(JalaliDatetime.fromDateTime(g).julianDay);
-        print(Jalali.fromDateTime(g).julianDayNumber);
-        print(JalaliDatetime.fromDateTime(g).isLeapYear);
-        print(Jalali.fromDateTime(g).isLeapYear());
+        // DateTime g = DateTime(626, 3, 22);
+        // print(toJulianDate(g));
+        // print(JalaliDatetime.fromDateTime(g).julianDay);
+        // print(Jalali.fromDateTime(g).julianDayNumber);
+        // print(JalaliDatetime.fromDateTime(g).isLeapYear);
+        // print(Jalali.fromDateTime(g).isLeapYear());
+
+        JalaliDatetime jalaliDatetime = JalaliDatetime(1404, 5, 5);
+        print(jalaliDatetime.julianDay);
+        print(jalaliDatetime.persiana_to_jd());
+
       });
   });
 
