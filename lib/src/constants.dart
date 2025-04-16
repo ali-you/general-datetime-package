@@ -22,4 +22,8 @@ class Constants {
     r'(?:[ T](\d\d)(?::?(\d\d)(?::?(\d\d)(?:[.,](\d+))?)?)?' // Time part.
     r'( ?[zZ]| ?([-+])(\d\d)(?::?(\d\d))?)?)?$',
   );
+
+  // Mean solar tropical year
+  static double tropicalYear= 365.24219878;
+
 }

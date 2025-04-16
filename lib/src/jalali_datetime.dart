@@ -1,4 +1,5 @@
 import 'package:general_datetime/src/constants.dart';
+import 'dart:math' as math;
 
 import 'general_datetime_interface.dart';
 
@@ -260,22 +261,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       totalDays += _monthLength(year, m);
     }
     totalDays += day - 1;
-    return 1948321 + totalDays;
-  }
-
-  double persiana_to_jd() {
-    double guess, adr1, adr2, equinox;
-
-    guess = (1948320.5 - 1) + (365.2422 * ((year - 1) - 1));
-    adr1 = year - 1;
-    equinox = 1948320.5 + (adr1 * 365) + (adr1 / 4).floor();
-
-    return equinox +
-        ((month <= 7) ?
-        ((month - 1) * 31) :
-        (((month - 1) * 30) + 6)
-        ) +
-        (day - 1);
+    return 1948320.5.floor() + totalDays;
   }
 
   /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)

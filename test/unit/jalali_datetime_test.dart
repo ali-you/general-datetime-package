@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
+import 'package:general_datetime/src/persian_convert.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
@@ -553,29 +554,32 @@ void main() {
           }
         }
       });
-      
-      test('julian test', () {
-        // DateTime g = DateTime(626, 3, 22);
-        // print(toJulianDate(g));
-        // print(JalaliDatetime.fromDateTime(g).julianDay);
-        // print(Jalali.fromDateTime(g).julianDayNumber);
-        // print(JalaliDatetime.fromDateTime(g).isLeapYear);
-        // print(Jalali.fromDateTime(g).isLeapYear());
-
-        JalaliDatetime jalaliDatetime = JalaliDatetime(1404, 5, 5);
-        print(jalaliDatetime.julianDay);
-        print(jalaliDatetime.persiana_to_jd());
-
-      });
   });
 
-  // group("julian date tests", () {
-  //   test("check julian date with gregorian", () {
-  //     double gregorian = toJulianDate(DateTime(2025).toUtc());
-  //     int jalali = JalaliDatetime.fromDateTime(DateTime(2025).toUtc()).julianDay;
-  //     expect(jalali, gregorian);
-  //   });
-  // });
+  group("julian date tests", () {
+    test("check julian date with gregorian", () {
+      double gregorian = toJulianDate(DateTime(2025).toUtc());
+      int jalali = JalaliDatetime.fromDateTime(DateTime(2025).toUtc()).julianDay;
+      expect(jalali, gregorian);
+    });
+
+    test("Julian day in list with gregorian", () {
+
+      for (int i= 400000; i < 4500000; i++) {
+        DateTime datetime = DateTime(0, 0, i).toUtc();
+        JalaliDatetime jalaliDatetime = JalaliDatetime.fromDateTime(datetime);
+        Jalali jalali = Jalali.fromDateTime(datetime);
+        print(datetime);
+        print(jalaliDatetime);
+        print(jalali);
+        print(jalali.julianDayNumber);
+        print(toJulianDate(datetime));
+        print("persian convert => ${PersianConvert.persianaToJd(jalali.year, jalali.month, jalali.day)}");
+        expect(jalaliDatetime.julianDay, toJulianDate(datetime).floor());
+      }
+
+    });
+  });
 
 
 
