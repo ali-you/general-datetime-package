@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
 import 'package:general_datetime/src/persian_convert.dart';
+import 'package:general_datetime/src/test.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
@@ -565,6 +566,8 @@ void main() {
 
     test("Julian day in list with gregorian", () {
 
+      print(PersianAstronomy.isLeapPersian(1403));
+
       for (int i= 400000; i < 4500000; i++) {
         DateTime datetime = DateTime(0, 0, i).toUtc();
         JalaliDatetime jalaliDatetime = JalaliDatetime.fromDateTime(datetime);
@@ -575,6 +578,7 @@ void main() {
         print(jalali.julianDayNumber);
         print(toJulianDate(datetime));
         print("persian convert => ${PersianConvert.persianaToJd(jalali.year, jalali.month, jalali.day)}");
+        print(PersianAstronomy.persianToJD(jalali.year, jalali.month, jalali.day));
         expect(jalaliDatetime.julianDay, toJulianDate(datetime).floor());
       }
 
