@@ -105,6 +105,43 @@ class Test {
     return E;
   }
 
+  static fixangle(a)
+  {
+    return a - 360.0 * (((a / 360.0) as double).floor());
+  }
+
+  static List oterms =
+      [
+    -4680.93,
+    -1.55,
+    1999.25,
+    -51.38,
+    -249.67,
+    -39.05,
+    7.12,
+    27.87,
+    5.79,
+    2.45
+  ]
+  ;
+
+  static obliqeq(jd)
+  {
+    double eps, u, v;
+    int i;
+    v = u = (jd - J2000) / (JulianCentury * 100);
+
+    eps = 23 + (26 / 60.0) + (21.448 / 3600.0);
+
+    if (u.abs() < 1.0) {
+      for (i = 0; i < 10; i++) {
+        eps += (oterms[i] / 3600.0) * v;
+        v *= u;
+      }
+    }
+    return eps;
+  }
+
   static List deltaTtab =
       [121, 112, 103, 95, 88, 82, 77, 72, 68, 63, 60, 56, 53, 51, 48, 46,
       44, 42, 40, 38, 35, 33, 31, 29, 26, 24, 22, 20, 18, 16, 14, 12,
