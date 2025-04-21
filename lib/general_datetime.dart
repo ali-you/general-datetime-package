@@ -3,6 +3,6 @@
 
 library;
 
-export 'src/general_datetime_interface.dart';
-export 'src/jalali_datetime.dart';
-export 'src/hijri_datetime.dart';
+export 'src/general_date_time_interface.dart';
+export 'src/jalali_date_time.dart';
+export 'src/hijri_date_time.dart';

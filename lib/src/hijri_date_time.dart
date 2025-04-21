@@ -1,14 +1,17 @@
-import 'package:general_datetime/src/constants.dart';
+import 'dart:math';
 
-import 'general_datetime_interface.dart';
+import 'package:general_datetime/src/general_date_time_interface.dart';
 
-/// Represents a date and time in the **Jalali (Persian/Iranian)** calendar system.
+import 'constants.dart';
+
+/// Represents a date and time in the **Hijri (Islamic)** calendar system
+/// using the **Umm al-Qura** calculation method.
 ///
-/// This class provides conversion between Gregorian and Jalali dates,
-/// along with time component support (hour, minute, second, etc).
+/// This class allows seamless handling of Islamic calendar dates,
+/// with full time component support (hour, minute, second, etc.).
 ///
-/// It extends the [GeneralDatetimeInterface] to support consistent behavior
-/// across multiple calendar types.
+/// It extends [GeneralDateTimeInterface] to maintain consistency
+/// with other date systems like Gregorian and Jalali.
 ///
 /// ### Features:
 /// - Supports Jalali <-> Gregorian conversion.
@@ -19,19 +22,22 @@ import 'general_datetime_interface.dart';
 ///
 /// ### Example:
 /// ```dart
-/// var now = JalaliDatetime.now(); // Get current Jalali date and time
-/// print(now); // 1403/1/19
+/// var now = HijriDatetime.now(); // Current Hijri date (Umm al-Qura)
+/// print(now); // 1446/9/28
 ///
-/// var jDate = JalaliDatetime(1402, 12, 30);
-/// print(jDate.toDatetime()); // Converts to equivalent Gregorian date
+/// var hDate = HijriDatetime(1445, 10, 1);
+/// print(hDate.toDatetime()); // Converts to corresponding Gregorian date
 /// ```
 ///
 /// ### Calendar Notes:
-/// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
-/// with highly accurate leap year rules and month lengths.
-class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
+/// The Hijri calendar is a **lunar calendar** consisting of 12 months.
+/// The Umm al-Qura system is based on astronomical calculations and is the official
+/// calendar of Saudi Arabia, commonly used for religious observances.
+///
+/// > Note: Dates may differ slightly from observational Hijri calendars used in other countries.
+class HijriDateTime extends GeneralDateTimeInterface {
   /// Private constructor for raw inputs
-  JalaliDatetime._raw(
+  HijriDateTime._raw(
     super.year, [
     super.month,
     super.day,
@@ -45,7 +51,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Start: Factories section
   /// Factory constructor with normalization
-  factory JalaliDatetime(
+  factory HijriDateTime(
     int year, [
     int month = 1,
     int day = 1,
@@ -55,7 +61,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int millisecond = 0,
     int microsecond = 0,
   ]) {
-    return JalaliDatetime._raw(
+    return HijriDateTime._raw(
       year,
       month,
       day,
@@ -68,8 +74,8 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   }
 
   /// Factory constructor for converting from DateTime
-  factory JalaliDatetime.fromDatetime(DateTime datetime) {
-    return JalaliDatetime._raw(
+  factory HijriDateTime.fromDatetime(DateTime datetime) {
+    return HijriDateTime._raw(
       datetime.year,
       datetime.month,
       datetime.day,
@@ -79,23 +85,23 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       datetime.millisecond,
       datetime.microsecond,
       datetime.isUtc,
-    )._toJalali();
+    )._toHijri();
   }
 
   /// Factory constructor for current date and time
-  factory JalaliDatetime.now() {
-    final DateTime dt = DateTime.now();
-    return JalaliDatetime.fromDatetime(dt);
+  factory HijriDateTime.now() {
+    DateTime dt = DateTime.now();
+    return HijriDateTime.fromDatetime(dt);
   }
 
   /// Factory constructor for current date and time in UTC
-  factory JalaliDatetime.timestamp() {
+  factory HijriDateTime.timestamp() {
     final DateTime dt = DateTime.now().toUtc();
-    return JalaliDatetime.fromDatetime(dt);
+    return HijriDateTime.fromDatetime(dt);
   }
 
   /// Factory constructor in UTC with normalization
-  factory JalaliDatetime.utc(
+  factory HijriDateTime.utc(
     int year, [
     int month = 1,
     int day = 1,
@@ -105,7 +111,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int millisecond = 0,
     int microsecond = 0,
   ]) =>
-      JalaliDatetime._raw(
+      HijriDateTime._raw(
         year,
         month,
         day,
@@ -117,31 +123,31 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
         true,
       )._normalize();
 
-  factory JalaliDatetime.fromSecondsSinceEpoch(int secondsSinceEpoch,
+  factory HijriDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         secondsSinceEpoch * 1000,
         isUtc: isUtc);
-    return JalaliDatetime.fromDatetime(dt);
+    return HijriDateTime.fromDatetime(dt);
   }
 
-  factory JalaliDatetime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
+  factory HijriDateTime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         millisecondsSinceEpoch,
         isUtc: isUtc);
-    return JalaliDatetime.fromDatetime(dt);
+    return HijriDateTime.fromDatetime(dt);
   }
 
-  factory JalaliDatetime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
+  factory HijriDateTime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
         microsecondsSinceEpoch,
         isUtc: isUtc);
-    return JalaliDatetime.fromDatetime(dt);
+    return HijriDateTime.fromDatetime(dt);
   }
 
-  factory JalaliDatetime.parse(String formattedString) {
+  factory HijriDateTime.parse(String formattedString) {
     Match? match = Constants.parseFormat.firstMatch(formattedString);
     if (match != null) {
       int parseIntOrZero(String? matched) {
@@ -193,7 +199,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
         }
       }
 
-      return JalaliDatetime._raw(
+      return HijriDateTime._raw(
         year,
         month,
         day,
@@ -211,9 +217,9 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// End: Factories section
 
-  static JalaliDatetime? tryParse(String formattedString) {
+  static HijriDateTime? tryParse(String formattedString) {
     try {
-      return JalaliDatetime.parse(formattedString);
+      return HijriDateTime.parse(formattedString);
     } on FormatException {
       return null;
     }
@@ -221,20 +227,20 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// The calendar name
   @override
-  String get name => "Jalali";
+  String get name => "Hijri";
 
   /// Calculate weekday (0=Saturday, 6=Friday)
   @override
   int get weekday {
-    DateTime gd = toDatetime();
-    return (gd.weekday) % 7;
+    DateTime gregorian = toDatetime();
+    return (gregorian.weekday) % 7;
   }
 
   /// Get days in the current month
   @override
   int get monthLength => _monthLength(year, month);
 
-  /// This computes the day count within the Jalali year.
+  /// This computes the day count within the Hijri year.
   @override
   int get dayOfYear {
     int dayCount = 0;
@@ -246,42 +252,38 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Check if the year is a leap year
   @override
-  bool get isLeapYear => _isLeapYear(year);
-
-  /// Julian Day Number getter
-  @override
-  int get julianDay {
-    int totalDays = 0;
-    for (int k = 1; k < year; k++) {
-      totalDays += 365;
-      if (_isLeapYear(k)) totalDays += 1;
-    }
-    for (int m = 1; m < month; m++) {
-      totalDays += _monthLength(year, m);
-    }
-    totalDays += day - 1;
-    return 1948321 + totalDays;
+  bool get isLeapYear {
+    return (((11 * year) + 14) % 30) < 11;
   }
 
-  /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
+  /// Julian Day Number getter
+  /// For HijriDatetime we use the computed JD (rounded down).
+  @override
+  int get julianDay => _hijriToJD(year, month, day).floor();
+
+  /// Conversion from HijriDatetime(Umm al-Qura) to DateTime (Hijri to Gregorian)
   /// This method uses an approximate conversion via Julian day calculations.
-  /// For a given Jalali date, we compute its Julian Day Number (JD) using
+  /// For a given Hijri date, we compute its Julian Day Number (JD) using
   /// an approximation formula and then convert the JD to the Gregorian date.
+  /// This method uses the Fliegel-Van Flandern algorithm.
   @override
   DateTime toDatetime() {
-    int a = julianDay + 32044;
-    int b = ((4 * a) + 3) ~/ 146097;
-    int c = a - ((146097 * b) ~/ 4);
-    int d = ((4 * c) + 3) ~/ 1461;
-    int e = c - ((1461 * d) ~/ 4);
-    int m = ((5 * e) + 2) ~/ 153;
-    int dayG = e - ((153 * m + 2) ~/ 5) + 1;
-    int monthG = m + 3 - 12 * (m ~/ 10);
-    int yearG = 100 * b + d - 4800 + (m ~/ 10);
+    int l = julianDay + 68569;
+    int n = (4 * l) ~/ 146097;
+    l = l - ((146097 * n + 3) ~/ 4);
+    int i = (4000 * (l + 1)) ~/ 1461001;
+    l = l - (1461 * i) ~/ 4 + 31;
+    int j1 = (80 * l) ~/ 2447;
+    int dayG = l - (2447 * j1) ~/ 80;
+    l = j1 ~/ 11;
+    int monthG = j1 + 2 - 12 * l;
+    int yearG = 100 * (n - 49) + i + l;
+
     if (isUtc) {
       return DateTime.utc(
           yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
     }
+
     return DateTime(
       yearG,
       monthG,
@@ -294,112 +296,105 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     );
   }
 
-  /// Add a Duration to the Jalali date
+  /// Add a Duration to the Hijri date
   @override
-  JalaliDatetime add(Duration duration) {
-    final DateTime result = toDatetime().add(duration);
-    return JalaliDatetime.fromDatetime(result);
+  GeneralDateTimeInterface add(Duration duration) {
+    DateTime result = toDatetime().add(duration);
+    return HijriDateTime.fromDatetime(result);
   }
 
-  /// Subtract a Duration from the Jalali date
+  /// Subtract a Duration from the Hijri date
   @override
-  JalaliDatetime subtract(Duration duration) {
-    final DateTime result = toDatetime().subtract(duration);
-    return JalaliDatetime.fromDatetime(result);
+  GeneralDateTimeInterface subtract(Duration duration) {
+    DateTime result = toDatetime().subtract(duration);
+    return HijriDateTime.fromDatetime(result);
   }
 
   /// Convert to local time
   @override
-  JalaliDatetime toLocal() {
-    if (!isUtc) return this;
-    final localDt = toDatetime().toLocal();
-    return JalaliDatetime.fromDatetime(localDt);
+  GeneralDateTimeInterface toLocal() {
+    DateTime localDt = toDatetime().toLocal();
+    return HijriDateTime.fromDatetime(localDt);
   }
 
   /// Convert to UTC time
   @override
-  JalaliDatetime toUtc() {
-    if (isUtc) return this;
-    final utcDt = toDatetime().toUtc();
-    return JalaliDatetime.fromDatetime(utcDt);
+  GeneralDateTimeInterface toUtc() {
+    DateTime utcDt = toDatetime().toUtc();
+    return HijriDateTime.fromDatetime(utcDt);
   }
 
-  /// Convert from Gregorian to Jalali
-  JalaliDatetime _toJalali() {
+  /// Conversion from Gregorian to Hijri (Umm al-Qura)
+  /// This method converts the current Gregorian date (stored in the instance)
+  /// to a Hijri date according to an approximate algorithm. It computes the
+  /// Julian Day Number (JD) of the Gregorian date and then derives the Hijri date.
+  HijriDateTime _toHijri() {
     int gy = year;
     int gm = month;
     int gd = day;
-    List<int> gDM = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    int jy;
-    if (gy > 1600) {
-      jy = 979;
-      gy -= 1600;
-    } else {
-      jy = 0;
-      gy -= 621;
-    }
-    int gy2 = (gm > 2) ? (gy + 1) : gy;
-    int days = (365 * gy) +
-        ((gy2 + 3) ~/ 4) -
-        ((gy2 + 99) ~/ 100) +
-        ((gy2 + 399) ~/ 400) -
-        80 +
-        gd;
-    for (int i = 0; i < gm; ++i) {
-      days += gDM[i];
-    }
-    jy += 33 * (days ~/ 12053);
-    days %= 12053;
-    jy += 4 * (days ~/ 1461);
-    days %= 1461;
-    jy += (days - 1) ~/ 365;
-    if (days > 365) days = (days - 1) % 365;
-    int jm = (days < 186) ? 1 + (days ~/ 31) : 7 + ((days - 186) ~/ 30);
-    int jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
-    return JalaliDatetime._raw(
-        jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
+    // Convert Gregorian date to Julian Day Number (JD)
+    int a = ((14 - gm) ~/ 12);
+    int y = gy + 4800 - a;
+    int m = gm + 12 * a - 3;
+    double jd = gd +
+        ((153 * m + 2) ~/ 5) +
+        365 * y +
+        (y ~/ 4) -
+        (y ~/ 100) +
+        (y ~/ 400) -
+        32045;
+    // Adjust JD to align with Islamic epoch.
+    // The following formula is an approximation.
+    int hYear = ((30 * (jd - 1948439.5) + 10646) / 10631).floor();
+    double firstDayOfHijriYear = _hijriToJD(hYear, 1, 1);
+    int hMonth = min(12, ((jd - firstDayOfHijriYear) / 29.5).ceil() + 1);
+    double firstDayOfHijriMonth = _hijriToJD(hYear, hMonth, 1);
+    int hDay = (jd - firstDayOfHijriMonth).floor() + 1;
+
+    return HijriDateTime._raw(hYear, hMonth, hDay, hour, minute, second,
+        millisecond, microsecond, isUtc);
   }
 
-  /// Normalize values (overflow handling)
-  JalaliDatetime _normalize() {
+  /// **Normalize values (overflow handling)**
+  HijriDateTime _normalize() {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
-    // Normalize microseconds to milliseconds
+    // Normalize microseconds to milliseconds.
     ms += us ~/ 1000;
     us = us.remainder(1000);
     if (us < 0) {
       us += 1000;
       ms -= 1;
     }
-    // Normalize milliseconds to seconds
+    // Normalize milliseconds to seconds.
     s += ms ~/ 1000;
     ms = ms.remainder(1000);
     if (ms < 0) {
       ms += 1000;
       s -= 1;
     }
-    // Normalize seconds to minutes
+    // Normalize seconds to minutes.
     min += s ~/ 60;
     s = s.remainder(60);
     if (s < 0) {
       s += 60;
       min -= 1;
     }
-    // Normalize minutes to hours
+    // Normalize minutes to hours.
     h += min ~/ 60;
     min = min.remainder(60);
     if (min < 0) {
       min += 60;
       h -= 1;
     }
-    // Normalize hours to days
+    // Normalize hours to days.
     d += h ~/ 24;
     h = h.remainder(24);
     if (h < 0) {
       h += 24;
       d -= 1;
     }
-    // Normalize days to months
+    // Normalize days within Hijri month boundaries.
     while (d < 1) {
       m -= 1;
       if (m < 1) {
@@ -410,13 +405,13 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     }
     while (d > _monthLength(y, m)) {
       d -= _monthLength(y, m);
-      m += 1;
+      m++;
       if (m > 12) {
         m = 1;
         y += 1;
       }
     }
-    // Normalize months to years
+    // Normalize months to years.
     while (m < 1) {
       m += 12;
       y -= 1;
@@ -425,26 +420,28 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       m -= 12;
       y += 1;
     }
-    return JalaliDatetime._raw(y, m, d, h, min, s, ms, us, isUtc);
+    return HijriDateTime._raw(y, m, d, h, min, s, ms, us);
   }
 
   /// Helper method to get month length
+  /// In the Umm al-Qura calendar, months are typically alternately 30 and 29 days,
+  /// with the last month having 30 days in a leap year.
   int _monthLength(int year, int month) {
-    if (month <= 6) return 31;
-    if (month <= 11) return 30;
-    return _isLeapYear(year) ? 30 : 29;
+    if (month == 12 && isLeapYear) return 30;
+    return (month % 2 == 1) ? 30 : 29;
   }
 
-  /// Helper method to check if a Jalali year is leap
-  bool _isLeapYear(int jy) {
-    // Special case: Year 1 is not a leap year.
-    if (jy == 1) return false;
-    // Calculate the remainder in the 33-year cycle.
-    // Make sure we have a positive remainder.
-    int r = jy % 33;
-    if (r < 0) r += 33;
-    // Leap years in the 33-year cycle occur in these remainders.
-    const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
-    return leapRemainders.contains(r);
+  /// Helper method to convert Hijri date to Julian Day Number (JD)
+  /// The following formula is an approximation adapted for the Umm al-Qura system.
+  double _hijriToJD(int year, int month, int day) {
+    // Using an approximation formula for the Islamic calendar:
+    // JD = day + ceil(29.5 * (month - 1)) + (year - 1) * 354 +
+    //      floor((3 + (11 * year)) / 30) + 1948440 - 1
+    return day +
+        (29.5 * (month - 1)).ceilToDouble() +
+        (year - 1) * 354 +
+        ((3 + (11 * year)) / 30).floor() +
+        1948440 -
+        1;
   }
 }
