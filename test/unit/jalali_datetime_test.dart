@@ -566,7 +566,7 @@ void main() {
 
     test("Julian day in list with gregorian", () {
 
-      print(PersianAstronomy.isLeapPersian(1403));
+      print(Test.leapPersian(1403));
 
       for (int i= 400000; i < 4500000; i++) {
         DateTime datetime = DateTime(0, 0, i).toUtc();
@@ -578,9 +578,31 @@ void main() {
         print(jalali.julianDayNumber);
         print(toJulianDate(datetime));
         print("persian convert => ${PersianConvert.persianaToJd(jalali.year, jalali.month, jalali.day)}");
-        print(PersianAstronomy.persianToJD(jalali.year, jalali.month, jalali.day));
+        // print(PersianAstronomy.persianToJD(jalali.year, jalali.month, jalali.day));
         expect(jalaliDatetime.julianDay, toJulianDate(datetime).floor());
       }
+
+    });
+
+
+
+    test("test Test class", () {
+      int count = 0;
+      for (int i= 0; i < 3100; i++) {
+        Jalali jalali = Jalali(i);
+        JalaliDatetime jalaliDatetime = JalaliDatetime(i);
+
+        bool test = Test.leapPersian(i);
+        if (test != jalali.isLeapYear()) {
+          count++;
+          print("year $i => test: $test, jalali: ${jalali.isLeapYear()}");
+        }
+
+
+        // expect(jalaliDatetime.isLeapYear, jalali.isLeapYear());
+      }
+      print(count);
+
 
     });
   });
