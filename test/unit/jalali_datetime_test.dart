@@ -483,6 +483,17 @@ void main() {
       expect(j.second, equals(45));
     });
   });
+
+  group('Julian day comparison', () {
+    test('Compare with gregorian', () {
+        for (int year = 0; year <= 3176; year++) {
+          final JalaliDatetime jalaliDatetime = JalaliDatetime(year);
+          expect(jalaliDatetime.julianDay, toJulianDate(jalaliDatetime.toDatetime()).floor());
+        }
+    });
+  });
+
+
   group('Compare with another package', () {
 
     test('compare leap year', () {
@@ -506,14 +517,7 @@ void main() {
       for (int year = -60; year <= 3176; year++) {
         final Jalali another = Jalali(year);
         final JalaliDatetime own = JalaliDatetime(year);
-
-        // if (another.isLeapYear()) print("$year => ${year+4}" );
-
-        expect(own.julianDay, another.julianDayNumber);
         expect(own.isLeapYear, another.isLeapYear());
-
-          // expect(own.isLeapYear, another.isLeapYear(), reason: 'Year mismatch on $year');
-          // expect(own, another, reason: 'Year mismatch on $year,$month => ');
         }
     });
 
@@ -539,8 +543,8 @@ void main() {
       }
     });
 
-      test('convert gregorian to jalali', () {
-        for (int year = 2000; year <= 3000; year++) {
+      test('convert gregorian to jalali list', () {
+        for (int year = 1000; year <= 3000; year++) {
           for (int month = 1; month <= 12; month++) {
             for (int day = 1; day <= getDaysInMonth(year, month); day++) {
               final Jalali another = Jalali.fromDateTime(DateTime(year, month, day));
@@ -551,6 +555,19 @@ void main() {
             }
           }
         }
+      });
+
+      test('single convert gregorian to jalali', () {
+        DateTime dateTime = DateTime(2256, 3, 30);
+        final Jalali another = Jalali.fromDateTime(dateTime);
+        final JalaliDatetime own = JalaliDatetime.fromDateTime(dateTime);
+        print(own);
+        print(another);
+        print(own.isLeapYear);
+        print(another.isLeapYear());
+        expect(own.year, another.year);
+        expect(own.month, another.month);
+        expect(own.day, another.day);
       });
   });
 

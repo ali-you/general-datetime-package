@@ -301,7 +301,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       totalDays += _monthLength(year, m);
     }
     totalDays += day - 1;
-    return 1948321 + totalDays;
+    return 1948320 + totalDays;
   }
 
   /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
@@ -526,15 +526,14 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   //   return leapRemainders.contains(r);
   // }
 
-  // bool _isLeapYear(int jy) {
-  //     int base = year > 0 ? 474 : 473;
-  //     int cycleYear = ((year - base) % 2820 + 2820) % 2820; // ensures positive mod
-  //     return (((cycleYear + 474 + 38) * 682) % 2816) < 682;
-  //
-  //
-  // }
-
-  bool _isLeapYear(int jy) => _leapAndCycle(jy) == 0;
+  bool _isLeapYear(int jy) {
+    if (jy < -61 || jy >= 3178) {
+      int base = year > 0 ? 474 : 473;
+      int cycleYear = ((year - base) % 2820 + 2820) % 2820;
+      return (((cycleYear + 474 + 38) * 682) % 2816) < 682;
+    }
+    return _leapAndCycle(jy) == 0;
+  }
 
   /// Shared internal helper to calculate leap status from Jalali logic.
   int _leapAndCycle(int jy) {
