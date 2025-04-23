@@ -271,6 +271,24 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   @override
   bool get isLeapYear => _isLeapYear(year);
 
+  // static double persianToJd(int year, int month, int day) {
+  //   var adr, equinox, guess, jd;
+  //   guess = (PERSIAN_EPOCH - 1) + (TropicalYear * ((year - 1) - 1));
+  //   adr = [year - 1, 0];
+  //   while (adr[0] < year){
+  //     adr = persianYear(guess);
+  //     guess = adr[1] + (TropicalYear + 2);
+  //   }
+  //   equinox = adr[1];
+  //   jd = equinox +
+  //       ((month <= 7) ?
+  //       ((month - 1) * 31) :
+  //       (((month - 1) * 30) + 6)
+  //       ) +
+  //       (day - 1);
+  //   return jd;
+  // }
+
   /// Julian Day Number getter
   @override
   int get julianDay {
@@ -508,13 +526,15 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   //   return leapRemainders.contains(r);
   // }
 
-  bool _isLeapYear(int jy) {
-      int base = year > 0 ? 474 : 473;
-      int cycleYear = ((year - base) % 2820 + 2820) % 2820; // ensures positive mod
-      return (((cycleYear + 474 + 38) * 682) % 2816) < 682;
+  // bool _isLeapYear(int jy) {
+  //     int base = year > 0 ? 474 : 473;
+  //     int cycleYear = ((year - base) % 2820 + 2820) % 2820; // ensures positive mod
+  //     return (((cycleYear + 474 + 38) * 682) % 2816) < 682;
+  //
+  //
+  // }
 
-
-  }
+  bool _isLeapYear(int jy) => _leapAndCycle(jy) == 0;
 
   /// Shared internal helper to calculate leap status from Jalali logic.
   int _leapAndCycle(int jy) {

@@ -503,11 +503,14 @@ void main() {
     });
 
     test('compare leap year in list', () {
-      for (int year = 1178; year <= 1500; year++) {
+      for (int year = -60; year <= 3176; year++) {
         final Jalali another = Jalali(year);
         final JalaliDatetime own = JalaliDatetime(year);
 
-        if (another.isLeapYear()) print("$year => ${year+4}" );
+        // if (another.isLeapYear()) print("$year => ${year+4}" );
+
+        expect(own.julianDay, another.julianDayNumber);
+        expect(own.isLeapYear, another.isLeapYear());
 
           // expect(own.isLeapYear, another.isLeapYear(), reason: 'Year mismatch on $year');
           // expect(own, another, reason: 'Year mismatch on $year,$month => ');
