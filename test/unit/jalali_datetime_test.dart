@@ -27,6 +27,14 @@ void main() {
     return jdDay + dayFraction;
   }
 
+  double jdn(DateTime date) {
+    double res = (1461 * (date.year + 4800 + (date.month - 14)/12)) / 4 +
+        (367 * (date.month - 2 - 12 * ((date.month - 14)/12))) / 12 -
+        (3 * ((date.year + 4900 + (date.month - 14)/12) / 100)) / 4 +
+        date.day - 32075;
+    return res;
+  }
+
   int getDaysInMonth(int year, int month) {
     DateTime firstDayOfNextMonth = DateTime(year, month + 1, 1);
     DateTime lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
