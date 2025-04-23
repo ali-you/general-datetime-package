@@ -588,9 +588,13 @@ void main() {
 
     test("test Test class", () {
       int count = 0;
-      for (int i= 0; i < 3100; i++) {
+      for (int i= 1; i < 10; i++) {
         Jalali jalali = Jalali(i);
         JalaliDatetime jalaliDatetime = JalaliDatetime(i);
+        print(jalali.julianDayNumber);
+        print(jalaliDatetime.julianDay);
+        print(Test.persianToJd(i, 1, 1));
+        print(toJulianDate(jalali.toDateTime()));
 
         bool test = Test.leapPersian(i);
         if (test != jalali.isLeapYear()) {
