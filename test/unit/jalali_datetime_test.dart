@@ -3,7 +3,6 @@ import 'package:general_datetime/general_datetime.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 void main() {
-
   double toJulianDate(DateTime date) {
     final year = date.toUtc().year;
     final month = date.toUtc().month;
@@ -20,7 +19,9 @@ void main() {
 
     final jdDay = (365.25 * (y + 4716)).floor() +
         (30.6001 * (m + 1)).floor() +
-        day + b - 1524.5;
+        day +
+        b -
+        1524.5;
 
     final dayFraction = (hour + minute / 60 + second / 3600) / 24;
 
@@ -28,16 +29,18 @@ void main() {
   }
 
   double jdn(DateTime date) {
-    double res = (1461 * (date.year + 4800 + (date.month - 14)/12)) / 4 +
-        (367 * (date.month - 2 - 12 * ((date.month - 14)/12))) / 12 -
-        (3 * ((date.year + 4900 + (date.month - 14)/12) / 100)) / 4 +
-        date.day - 32075;
+    double res = (1461 * (date.year + 4800 + (date.month - 14) / 12)) / 4 +
+        (367 * (date.month - 2 - 12 * ((date.month - 14) / 12))) / 12 -
+        (3 * ((date.year + 4900 + (date.month - 14) / 12) / 100)) / 4 +
+        date.day -
+        32075;
     return res;
   }
 
   int getDaysInMonth(int year, int month) {
     DateTime firstDayOfNextMonth = DateTime(year, month + 1, 1);
-    DateTime lastDayOfCurrentMonth = firstDayOfNextMonth.subtract(Duration(days: 1));
+    DateTime lastDayOfCurrentMonth =
+        firstDayOfNextMonth.subtract(Duration(days: 1));
     return lastDayOfCurrentMonth.day;
   }
 
@@ -494,27 +497,27 @@ void main() {
 
   group('Julian day comparison', () {
     test('Compare with gregorian', () {
-        for (int year = 0; year <= 3176; year++) {
-          final JalaliDatetime jalaliDatetime = JalaliDatetime(year);
-          expect(jalaliDatetime.julianDay, toJulianDate(jalaliDatetime.toDatetime()).floor());
-        }
+      for (int year = 0; year <= 3176; year++) {
+        final JalaliDatetime jalaliDatetime = JalaliDatetime(year);
+        expect(jalaliDatetime.julianDay,
+            toJulianDate(jalaliDatetime.toDatetime()).floor());
+      }
     });
   });
 
-
   group('Compare with another package', () {
-
     test('compare leap year', () {
       final Jalali another = Jalali(1635);
       final JalaliDatetime own = JalaliDatetime(1635);
       expect(own.isLeapYear, another.isLeapYear());
     });
-    
+
     test('compare leap year with conversion', () {
       final Jalali another = Jalali.fromDateTime(DateTime(2256));
       final JalaliDatetime own = JalaliDatetime.fromDateTime(DateTime(2256));
       print(own);
       print(another);
+      print(another.isLeapYear());
       expect(own.isLeapYear, another.isLeapYear());
       // Expected: <1635>
       // Actual: <1634>
@@ -526,7 +529,7 @@ void main() {
         final Jalali another = Jalali(year);
         final JalaliDatetime own = JalaliDatetime(year);
         expect(own.isLeapYear, another.isLeapYear());
-        }
+      }
     });
 
     test('compare months', () {
@@ -542,51 +545,60 @@ void main() {
     test('convert jalali to gregorian', () {
       for (int year = 1; year <= 3176; year++) {
         for (int month = 1; month <= 12; month++) {
-          for (int day = 1; day <= Jalali(year, month).monthLength; day++){
+          for (int day = 1; day <= Jalali(year, month).monthLength; day++) {
             final Jalali another = Jalali(year, month, day);
             final JalaliDatetime own = JalaliDatetime(year, month, day);
-            expect(own.toDatetime(), another.toDateTime(), reason: 'Year mismatch on $year,$month => ');
+            expect(own.toDatetime(), another.toDateTime(),
+                reason: 'Year mismatch on year:$year, month:$month');
           }
         }
       }
     });
 
-      test('convert gregorian to jalali list', () {
-        for (int year = 1000; year <= 3000; year++) {
-          for (int month = 1; month <= 12; month++) {
-            for (int day = 1; day <= getDaysInMonth(year, month); day++) {
-              final Jalali another = Jalali.fromDateTime(DateTime(year, month, day));
-              final JalaliDatetime own = JalaliDatetime.fromDateTime(DateTime(year, month, day));
-                expect(own.year, another.year, reason: 'Year mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
-                expect(own.month, another.month, reason: 'Month mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
-                expect(own.day, another.day, reason: 'Day mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
-            }
+    test('convert gregorian to jalali list', () {
+      for (int year = 562; year <= 3797; year++) {
+        for (int month = 1; month <= 12; month++) {
+          for (int day = 1; day <= getDaysInMonth(year, month); day++) {
+            final Jalali another =
+                Jalali.fromDateTime(DateTime(year, month, day));
+            final JalaliDatetime own =
+                JalaliDatetime.fromDateTime(DateTime(year, month, day));
+            expect(own.year, another.year,
+                reason:
+                    'Year mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
+            expect(own.month, another.month,
+                reason:
+                    'Month mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
+            expect(own.day, another.day,
+                reason:
+                    'Day mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
           }
         }
-      });
+      }
+    });
 
-      test('single convert gregorian to jalali', () {
-        DateTime dateTime = DateTime(2256, 3, 30);
-        final Jalali another = Jalali.fromDateTime(dateTime);
-        final JalaliDatetime own = JalaliDatetime.fromDateTime(dateTime);
-        print(own);
-        print(another);
-        print(own.isLeapYear);
-        print(another.isLeapYear());
-        expect(own.year, another.year);
-        expect(own.month, another.month);
-        expect(own.day, another.day);
-      });
+    test('single convert gregorian to jalali', () {
+      DateTime dateTime = DateTime(2256, 3, 20);
+      final JalaliDatetime own = JalaliDatetime.fromDateTime(dateTime);
+      final Jalali another = Jalali.fromDateTime(dateTime);
+      print(own);
+      print(another);
+      print(own.isLeapYear);
+      print(another.isLeapYear());
+      expect(own.year, another.year);
+      expect(own.month, another.month);
+      expect(own.day, another.day);
+    });
   });
 
-  // group("julian date tests", () {
-  //   test("check julian date with gregorian", () {
-  //     double gregorian = toJulianDate(DateTime(2025).toUtc());
-  //     int jalali = JalaliDatetime.fromDateTime(DateTime(2025).toUtc()).julianDay;
-  //     expect(jalali, gregorian);
-  //   });
-  // });
+  group("Bidirectional conversion", () {
+    test("check 3 dates", () {
+      for (int day = 1; day <= 3000; day++) {
+        DateTime dateTime = DateTime(623, 1, day);
+        Jalali jalali = Jalali.fromDateTime(dateTime);
 
-
-
+        expect(jalali.toDateTime(), dateTime);
+      }
+    });
+  });
 }

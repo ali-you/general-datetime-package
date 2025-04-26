@@ -310,15 +310,34 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   /// an approximation formula and then convert the JD to the Gregorian date.
   @override
   DateTime toDatetime() {
-    int a = julianDay + 32044;
-    int b = ((4 * a) + 3) ~/ 146097;
-    int c = a - ((146097 * b) ~/ 4);
-    int d = ((4 * c) + 3) ~/ 1461;
-    int e = c - ((1461 * d) ~/ 4);
-    int m = ((5 * e) + 2) ~/ 153;
-    int dayG = e - ((153 * m + 2) ~/ 5) + 1;
-    int monthG = m + 3 - 12 * (m ~/ 10);
-    int yearG = 100 * b + d - 4800 + (m ~/ 10);
+    // int a = julianDay + 32045;
+    // int b = ((4 * a) + 3) ~/ 146097;
+    // int c = a - ((146097 * b) ~/ 4);
+    // int d = ((4 * c) + 3) ~/ 1461;
+    // int e = c - ((1461 * d) ~/ 4);
+    // int m = ((5 * e) + 2) ~/ 153;
+    // int dayG = e - ((153 * m + 2) ~/ 5) + 1;
+    // int monthG = m + 3 - 12 * (m ~/ 10);
+    // int yearG = 100 * b + d - 4800 + (m ~/ 10);
+
+    int floorDiv(int x, int y) => (x / y).floor();
+
+    // Determine offset based on Julian vs Gregorian calendar reform
+    // JDN 2299161 = 1582-10-15 (start of Gregorian calendar)
+    print("julianDay");
+    print(julianDay);
+    final int offset = julianDay >= 1948320 ? 32045 : 32044;
+    int a = julianDay + offset;
+    int b = floorDiv(4 * a + 3, 146097);
+    int c = a - floorDiv(146097 * b, 4);
+    int d = floorDiv(4 * c + 3, 1461);
+    int e = c - floorDiv(1461 * d, 4);
+    int m = floorDiv(5 * e + 2, 153);
+
+    int dayG = e - floorDiv(153 * m + 2, 5) + 1;
+    int monthG = m + 3 - 12 * floorDiv(m, 10);
+    int yearG = 100 * b + d - 4800 + floorDiv(m, 10);
+
     if (isUtc) {
       return DateTime.utc(
           yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
@@ -365,76 +384,29 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     return JalaliDatetime.fromDateTime(utcDt);
   }
 
-  // /// Convert from Gregorian to Jalali
-  // JalaliDatetime _toJalali() {
-  //   final int gDayNo =
-  //       DateTime(year, month, day).difference(DateTime(0)).inDays;
-  //
-  //   int jy = year - 621;
-  //   int gDayNo1 = DateTime(_gregorianYear(jy), 3, _startYearMarch(jy))
-  //       .difference(DateTime(0))
-  //       .inDays;
-  //
-  //   int jDayNo = gDayNo - gDayNo1;
-  //
-  //   if (jDayNo >= 0) {
-  //     if (jDayNo <= 185) {
-  //       return JalaliDatetime._raw(jy, 1 + jDayNo ~/ 31, (jDayNo % 31) + 1,
-  //           hour, minute, second, millisecond, microsecond, isUtc);
-  //     } else {
-  //       jDayNo -= 186;
-  //       return JalaliDatetime._raw(jy, 7 + jDayNo ~/ 30, (jDayNo % 30) + 1,
-  //           hour, minute, second, millisecond, microsecond, isUtc);
-  //     }
-  //   } else {
-  //     jy -= 1;
-  //     final int prevDayNo = DateTime(_gregorianYear(jy), 3, _startYearMarch(jy))
-  //         .difference(DateTime(0))
-  //         .inDays;
-  //     jDayNo = gDayNo - prevDayNo;
-  //     if (jDayNo <= 185) {
-  //       return JalaliDatetime._raw(jy, 1 + jDayNo ~/ 31, (jDayNo % 31) + 1,
-  //           hour, minute, second, millisecond, microsecond, isUtc);
-  //     } else {
-  //       jDayNo -= 186;
-  //       return JalaliDatetime._raw(jy, 7 + jDayNo ~/ 30, (jDayNo % 30) + 1,
-  //           hour, minute, second, millisecond, microsecond, isUtc);
-  //     }
-  //   }
-  // }
-
   /// Convert from Gregorian to Jalali
   JalaliDatetime _toJalali() {
-    int gy = year;
-    int gm = month;
-    int gd = day;
-    List<int> gDM = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    int jy;
-    if (gy > 1600) {
-      jy = 979;
-      gy -= 1600;
+    int jy = year - 621;
+    int jdn1f = super.jdn(year, 3, _startYearMarch(jy));
+    int jdn = super.jdn(year, month, day);
+    int lastLeap = _leapAndCycle(jy);
+    int k = jdn - jdn1f;
+    if (k >= 0) {
+      if (k <= 185) {
+        final int jm = 1 + (k ~/ 31);
+        final int jd = (k % 31) + 1;
+        return JalaliDatetime._raw(
+            jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
+      } else {
+        k -= 186;
+      }
     } else {
-      jy = 0;
-      gy -= 621;
+      jy -= 1;
+      k += 179;
+      if (lastLeap == 1) k += 1;
     }
-    int gy2 = (gm > 2) ? (gy + 1) : gy;
-    int days = (365 * gy) +
-        ((gy2 + 3) ~/ 4) -
-        ((gy2 + 99) ~/ 100) +
-        ((gy2 + 399) ~/ 400) -
-        80 +
-        gd;
-    for (int i = 0; i < gm; ++i) {
-      days += gDM[i];
-    }
-    jy += 33 * (days ~/ 12053);
-    days %= 12053;
-    jy += 4 * (days ~/ 1461);
-    days %= 1461;
-    jy += (days - 1) ~/ 365;
-    if (days > 365) days = (days - 1) % 365;
-    int jm = (days < 186) ? 1 + (days ~/ 31) : 7 + ((days - 186) ~/ 30);
-    int jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+    final int jm = 7 + (k ~/ 30);
+    final int jd = (k % 30) + 1;
     return JalaliDatetime._raw(
         jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
   }

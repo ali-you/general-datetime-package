@@ -302,6 +302,14 @@ abstract class GeneralDatetimeInterface<T>
     }
   }
 
+  int jdn(int year, int month, int day) =>
+      (((year + ((month - 8) ~/ 6) + 100100) * 1461) ~/ 4) +
+      ((153 * ((month + 9) % 12) + 2) ~/ 5) +
+      day -
+      34840408 -
+      ((((year + 100100 + ((month - 8) ~/ 6)) ~/ 100) * 3) ~/ 4) +
+      752;
+
   String _twoDigits(int n) {
     if (n >= 10) return "$n";
     return "0$n";
