@@ -10,12 +10,12 @@
 - Updated `README.md` and documentation
 
 ## [0.1.1]
-- Jalali Datetime completed (Persian calendar)
+- Jalali DateTime completed (Persian calendar)
 - New testcases added
 - Updated `README.md` and documentation
 
 ## [0.0.2]
-- Jalali Datetime completed (Persian calendar)
+- Jalali DateTime completed (Persian calendar)
 - New testcases added
 - Updated `README.md` and documentation
 

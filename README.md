@@ -1,4 +1,4 @@
-# General Datetime (Dynamic Calendar)
+# General DateTime (Dynamic Calendar)
 
 <a href="https://pub.dev/packages/general_datetime">
    <img src="https://img.shields.io/pub/v/general_datetime?label=pub.dev&labelColor=333940&logo=dart">
@@ -85,7 +85,7 @@ dates across multiple calendar systems. For example, you can work with the Jalal
 provided implementation:
 
 ```dart
-import 'package:general_datetime/general_datetime.dart';
+import 'package:general_datetime/general_date_time.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:

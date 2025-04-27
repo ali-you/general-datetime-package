@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:general_datetime/src/general_datetime_interface.dart';
+import 'package:general_datetime/src/general_date_time_interface.dart';
 
 import 'constants.dart';
 
@@ -10,7 +10,7 @@ import 'constants.dart';
 /// This class allows seamless handling of Islamic calendar dates,
 /// with full time component support (hour, minute, second, etc.).
 ///
-/// It extends [GeneralDatetimeInterface] to maintain consistency
+/// It extends [GeneralDateTimeInterface] to maintain consistency
 /// with other date systems like Gregorian and Jalali.
 ///
 /// ### Features:
@@ -35,9 +35,9 @@ import 'constants.dart';
 /// calendar of Saudi Arabia, commonly used for religious observances.
 ///
 /// > Note: Dates may differ slightly from observational Hijri calendars used in other countries.
-class HijriDatetime extends GeneralDatetimeInterface {
+class HijriDateTime extends GeneralDateTimeInterface {
   /// Private constructor for raw inputs
-  HijriDatetime._raw(
+  HijriDateTime._raw(
     super.year, [
     super.month,
     super.day,
@@ -51,7 +51,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
 
   /// Start: Factories section
   /// Factory constructor with normalization
-  factory HijriDatetime(
+  factory HijriDateTime(
     int year, [
     int month = 1,
     int day = 1,
@@ -61,7 +61,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
     int millisecond = 0,
     int microsecond = 0,
   ]) {
-    return HijriDatetime._raw(
+    return HijriDateTime._raw(
       year,
       month,
       day,
@@ -74,34 +74,34 @@ class HijriDatetime extends GeneralDatetimeInterface {
   }
 
   /// Factory constructor for converting from DateTime
-  factory HijriDatetime.fromDateTime(DateTime datetime) {
-    return HijriDatetime._raw(
-      datetime.year,
-      datetime.month,
-      datetime.day,
-      datetime.hour,
-      datetime.minute,
-      datetime.second,
-      datetime.millisecond,
-      datetime.microsecond,
-      datetime.isUtc,
+  factory HijriDateTime.fromDateTime(DateTime dateTime) {
+    return HijriDateTime._raw(
+      dateTime.year,
+      dateTime.month,
+      dateTime.day,
+      dateTime.hour,
+      dateTime.minute,
+      dateTime.second,
+      dateTime.millisecond,
+      dateTime.microsecond,
+      dateTime.isUtc,
     )._toHijri();
   }
 
   /// Factory constructor for current date and time
-  factory HijriDatetime.now() {
+  factory HijriDateTime.now() {
     DateTime dt = DateTime.now();
-    return HijriDatetime.fromDateTime(dt);
+    return HijriDateTime.fromDateTime(dt);
   }
 
   /// Factory constructor for current date and time in UTC
-  factory HijriDatetime.timestamp() {
+  factory HijriDateTime.timestamp() {
     final DateTime dt = DateTime.now().toUtc();
-    return HijriDatetime.fromDateTime(dt);
+    return HijriDateTime.fromDateTime(dt);
   }
 
   /// Factory constructor in UTC with normalization
-  factory HijriDatetime.utc(
+  factory HijriDateTime.utc(
     int year, [
     int month = 1,
     int day = 1,
@@ -111,7 +111,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
     int millisecond = 0,
     int microsecond = 0,
   ]) =>
-      HijriDatetime._raw(
+      HijriDateTime._raw(
         year,
         month,
         day,
@@ -123,31 +123,31 @@ class HijriDatetime extends GeneralDatetimeInterface {
         true,
       )._normalize();
 
-  factory HijriDatetime.fromSecondsSinceEpoch(int secondsSinceEpoch,
+  factory HijriDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         secondsSinceEpoch * 1000,
         isUtc: isUtc);
-    return HijriDatetime.fromDateTime(dt);
+    return HijriDateTime.fromDateTime(dt);
   }
 
-  factory HijriDatetime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
+  factory HijriDateTime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         millisecondsSinceEpoch,
         isUtc: isUtc);
-    return HijriDatetime.fromDateTime(dt);
+    return HijriDateTime.fromDateTime(dt);
   }
 
-  factory HijriDatetime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
+  factory HijriDateTime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
         microsecondsSinceEpoch,
         isUtc: isUtc);
-    return HijriDatetime.fromDateTime(dt);
+    return HijriDateTime.fromDateTime(dt);
   }
 
-  factory HijriDatetime.parse(String formattedString) {
+  factory HijriDateTime.parse(String formattedString) {
     Match? match = Constants.parseFormat.firstMatch(formattedString);
     if (match != null) {
       int parseIntOrZero(String? matched) {
@@ -199,7 +199,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
         }
       }
 
-      return HijriDatetime._raw(
+      return HijriDateTime._raw(
         year,
         month,
         day,
@@ -217,9 +217,9 @@ class HijriDatetime extends GeneralDatetimeInterface {
 
   /// End: Factories section
 
-  static HijriDatetime? tryParse(String formattedString) {
+  static HijriDateTime? tryParse(String formattedString) {
     try {
-      return HijriDatetime.parse(formattedString);
+      return HijriDateTime.parse(formattedString);
     } on FormatException {
       return null;
     }
@@ -298,37 +298,37 @@ class HijriDatetime extends GeneralDatetimeInterface {
 
   /// Add a Duration to the Hijri date
   @override
-  GeneralDatetimeInterface add(Duration duration) {
+  GeneralDateTimeInterface add(Duration duration) {
     DateTime result = toDatetime().add(duration);
-    return HijriDatetime.fromDateTime(result);
+    return HijriDateTime.fromDateTime(result);
   }
 
   /// Subtract a Duration from the Hijri date
   @override
-  GeneralDatetimeInterface subtract(Duration duration) {
+  GeneralDateTimeInterface subtract(Duration duration) {
     DateTime result = toDatetime().subtract(duration);
-    return HijriDatetime.fromDateTime(result);
+    return HijriDateTime.fromDateTime(result);
   }
 
   /// Convert to local time
   @override
-  GeneralDatetimeInterface toLocal() {
+  GeneralDateTimeInterface toLocal() {
     DateTime localDt = toDatetime().toLocal();
-    return HijriDatetime.fromDateTime(localDt);
+    return HijriDateTime.fromDateTime(localDt);
   }
 
   /// Convert to UTC time
   @override
-  GeneralDatetimeInterface toUtc() {
+  GeneralDateTimeInterface toUtc() {
     DateTime utcDt = toDatetime().toUtc();
-    return HijriDatetime.fromDateTime(utcDt);
+    return HijriDateTime.fromDateTime(utcDt);
   }
 
   /// Conversion from Gregorian to Hijri (Umm al-Qura)
   /// This method converts the current Gregorian date (stored in the instance)
   /// to a Hijri date according to an approximate algorithm. It computes the
   /// Julian Day Number (JD) of the Gregorian date and then derives the Hijri date.
-  HijriDatetime _toHijri() {
+  HijriDateTime _toHijri() {
     int gy = year;
     int gm = month;
     int gd = day;
@@ -351,12 +351,12 @@ class HijriDatetime extends GeneralDatetimeInterface {
     double firstDayOfHijriMonth = _hijriToJD(hYear, hMonth, 1);
     int hDay = (jd - firstDayOfHijriMonth).floor() + 1;
 
-    return HijriDatetime._raw(hYear, hMonth, hDay, hour, minute, second,
+    return HijriDateTime._raw(hYear, hMonth, hDay, hour, minute, second,
         millisecond, microsecond, isUtc);
   }
 
   /// **Normalize values (overflow handling)**
-  HijriDatetime _normalize() {
+  HijriDateTime _normalize() {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
     // Normalize microseconds to milliseconds.
@@ -420,7 +420,7 @@ class HijriDatetime extends GeneralDatetimeInterface {
       m -= 12;
       y += 1;
     }
-    return HijriDatetime._raw(y, m, d, h, min, s, ms, us);
+    return HijriDateTime._raw(y, m, d, h, min, s, ms, us);
   }
 
   /// Helper method to get month length

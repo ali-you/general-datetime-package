@@ -1,13 +1,14 @@
 import 'package:general_datetime/src/constants.dart';
+import 'package:general_datetime/src/gregorian_helper.dart';
 
-import 'general_datetime_interface.dart';
+import 'general_date_time_interface.dart';
 
 /// Represents a date and time in the **Jalali (Persian/Iranian)** calendar system.
 ///
 /// This class provides conversion between Gregorian and Jalali dates,
 /// along with time component support (hour, minute, second, etc).
 ///
-/// It extends the [GeneralDatetimeInterface] to support consistent behavior
+/// It extends the [GeneralDateTimeInterface] to support consistent behavior
 /// across multiple calendar types.
 ///
 /// ### Features:
@@ -29,9 +30,9 @@ import 'general_datetime_interface.dart';
 /// ### Calendar Notes:
 /// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
 /// with highly accurate leap year rules and month lengths.
-class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
+class JalaliDateTime extends GeneralDateTimeInterface<JalaliDateTime> {
   /// Private constructor for raw inputs
-  JalaliDatetime._raw(
+  JalaliDateTime._raw(
     super.year, [
     super.month,
     super.day,
@@ -68,7 +69,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Start: Factories section
   /// Factory constructor with normalization
-  factory JalaliDatetime(
+  factory JalaliDateTime(
     int year, [
     int month = 1,
     int day = 1,
@@ -78,7 +79,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int millisecond = 0,
     int microsecond = 0,
   ]) {
-    return JalaliDatetime._raw(
+    return JalaliDateTime._raw(
       year,
       month,
       day,
@@ -91,34 +92,34 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   }
 
   /// Factory constructor for converting from DateTime
-  factory JalaliDatetime.fromDateTime(DateTime datetime) {
-    return JalaliDatetime._raw(
-      datetime.year,
-      datetime.month,
-      datetime.day,
-      datetime.hour,
-      datetime.minute,
-      datetime.second,
-      datetime.millisecond,
-      datetime.microsecond,
-      datetime.isUtc,
+  factory JalaliDateTime.fromDateTime(DateTime dateTime) {
+    return JalaliDateTime._raw(
+      dateTime.year,
+      dateTime.month,
+      dateTime.day,
+      dateTime.hour,
+      dateTime.minute,
+      dateTime.second,
+      dateTime.millisecond,
+      dateTime.microsecond,
+      dateTime.isUtc,
     )._toJalali();
   }
 
   /// Factory constructor for current date and time
-  factory JalaliDatetime.now() {
+  factory JalaliDateTime.now() {
     final DateTime dt = DateTime.now();
-    return JalaliDatetime.fromDateTime(dt);
+    return JalaliDateTime.fromDateTime(dt);
   }
 
   /// Factory constructor for current date and time in UTC
-  factory JalaliDatetime.timestamp() {
+  factory JalaliDateTime.timestamp() {
     final DateTime dt = DateTime.now().toUtc();
-    return JalaliDatetime.fromDateTime(dt);
+    return JalaliDateTime.fromDateTime(dt);
   }
 
   /// Factory constructor in UTC with normalization
-  factory JalaliDatetime.utc(
+  factory JalaliDateTime.utc(
     int year, [
     int month = 1,
     int day = 1,
@@ -128,7 +129,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     int millisecond = 0,
     int microsecond = 0,
   ]) =>
-      JalaliDatetime._raw(
+      JalaliDateTime._raw(
         year,
         month,
         day,
@@ -140,31 +141,31 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
         true,
       )._normalize();
 
-  factory JalaliDatetime.fromSecondsSinceEpoch(int secondsSinceEpoch,
+  factory JalaliDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         secondsSinceEpoch * 1000,
         isUtc: isUtc);
-    return JalaliDatetime.fromDateTime(dt);
+    return JalaliDateTime.fromDateTime(dt);
   }
 
-  factory JalaliDatetime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
+  factory JalaliDateTime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         millisecondsSinceEpoch,
         isUtc: isUtc);
-    return JalaliDatetime.fromDateTime(dt);
+    return JalaliDateTime.fromDateTime(dt);
   }
 
-  factory JalaliDatetime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
+  factory JalaliDateTime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
         microsecondsSinceEpoch,
         isUtc: isUtc);
-    return JalaliDatetime.fromDateTime(dt);
+    return JalaliDateTime.fromDateTime(dt);
   }
 
-  factory JalaliDatetime.parse(String formattedString) {
+  factory JalaliDateTime.parse(String formattedString) {
     Match? match = Constants.parseFormat.firstMatch(formattedString);
     if (match != null) {
       int parseIntOrZero(String? matched) {
@@ -216,7 +217,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
         }
       }
 
-      return JalaliDatetime._raw(
+      return JalaliDateTime._raw(
         year,
         month,
         day,
@@ -234,13 +235,16 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// End: Factories section
 
-  static JalaliDatetime? tryParse(String formattedString) {
+  static JalaliDateTime? tryParse(String formattedString) {
     try {
-      return JalaliDatetime.parse(formattedString);
+      return JalaliDateTime.parse(formattedString);
     } on FormatException {
       return null;
     }
   }
+
+  /// private variable to implement gregorian calculations
+  final GregorianHelper _gregorianHelper = GregorianHelper();
 
   /// The calendar name
   @override
@@ -271,37 +275,29 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   @override
   bool get isLeapYear => _isLeapYear(year);
 
-  // static double persianToJd(int year, int month, int day) {
-  //   var adr, equinox, guess, jd;
-  //   guess = (PERSIAN_EPOCH - 1) + (TropicalYear * ((year - 1) - 1));
-  //   adr = [year - 1, 0];
-  //   while (adr[0] < year){
-  //     adr = persianYear(guess);
-  //     guess = adr[1] + (TropicalYear + 2);
-  //   }
-  //   equinox = adr[1];
-  //   jd = equinox +
-  //       ((month <= 7) ?
-  //       ((month - 1) * 31) :
-  //       (((month - 1) * 30) + 6)
-  //       ) +
-  //       (day - 1);
-  //   return jd;
-  // }
-
   /// Julian Day Number getter
   @override
   int get julianDay {
     int totalDays = 0;
-    for (int k = 1; k < year; k++) {
-      totalDays += 365;
-      if (_isLeapYear(k)) totalDays += 1;
+    if (year > 1) {
+      for (int k = 1; k < year; k++) {
+        totalDays += 365;
+        if (_isLeapYear(k)) totalDays += 1;
+      }
+    } else if (year < 1) {
+      for (int k = year; k < 1; k++) {
+        totalDays -= 365;
+        if (_isLeapYear(k)) totalDays -= 1;
+      }
     }
+    // Add all months of the current year
     for (int m = 1; m < month; m++) {
       totalDays += _monthLength(year, m);
     }
-    totalDays += day - 1;
-    return 1948320 + totalDays;
+    // Add days in current month (zero-based)
+    totalDays += (day - 1);
+    // 1 Farvardin 1 → JDN 1948320
+    return 1948321 + totalDays;
   }
 
   /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
@@ -310,24 +306,9 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
   /// an approximation formula and then convert the JD to the Gregorian date.
   @override
   DateTime toDatetime() {
-    // int a = julianDay + 32045;
-    // int b = ((4 * a) + 3) ~/ 146097;
-    // int c = a - ((146097 * b) ~/ 4);
-    // int d = ((4 * c) + 3) ~/ 1461;
-    // int e = c - ((1461 * d) ~/ 4);
-    // int m = ((5 * e) + 2) ~/ 153;
-    // int dayG = e - ((153 * m + 2) ~/ 5) + 1;
-    // int monthG = m + 3 - 12 * (m ~/ 10);
-    // int yearG = 100 * b + d - 4800 + (m ~/ 10);
-
     int floorDiv(int x, int y) => (x / y).floor();
 
-    // Determine offset based on Julian vs Gregorian calendar reform
-    // JDN 2299161 = 1582-10-15 (start of Gregorian calendar)
-    print("julianDay");
-    print(julianDay);
-    final int offset = julianDay >= 1948320 ? 32045 : 32044;
-    int a = julianDay + offset;
+    int a = julianDay + 32044;
     int b = floorDiv(4 * a + 3, 146097);
     int c = a - floorDiv(146097 * b, 4);
     int d = floorDiv(4 * c + 3, 1461);
@@ -356,46 +337,46 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Add a Duration to the Jalali date
   @override
-  JalaliDatetime add(Duration duration) {
+  JalaliDateTime add(Duration duration) {
     final DateTime result = toDatetime().add(duration);
-    return JalaliDatetime.fromDateTime(result);
+    return JalaliDateTime.fromDateTime(result);
   }
 
   /// Subtract a Duration from the Jalali date
   @override
-  JalaliDatetime subtract(Duration duration) {
+  JalaliDateTime subtract(Duration duration) {
     final DateTime result = toDatetime().subtract(duration);
-    return JalaliDatetime.fromDateTime(result);
+    return JalaliDateTime.fromDateTime(result);
   }
 
   /// Convert to local time
   @override
-  JalaliDatetime toLocal() {
+  JalaliDateTime toLocal() {
     if (!isUtc) return this;
     final localDt = toDatetime().toLocal();
-    return JalaliDatetime.fromDateTime(localDt);
+    return JalaliDateTime.fromDateTime(localDt);
   }
 
   /// Convert to UTC time
   @override
-  JalaliDatetime toUtc() {
+  JalaliDateTime toUtc() {
     if (isUtc) return this;
     final utcDt = toDatetime().toUtc();
-    return JalaliDatetime.fromDateTime(utcDt);
+    return JalaliDateTime.fromDateTime(utcDt);
   }
 
   /// Convert from Gregorian to Jalali
-  JalaliDatetime _toJalali() {
+  JalaliDateTime _toJalali() {
     int jy = year - 621;
-    int jdn1f = super.jdn(year, 3, _startYearMarch(jy));
-    int jdn = super.jdn(year, month, day);
+    int jdn1f = _gregorianHelper.julianDay(year, 3, _startYearMarch(jy));
+    int jdn = _gregorianHelper.julianDay(year, month, day);
     int lastLeap = _leapAndCycle(jy);
     int k = jdn - jdn1f;
     if (k >= 0) {
       if (k <= 185) {
         final int jm = 1 + (k ~/ 31);
         final int jd = (k % 31) + 1;
-        return JalaliDatetime._raw(
+        return JalaliDateTime._raw(
             jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
       } else {
         k -= 186;
@@ -407,12 +388,12 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     }
     final int jm = 7 + (k ~/ 30);
     final int jd = (k % 30) + 1;
-    return JalaliDatetime._raw(
+    return JalaliDateTime._raw(
         jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
   }
 
   /// Normalize values (overflow handling)
-  JalaliDatetime _normalize() {
+  JalaliDateTime _normalize() {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
     // Normalize microseconds to milliseconds
@@ -476,7 +457,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
       m -= 12;
       y += 1;
     }
-    return JalaliDatetime._raw(y, m, d, h, min, s, ms, us, isUtc);
+    return JalaliDateTime._raw(y, m, d, h, min, s, ms, us, isUtc);
   }
 
   /// Helper method to get month length
@@ -485,18 +466,6 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
     if (month <= 11) return 30;
     return _isLeapYear(year) ? 30 : 29;
   }
-
-  // bool _isLeapYear(int jy) {
-  //   // Special case: Year 1 is not a leap year.
-  //   if (jy == 1) return false;
-  //   // Calculate the remainder in the 33-year cycle.
-  //   // Make sure we have a positive remainder.
-  //   int r = jy % 33;
-  //   if (r < 0) r += 33;
-  //   // Leap years in the 33-year cycle occur in these remainders.
-  //   const leapRemainders = [1, 5, 9, 13, 17, 22, 26, 30];
-  //   return leapRemainders.contains(r);
-  // }
 
   bool _isLeapYear(int jy) {
     if (jy < -61 || jy >= 3178) {
@@ -509,6 +478,13 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Shared internal helper to calculate leap status from Jalali logic.
   int _leapAndCycle(int jy) {
+    if (jy < -61 || jy >= 3178) {
+      int base = jy > 0 ? 474 : 473;
+      int cycleYear = ((jy - base) % 2820 + 2820) % 2820;
+      int leap = (((cycleYear + 474 + 38) * 682) % 2816) ~/ 682;
+      return leap == 0 ? 0 : 1; // Return 0 for leap year, 1 otherwise
+    }
+
     final _CycleStats stats = _cycleStats(jy);
     int n = jy - stats.lastBreak; // n = years since last break point (jp)
     if (stats.jump - n < 6) {
@@ -523,6 +499,11 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   /// Gets the Gregorian March day when Farvardin 1st (Nowruz) starts
   int _startYearMarch(int jy) {
+    if (jy < -61 || jy >= 3178) {
+      int gy = _gregorianYear(jy);
+      int march = ((gy ~/ 4) - ((gy ~/ 100 + 1) * 3 ~/ 4) - 150);
+      return 20 - march;
+    }
     final int gy = _gregorianYear(jy);
     final _CycleStats stats = _cycleStats(jy);
     final int leapG = gy ~/ 4 - ((gy ~/ 100 + 1) * 3 ~/ 4) - 150;
@@ -531,7 +512,7 @@ class JalaliDatetime extends GeneralDatetimeInterface<JalaliDatetime> {
 
   _CycleStats _cycleStats(int jy) {
     if (jy < -61 || jy >= 3178) {
-      throw StateError('Year out of range');
+      throw Exception('Year must be between 61 and 3178 in this algorithm');
     }
     // leap year count
     int leapCount = -14;
