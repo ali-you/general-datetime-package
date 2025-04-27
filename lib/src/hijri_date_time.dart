@@ -22,11 +22,11 @@ import 'constants.dart';
 ///
 /// ### Example:
 /// ```dart
-/// var now = HijriDatetime.now(); // Current Hijri date (Umm al-Qura)
+/// var now = HijriDateTime.now(); // Current Hijri date (Umm al-Qura)
 /// print(now); // 1446/9/28
 ///
-/// var hDate = HijriDatetime(1445, 10, 1);
-/// print(hDate.toDatetime()); // Converts to corresponding Gregorian date
+/// var hDate = HijriDateTime(1445, 10, 1);
+/// print(hDate.toDateTime()); // Converts to corresponding Gregorian date
 /// ```
 ///
 /// ### Calendar Notes:
@@ -232,7 +232,7 @@ class HijriDateTime extends GeneralDateTimeInterface {
   /// Calculate weekday (0=Saturday, 6=Friday)
   @override
   int get weekday {
-    DateTime gregorian = toDatetime();
+    DateTime gregorian = toDateTime();
     return (gregorian.weekday) % 7;
   }
 
@@ -257,17 +257,17 @@ class HijriDateTime extends GeneralDateTimeInterface {
   }
 
   /// Julian Day Number getter
-  /// For HijriDatetime we use the computed JD (rounded down).
+  /// For HijriDateTime we use the computed JD (rounded down).
   @override
   int get julianDay => _hijriToJD(year, month, day).floor();
 
-  /// Conversion from HijriDatetime(Umm al-Qura) to DateTime (Hijri to Gregorian)
+  /// Conversion from HijriDateTime(Umm al-Qura) to DateTime (Hijri to Gregorian)
   /// This method uses an approximate conversion via Julian day calculations.
   /// For a given Hijri date, we compute its Julian Day Number (JD) using
   /// an approximation formula and then convert the JD to the Gregorian date.
   /// This method uses the Fliegel-Van Flandern algorithm.
   @override
-  DateTime toDatetime() {
+  DateTime toDateTime() {
     int l = julianDay + 68569;
     int n = (4 * l) ~/ 146097;
     l = l - ((146097 * n + 3) ~/ 4);
@@ -299,28 +299,28 @@ class HijriDateTime extends GeneralDateTimeInterface {
   /// Add a Duration to the Hijri date
   @override
   GeneralDateTimeInterface add(Duration duration) {
-    DateTime result = toDatetime().add(duration);
+    DateTime result = toDateTime().add(duration);
     return HijriDateTime.fromDateTime(result);
   }
 
   /// Subtract a Duration from the Hijri date
   @override
   GeneralDateTimeInterface subtract(Duration duration) {
-    DateTime result = toDatetime().subtract(duration);
+    DateTime result = toDateTime().subtract(duration);
     return HijriDateTime.fromDateTime(result);
   }
 
   /// Convert to local time
   @override
   GeneralDateTimeInterface toLocal() {
-    DateTime localDt = toDatetime().toLocal();
+    DateTime localDt = toDateTime().toLocal();
     return HijriDateTime.fromDateTime(localDt);
   }
 
   /// Convert to UTC time
   @override
   GeneralDateTimeInterface toUtc() {
-    DateTime utcDt = toDatetime().toUtc();
+    DateTime utcDt = toDateTime().toUtc();
     return HijriDateTime.fromDateTime(utcDt);
   }
 

@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_date_time.dart';
 
 void main() {
-  group('HijriDatetime Challenging Test Cases', () {
+  group('HijriDateTime Challenging Test Cases', () {
     test('Normalization overflow test (basic)', () {
-      // Construct a HijriDatetime with overflowing time parts.
+      // Construct a HijriDateTime with overflowing time parts.
       // For example: 23h, 59m, 59s with extra 1500 ms and 2000 us.
       final dt = HijriDateTime(1444, 1, 29, 23, 59, 59, 1500, 2000);
       // After normalization, the hour, minute, and second values must be within conventional ranges.
@@ -27,7 +27,7 @@ void main() {
       // Convert to Hijri using our factory method.
       final hijri = HijriDateTime.fromDateTime(greg);
       // Convert back to Gregorian.
-      final gregConverted = hijri.toDatetime();
+      final gregConverted = hijri.toDateTime();
       // Due to approximation the values might not match exactly,
       // but the conversion should produce a valid DateTime.
       expect(gregConverted, isNotNull);
@@ -74,7 +74,7 @@ void main() {
     });
 
     test('Negative time normalization', () {
-      // Construct a HijriDatetime with negative overflow values.
+      // Construct a HijriDateTime with negative overflow values.
       final dt = HijriDateTime(-100, 1, 2, -2, -70, -125, -2000, -3000);
       final gt = DateTime(-100, 1, 2, -2, -70, -125, -2000, -3000);
       // Ensure hours, minutes, seconds are within valid ranges.
@@ -110,18 +110,18 @@ void main() {
     test('Millisecond precision round-trip', () {
       final original = DateTime.now().copyWith(microsecond: 456789);
       final hijri = HijriDateTime.fromDateTime(original);
-      final roundTrip = hijri.toDatetime();
+      final roundTrip = hijri.toDateTime();
       // Accept a small difference due to approximations.
       expect(
           roundTrip.difference(original).inMicroseconds.abs(), lessThan(2000));
     });
 
     test('Epoch boundary conversion', () {
-      // Convert the UNIX epoch and verify that toDatetime produces a valid DateTime.
+      // Convert the UNIX epoch and verify that toDateTime produces a valid DateTime.
       final unixEpoch = DateTime.utc(1970);
       final hijriEpoch = HijriDateTime.fromDateTime(unixEpoch);
       // We expect the corresponding Gregorian conversion to match the epoch time.
-      expect(hijriEpoch.toDatetime().isAtSameMomentAs(unixEpoch), isTrue);
+      expect(hijriEpoch.toDateTime().isAtSameMomentAs(unixEpoch), isTrue);
     });
   });
 
@@ -136,7 +136,7 @@ void main() {
 
     test('Hijri 1400-1-1 → Gregorian crossover', () {
       final hijri = HijriDateTime(1400, 1, 1);
-      final greg = hijri.toDatetime();
+      final greg = hijri.toDateTime();
       // Verify that the Gregorian equivalent falls within an expected historical range.
       expect(greg.year, inInclusiveRange(1979, 1980));
     });
@@ -154,7 +154,7 @@ void main() {
     test('Negative year calculation', () {
       final dt = HijriDateTime(-500, 1, 1);
       // The conversion should yield a valid Gregorian DateTime.
-      expect(dt.toDatetime(), isNotNull);
+      expect(dt.toDateTime(), isNotNull);
     });
   });
 
@@ -194,7 +194,7 @@ void main() {
     });
   });
 
-  group('Negative Time Normalization for HijriDatetime', () {
+  group('Negative Time Normalization for HijriDateTime', () {
     test('Negative hour normalization', () {
       final dt = HijriDateTime(1442, 9, 1, -3);
       // Expected final: normalization should roll negative hour to previous day.

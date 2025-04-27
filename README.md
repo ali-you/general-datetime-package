@@ -53,7 +53,8 @@ value normalization gracefully.
   dates.
 
 - **Parsing and Formatting:**
-  Create custom datetime (JalaliDatetime, HijriDatetime) instances from formatted strings and output a consistent string
+  Create custom datetime (JalaliDateTime, HijriDateTime) instances from formatted strings and output
+  a consistent string
   representation.
 
 ## Installation
@@ -66,7 +67,7 @@ Include the following dependency in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  general_datetime: ^1.0.1
+  general_datetime: <latest_version>
 
 ```
 
@@ -89,23 +90,23 @@ import 'package:general_datetime/general_date_time.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:
-  JalaliDatetime jDate = JalaliDatetime.fromDateTime(DateTime(2025, 3, 1));
+  JalaliDateTime jDate = JalaliDateTime.fromDateTime(DateTime(2025, 3, 1));
   print('Converted to Jalali: ${jDate.toString()}'); // e.g. "1403-12-11 00:00:00.000"
 
   // Create a Jalali date directly (auto-normalization applies):
-  JalaliDatetime directDate = JalaliDatetime(1403, 12, 11, 14, 30);
+  JalaliDateTime directDate = JalaliDateTime(1403, 12, 11, 14, 30);
   print('Direct Jalali: ${directDate.toString()}');
 
   // Perform arithmetic:
-  JalaliDatetime futureDate = jDate.add(Duration(days: 5, hours: 3));
+  JalaliDateTime futureDate = jDate.add(Duration(days: 5, hours: 3));
   print('Future Date: ${futureDate.toString()}');
 
   // Compare dates:
-  bool isBefore = jDate.isBefore(JalaliDatetime(1403, 12, 12));
+  bool isBefore = jDate.isBefore(JalaliDateTime(1403, 12, 12));
   print('Is jDate before 1403-12-12? $isBefore');
 
   // Parse a date string:
-  JalaliDatetime parsed = JalaliDatetime.parse("1403-12-11 14:30:45.123456Z");
+  JalaliDateTime parsed = JalaliDateTime.parse("1403-12-11 14:30:45.123456Z");
   print('Parsed Date: ${parsed.toString()}');
 
   // Time zone information:
@@ -217,6 +218,27 @@ additional calendar systems.
 [//]: # (> [!CAUTION])
 
 [//]: # (> Advises about risks or negative outcomes of certain actions.)
+
+## Calendars
+
+### Persian Calendar (Jalali)
+
+The Persian (Jalali) calendar is a solar calendar first formalized in 1079 CE under Omar Khayyam
+that measures years by the true motion of the Earth around the Sun, yielding an average year length
+of approximately 365.2424 days—more accurate over centuries than the Gregorian’s 365.2425-day
+average. It begins its era on the vernal equinox of 622 CE (the Hijra), and structures time into
+twelve months: the first six of 31 days, the next five of 30 days, and the final month of 29 days in
+a common year or 30 days in a leap year. Leap years follow an intricate 33-year cycle (with
+occasional 29- or 37-year adjustments), tracked in code by a series of “break points” that align
+groups of eight leap years within each cycle. Converting between Jalali and Gregorian dates uses the
+Julian Day Number (JDN) as an intermediary—counting days from a fixed epoch—then applying standard
+astronomical floor-division formulas to translate JDN to Gregorian and back. Overflow or negative
+values in any date or time component are normalized by carrying into higher or lower units, so that
+inputs like “month 13” or “day 0” correctly wrap into valid Jalali dates. This blend of astronomical
+anchoring, cycle-based leap determination, and normalization yields a calendar that keeps Nowruz (
+the spring equinox) synchronized with the real equinox with minimal drift over millennia.
+Read
+more: [Persian Calendar (EMP) paper](https://www.astro.uni.torun.pl/~kb/Papers/EMP/PersianC-EMP.htm)
 
 ## Contributions
 

@@ -20,11 +20,11 @@ import 'general_date_time_interface.dart';
 ///
 /// ### Example:
 /// ```dart
-/// var now = JalaliDatetime.now(); // Get current Jalali date and time
+/// var now = JalaliDateTime.now(); // Get current Jalali date and time
 /// print(now); // 1403/1/19
 ///
-/// var jDate = JalaliDatetime(1402, 12, 30);
-/// print(jDate.toDatetime()); // Converts to equivalent Gregorian date
+/// var jDate = JalaliDateTime(1402, 12, 30);
+/// print(jDate.toDateTime()); // Converts to equivalent Gregorian date
 /// ```
 ///
 /// ### Calendar Notes:
@@ -253,7 +253,7 @@ class JalaliDateTime extends GeneralDateTimeInterface<JalaliDateTime> {
   /// Calculate weekday (0=Saturday, 6=Friday)
   @override
   int get weekday {
-    DateTime gd = toDatetime();
+    DateTime gd = toDateTime();
     return (gd.weekday) % 7;
   }
 
@@ -300,12 +300,12 @@ class JalaliDateTime extends GeneralDateTimeInterface<JalaliDateTime> {
     return 1948321 + totalDays;
   }
 
-  /// Conversion from JalaliDatetime to DateTime (Jalali to Gregorian)
+  /// Conversion from JalaliDateTime to DateTime (Jalali to Gregorian)
   /// This method uses an approximate conversion via Julian day calculations.
   /// For a given Jalali date, we compute its Julian Day Number (JD) using
   /// an approximation formula and then convert the JD to the Gregorian date.
   @override
-  DateTime toDatetime() {
+  DateTime toDateTime() {
     int floorDiv(int x, int y) => (x / y).floor();
 
     int a = julianDay + 32044;
@@ -338,14 +338,14 @@ class JalaliDateTime extends GeneralDateTimeInterface<JalaliDateTime> {
   /// Add a Duration to the Jalali date
   @override
   JalaliDateTime add(Duration duration) {
-    final DateTime result = toDatetime().add(duration);
+    final DateTime result = toDateTime().add(duration);
     return JalaliDateTime.fromDateTime(result);
   }
 
   /// Subtract a Duration from the Jalali date
   @override
   JalaliDateTime subtract(Duration duration) {
-    final DateTime result = toDatetime().subtract(duration);
+    final DateTime result = toDateTime().subtract(duration);
     return JalaliDateTime.fromDateTime(result);
   }
 
@@ -353,7 +353,7 @@ class JalaliDateTime extends GeneralDateTimeInterface<JalaliDateTime> {
   @override
   JalaliDateTime toLocal() {
     if (!isUtc) return this;
-    final localDt = toDatetime().toLocal();
+    final localDt = toDateTime().toLocal();
     return JalaliDateTime.fromDateTime(localDt);
   }
 
@@ -361,7 +361,7 @@ class JalaliDateTime extends GeneralDateTimeInterface<JalaliDateTime> {
   @override
   JalaliDateTime toUtc() {
     if (isUtc) return this;
-    final utcDt = toDatetime().toUtc();
+    final utcDt = toDateTime().toUtc();
     return JalaliDateTime.fromDateTime(utcDt);
   }
 

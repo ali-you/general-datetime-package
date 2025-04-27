@@ -61,42 +61,42 @@ void main() {
   group('Jalali to Gregorian Conversion Single Date', () {
     test('Normal Year', () {
       JalaliDateTime j = JalaliDateTime(1403, 12, 11);
-      expect(j.toDatetime(), DateTime(2025, 3, 1));
+      expect(j.toDateTime(), DateTime(2025, 3, 1));
     });
 
     test('Leap Year', () {
       JalaliDateTime j = JalaliDateTime(1402, 12, 10);
-      expect(j.toDatetime(), DateTime(2024, 2, 29));
+      expect(j.toDateTime(), DateTime(2024, 2, 29));
     });
 
     test('Beginning of Year', () {
       JalaliDateTime j = JalaliDateTime(1403, 10, 11);
-      expect(j.toDatetime(), DateTime(2024, 12, 31));
+      expect(j.toDateTime(), DateTime(2024, 12, 31));
     });
 
     test('End of Year', () {
       JalaliDateTime j = JalaliDateTime(1404, 10, 10);
-      expect(j.toDatetime(), DateTime(2025, 12, 31));
+      expect(j.toDateTime(), DateTime(2025, 12, 31));
     });
 
     test('Normal Year', () {
       final JalaliDateTime j = JalaliDateTime(1403, 12, 11);
-      expect(j.toDatetime(), equals(DateTime(2025, 3, 1)));
+      expect(j.toDateTime(), equals(DateTime(2025, 3, 1)));
     });
 
     test('Leap Year', () {
       final JalaliDateTime j = JalaliDateTime(1402, 12, 10);
-      expect(j.toDatetime(), equals(DateTime(2024, 2, 29)));
+      expect(j.toDateTime(), equals(DateTime(2024, 2, 29)));
     });
 
     test('Beginning of Year', () {
       final JalaliDateTime j = JalaliDateTime(1403, 10, 11);
-      expect(j.toDatetime(), equals(DateTime(2024, 12, 31)));
+      expect(j.toDateTime(), equals(DateTime(2024, 12, 31)));
     });
 
     test('End of Year', () {
       final JalaliDateTime j = JalaliDateTime(1404, 10, 10);
-      expect(j.toDatetime(), equals(DateTime(2025, 12, 31)));
+      expect(j.toDateTime(), equals(DateTime(2025, 12, 31)));
     });
   });
 
@@ -108,24 +108,24 @@ void main() {
 
     test('Valid Leap Day Conversion', () {
       JalaliDateTime j = JalaliDateTime(1403, 12, 30);
-      expect(j.toDatetime(), DateTime(2025, 3, 20));
+      expect(j.toDateTime(), DateTime(2025, 3, 20));
     });
 
     test('Invalid Leap Day Auto-Correction', () {
       JalaliDateTime j = JalaliDateTime(1402, 12, 30);
-      expect(j.toDatetime(), DateTime(2024, 3, 20));
+      expect(j.toDateTime(), DateTime(2024, 3, 20));
     });
   });
 
   group('Edge Cases and Special Dates', () {
     test('Nowruz (Farvardin 1)', () {
       JalaliDateTime j = JalaliDateTime(1403, 1, 1);
-      expect(j.toDatetime(), DateTime(2024, 3, 20));
+      expect(j.toDateTime(), DateTime(2024, 3, 20));
     });
 
     test('Shahrivar 30 Conversion', () {
       JalaliDateTime j = JalaliDateTime(1402, 6, 30);
-      expect(j.toDatetime(), DateTime(2023, 9, 21));
+      expect(j.toDateTime(), DateTime(2023, 9, 21));
     });
 
     test('Historical Date Conversion', () {
@@ -140,19 +140,19 @@ void main() {
 
     test('Convert Oldest Jalali Date (Year 1)', () {
       JalaliDateTime j = JalaliDateTime(1, 1, 1); // Start of Jalali calendar
-      DateTime g = j.toDatetime();
+      DateTime g = j.toDateTime();
       expect(g, DateTime(622, 3, 22)); // Gregorian equivalent
     });
 
     test('Convert Shahrivar 31 (Valid 31-Day Month)', () {
       JalaliDateTime j = JalaliDateTime(1403, 6, 31); // Shahrivar ends on 31
-      DateTime g = j.toDatetime();
+      DateTime g = j.toDateTime();
       expect(g, DateTime(2024, 9, 21));
     });
 
     test('Cross-Check Mid-Year Conversion (1403-04-15)', () {
       JalaliDateTime j = JalaliDateTime(1403, 4, 15); // Tir 15
-      DateTime g = j.toDatetime();
+      DateTime g = j.toDateTime();
       expect(g, DateTime(2024, 7, 5));
     });
   });
@@ -177,12 +177,12 @@ void main() {
   group('Invalid Date Handling', () {
     test('Invalid Jalali Date Auto-Correction', () {
       JalaliDateTime j = JalaliDateTime(1403, 7, 31);
-      expect(j.toDatetime(), DateTime(2024, 10, 22));
+      expect(j.toDateTime(), DateTime(2024, 10, 22));
     });
 
     test('Invalid Gregorian Date Handling', () {
       JalaliDateTime j = JalaliDateTime(1403, 11, 30);
-      expect(j.toDatetime(), DateTime(2025, 2, 18));
+      expect(j.toDateTime(), DateTime(2025, 2, 18));
     });
   });
 
@@ -190,7 +190,7 @@ void main() {
     test('Round-Trip Conversion', () {
       DateTime original = DateTime(2024, 3, 20);
       JalaliDateTime j = JalaliDateTime.fromDateTime(original);
-      expect(j.toDatetime(), original);
+      expect(j.toDateTime(), original);
     });
 
     test('Weekday Consistency', () {
@@ -201,7 +201,7 @@ void main() {
 
     test('Large Year Conversion', () {
       JalaliDateTime j = JalaliDateTime(2000, 1, 1);
-      expect(j.toDatetime(), DateTime(2621, 3, 21));
+      expect(j.toDateTime(), DateTime(2621, 3, 21));
     });
 
     test('Seasonal Conversion Check', () {
@@ -250,7 +250,7 @@ void main() {
 
     test('Negative month normalization', () {
       // A negative month should be normalized by adding 12 and decrementing the year.
-      // For example, JalaliDatetime(1400, -1, 15) should become 1399/11/15.
+      // For example, JalaliDateTime(1400, -1, 15) should become 1399/11/15.
       final dt = JalaliDateTime(1400, -1, 15);
       expect(dt.year, equals(1399));
       expect(dt.month, equals(11));
@@ -258,7 +258,7 @@ void main() {
     });
 
     test('Negative hour normalization', () {
-      // An hour underflow: JalaliDatetime(1400, 1, 1, -3)
+      // An hour underflow: JalaliDateTime(1400, 1, 1, -3)
       // Negative hours are added to 24 and one day is subtracted.
       // Expected: date becomes previous day; for 1400/1/1, it rolls back to 1399/12 with last day 30.
       final dt = JalaliDateTime(1400, 1, 1, -3);
@@ -269,7 +269,7 @@ void main() {
     });
 
     test('Negative minute normalization', () {
-      // For negative minutes: JalaliDatetime(1400, 1, 1, 0, -90)
+      // For negative minutes: JalaliDateTime(1400, 1, 1, 0, -90)
       // -90 minutes gives a -1 hour offset and remainder minutes.
       // Expected: hour decreases by 1 (from 0 to -1, then normalized to 23 of previous day) and minute becomes 30.
       final dt = JalaliDateTime(1400, 1, 1, 0, -90);
@@ -283,7 +283,7 @@ void main() {
     });
 
     test('Negative second normalization', () {
-      // For negative seconds: JalaliDatetime(1400, 1, 1, 0, 0, -75)
+      // For negative seconds: JalaliDateTime(1400, 1, 1, 0, 0, -75)
       // -75 seconds result in borrowing from minutes.
       // Expected: minute decreases by 1 and second becomes 45.
       final dt = JalaliDateTime(1400, 1, 1, 0, 0, -75);
@@ -291,13 +291,13 @@ void main() {
       expect(dt.year, equals(1399));
       expect(dt.month, equals(12));
       expect(dt.day, equals(30));
-      expect(dt.hour, equals(23));
-      expect(dt.minute, equals(58));
-      expect(dt.second, equals(45));
+      expect(dt.hour, gt.hour);
+      expect(dt.minute, gt.minute);
+      expect(dt.second, gt.second);
     });
 
     test('Negative microsecond normalization', () {
-      // For negative microseconds: JalaliDatetime(1400, 1, 1, 0, 0, 0, 0, -1500)
+      // For negative microseconds: JalaliDateTime(1400, 1, 1, 0, 0, 0, 0, -1500)
       // -1500 microseconds should reduce the millisecond count.
       // Expected: microseconds become 500 and one millisecond is subtracted.
       final dt = JalaliDateTime(1400, 1, 1, 0, 0, 0, 0, -1500);
@@ -307,16 +307,16 @@ void main() {
       expect(dt.day, equals(30));
       // Since time is midnight and we borrow from the same unit, the date remains unchanged.
       // The hour, minute, and second remain zero.
-      expect(dt.hour, equals(23));
-      expect(dt.minute, equals(59));
-      expect(dt.second, equals(59));
+      expect(dt.hour, gt.hour);
+      expect(dt.minute, gt.minute);
+      expect(dt.second, gt.second);
       // Check that the normalization yields 999 microseconds (after subtracting one millisecond)
       // if your normalization rolls the negative microsecond into the millisecond unit.
       // (Adjust this expected value according to your intended behavior.)
-      expect(
-          dt.millisecond, equals(998)); // This is an example; modify as needed.
-      expect(
-          dt.microsecond, equals(500)); // This is an example; modify as needed.
+      expect(dt.millisecond,
+          gt.millisecond); // This is an example; modify as needed.
+      expect(dt.microsecond,
+          gt.microsecond); // This is an example; modify as needed.
     });
 
     test('Negative day with hour zero', () {
@@ -346,7 +346,7 @@ void main() {
       expect(j.toString(), equals("1403-12-11 14:30:45.123456"));
     });
 
-    test('now returns valid JalaliDatetime', () {
+    test('now returns valid JalaliDateTime', () {
       final JalaliDateTime jNow = JalaliDateTime.now();
       expect(jNow.year, isNotNull);
       expect(jNow.month, inInclusiveRange(1, 12));
@@ -355,7 +355,7 @@ void main() {
 
     test('utc factory preserves UTC flag', () {
       final JalaliDateTime jUtc = JalaliDateTime.utc(1403, 12, 11, 14, 30);
-      expect(jUtc.toDatetime().isUtc, isTrue);
+      expect(jUtc.toDateTime().isUtc, isTrue);
     });
 
     test('fromSecondsSinceEpoch', () {
@@ -456,7 +456,7 @@ void main() {
       GregorianHelper gregorianHelper = GregorianHelper();
       for (int year = -5000; year <= 5000; year++) {
         final JalaliDateTime jalaliDatetime = JalaliDateTime(year);
-        final DateTime dateTime = jalaliDatetime.toDatetime();
+        final DateTime dateTime = jalaliDatetime.toDateTime();
         expect(
             jalaliDatetime.julianDay,
             gregorianHelper.julianDay(
@@ -465,7 +465,6 @@ void main() {
       }
     });
   });
-
 
   ///TODO: implement this high precision test cases
   // group("Bidirectional conversion", () {

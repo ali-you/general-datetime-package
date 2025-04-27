@@ -1,7 +1,13 @@
+# Changelog
+
+## [1.2.0]
+- `JalaliDateTime` algorithm changed to Khayyam algorithm with high precision
+- Updated `README.md` and documentation
+
 ## [1.0.1]
 - New optimizations in interface and implementations
-- `HijriDatetime` implemented completely
-- Added robust and varied test cases for `HijriDatetime`
+- `HijriDateTime` implemented completely
+- Added robust and varied test cases for `HijriDateTime`
 - Updated `README.md` and documentation
 
 ## [0.1.2]
