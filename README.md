@@ -237,6 +237,7 @@ values in any date or time component are normalized by carrying into higher or l
 inputs like “month 13” or “day 0” correctly wrap into valid Jalali dates. This blend of astronomical
 anchoring, cycle-based leap determination, and normalization yields a calendar that keeps Nowruz (
 the spring equinox) synchronized with the real equinox with minimal drift over millennia.
+
 Read
 more: [Persian Calendar (EMP) paper](https://www.astro.uni.torun.pl/~kb/Papers/EMP/PersianC-EMP.htm)
 
