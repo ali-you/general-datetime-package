@@ -86,7 +86,7 @@ dates across multiple calendar systems. For example, you can work with the Jalal
 provided implementation:
 
 ```dart
-import 'package:general_datetime/general_date_time.dart';
+import 'package:general_datetime/general_datetime.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:

@@ -1,4 +1,4 @@
-import 'package:general_datetime/general_date_time.dart';
+import 'package:general_datetime/general_datetime.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:

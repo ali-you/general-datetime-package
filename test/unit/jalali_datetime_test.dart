@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:general_datetime/general_date_time.dart';
+import 'package:general_datetime/general_datetime.dart';
 import 'package:general_datetime/src/gregorian_helper.dart';
 
 void main() {
