@@ -1,3 +1,5 @@
+import 'package:general_datetime/general_datetime.dart';
+
 abstract class GeneralDateTimeInterface<T>
     implements Comparable<GeneralDateTimeInterface> {
   GeneralDateTimeInterface(
@@ -11,6 +13,25 @@ abstract class GeneralDateTimeInterface<T>
     this.microsecond = 0,
     this.isUtc = false,
   ]);
+
+  static GeneralDateTimeInterface now<T extends GeneralDateTimeInterface>(){
+    if (T == JalaliDateTime) return JalaliDateTime.now();
+    if (T == HijriDateTime) return HijriDateTime.now();
+
+    switch (T){
+      case JalaliDateTime _: return JalaliDateTime.now();
+      case HijriDateTime _: return HijriDateTime.now();
+    }
+    throw TypeError();
+  }
+
+  // static GeneralDateTimeInterface fromDateTime<T extends GeneralDateTimeInterface>(DateTime dateTime){
+  //   switch (T){
+  //     case JalaliDateTime _: return JalaliDateTime.fromDateTime(dateTime);
+  //     case HijriDateTime _: return HijriDateTime.fromDateTime(dateTime);
+  //   }
+  //   throw TypeError();
+  // }
 
   final int year;
   final int month;
