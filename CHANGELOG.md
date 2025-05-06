@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.2.1]
+- Added `GeneralDateTimeInterface.now<T>()` to access current time via the generic interface.
+- Updated `README.md` and documentation
+
 ## [1.2.0]
 - `JalaliDateTime` algorithm changed to Khayyam algorithm with high precision
 - Updated `README.md` and documentation

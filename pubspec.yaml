@@ -1,6 +1,6 @@
 name: general_datetime
 description: "general_datetime is an package to handle all calendars and dates. The powerful interface can make any custom calendars"
-version: 1.2.0
+version: 1.2.1
 homepage: https://github.com/ali-you
 repository: https://github.com/ali-you/general-datetime-package
 documentation: https://github.com/ali-you/general-datetime-package

@@ -119,66 +119,72 @@ void main() {
 
 ## API Overview
 
-1. [x] ### Factory Constructors
+- ### Factory Constructors
 
-  - `fromDateTime(DateTime datetime)`
-   Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
+    - `fromDateTime(DateTime datetime)`
+      Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
 
-  - `now()`
-    Returns the current date and time in the default calendar.
+    - `now()`
+      Returns the current date and time in the default calendar.
 
-  - `utc(...)`
-    Creates a UTC date with normalization.
+    - `utc(...)`
+      Creates a UTC date with normalization.
 
-  - `fromSecondsSinceEpoch(...)`
-    Creates an instance from Unix seconds.
+    - `fromSecondsSinceEpoch(...)`
+      Creates an instance from Unix seconds.
 
-  - `fromMillisecondsSinceEpoch(...)`
-    Creates an instance from Unix milliseconds.
+    - `fromMillisecondsSinceEpoch(...)`
+      Creates an instance from Unix milliseconds.
 
-  - `fromMicrosecondsSinceEpoch(...)`
-    Creates an instance from Unix microseconds.
+    - `fromMicrosecondsSinceEpoch(...)`
+      Creates an instance from Unix microseconds.
 
-  - `parse(String formattedString)` and `tryParse(String formattedString)`
-    Parse ISO-like formatted strings into a calendar date.
-2. [x] ### Core Properties
+    - `parse(String formattedString)` and `tryParse(String formattedString)`
+      Parse ISO-like formatted strings into a calendar date.
 
-  - **Date Components:**
-    `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `microsecond`
+- ### Core Properties
 
-  - **Time Zone Information:**
-    `timeZoneName` and `timeZoneOffset` behave similar to Flutter’s DateTime.
+    - **Date Components:**
+      `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `microsecond`
 
-  - `isLeapYear`
-    Returns true if the current year is a leap year in the current calendar system.
+    - **Time Zone Information:**
+      `timeZoneName` and `timeZoneOffset` behave similar to Flutter’s DateTime.
 
-  - `dayOfYear`
-    Returns the day of the year (1-based).
+    - `isLeapYear`
+      Returns true if the current year is a leap year in the current calendar system.
 
-  - `julianDay`
-    The calculated Julian day number for the date.
-3. [x] ### Arithmetic & Comparison
+    - `dayOfYear`
+      Returns the day of the year (1-based).
 
-  - **Arithmetic Methods:**
-    `add(Duration duration)`, `subtract(Duration duration)` Implemented independently (without relying
-    on native DateTime arithmetic).
+    - `julianDay`
+      The calculated Julian day number for the date.
 
-  - **Difference:**
-    `difference(dynamic other)` returns a Duration representing the difference between two dates.
+- ### Arithmetic & Comparison
 
-  - **Comparison:**
-    `compareTo(dynamic other)`, `isBefore`, `isAfter`, `isAtSameMomentAs` Compare calendar dates
-    across systems.
-4. [x] ### `GeneralDateTimeInterface.now<T>()`
+    - **Arithmetic Methods:**
+      `add(Duration duration)`, `subtract(Duration duration)` Implemented independently (without
+      relying
+      on native DateTime arithmetic).
 
-  - Creates a calendar-specific instance representing the current date and time.
-  This generic method allows you to get the current time in a specific calendar system, such as Jalali
-  or Hijri. It uses Dart’s runtime type comparison since generic types are not preserved at runtime.
-  
-  **Example**
-  ```dart
-      var nowJalali = GeneralDateTimeInterface.now<JalaliDateTime>();
-  ```
+    - **Difference:**
+      `difference(dynamic other)` returns a Duration representing the difference between two dates.
+
+    - **Comparison:**
+      `compareTo(dynamic other)`, `isBefore`, `isAfter`, `isAtSameMomentAs` Compare calendar dates
+      across systems.
+
+- ### `GeneralDateTimeInterface.now<T>()`
+
+    - Creates a calendar-specific instance representing the current date and time.
+      This generic method allows you to get the current time in a specific calendar system, such as
+      Jalali or Hijri. It uses Dart’s runtime type comparison since generic types are not preserved
+      at runtime.
+
+**Example**
+```dart
+  var nowJalali = GeneralDateTimeInterface.now<JalaliDateTime>();
+```
+
 > [!NOTE]
 > Throws a TypeError if an unsupported or unrecognized calendar type is provided.
 
