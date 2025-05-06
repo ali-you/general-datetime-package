@@ -119,7 +119,7 @@ void main() {
 
 ## API Overview
 
-- ### Factory Constructors
+1. [x] ### Factory Constructors
 
   - `fromDateTime(DateTime datetime)`
    Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
@@ -141,8 +141,7 @@ void main() {
 
   - `parse(String formattedString)` and `tryParse(String formattedString)`
     Parse ISO-like formatted strings into a calendar date.
-
-- ### Core Properties
+2. [x] ### Core Properties
 
   - **Date Components:**
     `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `microsecond`
@@ -158,8 +157,7 @@ void main() {
 
   - `julianDay`
     The calculated Julian day number for the date.
-
-- ### Arithmetic & Comparison
+3. [x] ### Arithmetic & Comparison
 
   - **Arithmetic Methods:**
     `add(Duration duration)`, `subtract(Duration duration)` Implemented independently (without relying
@@ -171,8 +169,7 @@ void main() {
   - **Comparison:**
     `compareTo(dynamic other)`, `isBefore`, `isAfter`, `isAtSameMomentAs` Compare calendar dates
     across systems.
-
-- ### `GeneralDateTimeInterface.now<T>()`
+4. [x] ### `GeneralDateTimeInterface.now<T>()`
 
   - Creates a calendar-specific instance representing the current date and time.
   This generic method allows you to get the current time in a specific calendar system, such as Jalali
@@ -182,8 +179,8 @@ void main() {
   ```dart
       var nowJalali = GeneralDateTimeInterface.now<JalaliDateTime>();
   ```
-  > [!NOTE]
-  > Throws a TypeError if an unsupported or unrecognized calendar type is provided.
+> [!NOTE]
+> Throws a TypeError if an unsupported or unrecognized calendar type is provided.
 
 ## Customization
 
