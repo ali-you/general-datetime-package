@@ -119,7 +119,7 @@ void main() {
 
 ## API Overview
 
-### Factory Constructors
+- ### Factory Constructors
 
 - `fromDateTime(DateTime datetime)`
   Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
@@ -142,7 +142,7 @@ void main() {
 - `parse(String formattedString)` and `tryParse(String formattedString)`
   Parse ISO-like formatted strings into a calendar date.
 
-### Core Properties
+- ### Core Properties
 
 - **Date Components:**
   `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `microsecond`
@@ -159,7 +159,7 @@ void main() {
 - `julianDay`
   The calculated Julian day number for the date.
 
-### Arithmetic & Comparison
+- ### Arithmetic & Comparison
 
 - **Arithmetic Methods:**
   `add(Duration duration)`, `subtract(Duration duration)` Implemented independently (without relying
@@ -172,7 +172,7 @@ void main() {
   `compareTo(dynamic other)`, `isBefore`, `isAfter`, `isAtSameMomentAs` Compare calendar dates
   across systems.
 
-### `GeneralDateTimeInterface.now<T>()`
+- ### `GeneralDateTimeInterface.now<T>()`
 
 Creates a calendar-specific instance representing the current date and time.
 This generic method allows you to get the current time in a specific calendar system, such as Jalali
