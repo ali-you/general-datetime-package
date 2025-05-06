@@ -5,7 +5,7 @@ void main() {
 
   group('Static Methods', () {
     test('Now Method', () {
-      print(GeneralDateTimeInterface.now<HijriDateTime>());
+      print(GeneralDateTimeInterface.now<JalaliDateTime>());
     });
   });
 

@@ -172,6 +172,19 @@ void main() {
   `compareTo(dynamic other)`, `isBefore`, `isAfter`, `isAtSameMomentAs` Compare calendar dates
   across systems.
 
+### `GeneralDateTimeInterface.now<T>()`
+
+Creates a calendar-specific instance representing the current date and time.
+This generic method allows you to get the current time in a specific calendar system, such as Jalali
+or Hijri. It uses Dart’s runtime type comparison since generic types are not preserved at runtime.
+
+**Example**
+```dart
+    var nowJalali = GeneralDateTimeInterface.now<JalaliDateTime>();
+```
+> [!NOTE]
+> Throws a TypeError if an unsupported or unrecognized calendar type is provided.
+
 ## Customization
 
 Since this plugin is based on a general date interface, you can extend its functionality to support
