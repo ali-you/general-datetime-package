@@ -30,13 +30,6 @@ Hijri (Umm Al-Qura Calendar), and other
 calendar systems—all while preserving time components and handling timezone, leap year, and negative
 value normalization gracefully.
 
-## Related Packages
-
-| Package | Description |
-|--------|-------------|
-| [![general_date_format](https://img.shields.io/pub/v/general_date_format.svg)](https://pub.dev/packages/general_date_format) [**general_date_format**](https://pub.dev/packages/general_date_format) | Date formatting for multiple calendar systems with localization support |
-
-
 ## Features
 
 - **Gregorian ↔ Other calendars:**
