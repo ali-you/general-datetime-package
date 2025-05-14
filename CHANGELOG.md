@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.2.2]
+- Updated `README.md` and documentation
+
 ## [1.2.1]
 - Added `GeneralDateTimeInterface.now<T>()` to access current time via the generic interface.
 - Updated `README.md` and documentation
