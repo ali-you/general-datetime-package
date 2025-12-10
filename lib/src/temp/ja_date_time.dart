@@ -30,7 +30,7 @@ import '../../general_datetime.dart';
 /// ### Calendar Notes:
 /// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
 /// with highly accurate leap year rules and month lengths.
-class JaDateTime extends DateTime{
+class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime> {
   /// Private constructor for raw inputs
   ///
 

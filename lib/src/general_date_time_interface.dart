@@ -1,4 +1,5 @@
 import 'package:general_datetime/general_datetime.dart';
+import 'package:general_datetime/src/temp/ja_date_time.dart';
 
 abstract class GeneralDateTimeInterface<T>
     implements Comparable<GeneralDateTimeInterface> {
@@ -157,28 +158,28 @@ abstract class GeneralDateTimeInterface<T>
   /// b.isBefore(native); // true or false depending on internal conversion
   /// ```
   /// Throws [ArgumentError] if [other] is not a [GeneralDateTimeInterface] or [DateTime].
-  bool isBefore(dynamic other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      return selfDate.isBefore(other.toDateTime());
-    }
-    if (other is DateTime) return selfDate.isBefore(other);
-    throw ArgumentError(
-        'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
-  // bool isBefore(DateTime other) {
+  // bool isBefore(dynamic other) {
   //   final DateTime selfDate = toDateTime();
-  //   if (other is JaDateTime) {
+  //   if (other is GeneralDateTimeInterface) {
   //     return selfDate.isBefore(other.toDateTime());
   //   }
-  //   // if (other is GeneralDateTimeInterface) {
-  //   //   return selfDate.isBefore(other.toDateTime());
-  //   // }
-  //   // if (other is DateTime) return selfDate.isBefore(other);
+  //   if (other is DateTime) return selfDate.isBefore(other);
   //   throw ArgumentError(
   //       'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
   // }
+
+  bool isBefore(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is JaDateTime) {
+      return selfDate.isBefore(other.toDateTime());
+    }
+    // if (other is GeneralDateTimeInterface) {
+    //   return selfDate.isBefore(other.toDateTime());
+    // }
+    // if (other is DateTime) return selfDate.isBefore(other);
+    throw ArgumentError(
+        'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
+  }
 
   /// Checks whether this dateTime occurs after another.
   /// Compares this instance with [other], which can be either:
