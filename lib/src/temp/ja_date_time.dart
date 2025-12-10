@@ -1,6 +1,8 @@
 import 'package:general_datetime/src/constants.dart';
 import 'package:general_datetime/src/gregorian_helper.dart';
 
+import '../../general_datetime.dart';
+
 /// Represents a date and time in the **Jalali (Persian/Iranian)** calendar system.
 ///
 /// This class provides conversion between Gregorian and Jalali dates,
@@ -555,6 +557,14 @@ class JaDateTime extends DateTime{
     if ((jump % 33) == 4 && jump - fromBreak == 4) leapCount++;
     return _CycleStats(leapCount: leapCount, lastBreak: lastBreak, jump: jump);
   }
+
+  @override
+  // TODO: implement secondsSinceEpoch
+  int get secondsSinceEpoch => throw UnimplementedError();
+
+  @override
+  // TODO: implement time
+  Duration get time => throw UnimplementedError();
 }
 
 /// Helper private class to return results from cycle calculation

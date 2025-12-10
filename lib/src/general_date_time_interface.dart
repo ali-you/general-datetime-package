@@ -167,6 +167,19 @@ abstract class GeneralDateTimeInterface<T>
         'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
   }
 
+  // bool isBefore(DateTime other) {
+  //   final DateTime selfDate = toDateTime();
+  //   if (other is JaDateTime) {
+  //     return selfDate.isBefore(other.toDateTime());
+  //   }
+  //   // if (other is GeneralDateTimeInterface) {
+  //   //   return selfDate.isBefore(other.toDateTime());
+  //   // }
+  //   // if (other is DateTime) return selfDate.isBefore(other);
+  //   throw ArgumentError(
+  //       'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
+  // }
+
   /// Checks whether this dateTime occurs after another.
   /// Compares this instance with [other], which can be either:
   /// - An object implementing [GeneralDateTimeInterface], or
