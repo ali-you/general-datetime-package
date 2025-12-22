@@ -1,4 +1,5 @@
 import 'package:general_datetime/src/constants.dart';
+import 'package:general_datetime/src/general_date_time_interface_2.dart';
 import 'package:general_datetime/src/gregorian_helper.dart';
 
 import '../../general_datetime.dart';
@@ -30,7 +31,7 @@ import '../../general_datetime.dart';
 /// ### Calendar Notes:
 /// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
 /// with highly accurate leap year rules and month lengths.
-class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime> {
+class JaDateTime extends DateTime implements GeneralDateTimeInterface2<JaDateTime> {
   /// Private constructor for raw inputs
   ///
 
@@ -50,11 +51,11 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
   final int millisecond;
   @override
   final int microsecond;
-  @override
-  final bool isUtc;
+
+  final bool _isUtc;
 
 
-  JaDateTime._raw(
+  JaDateTime._internal(
       this.year, [
         this.month = 1,
         this.day = 1,
@@ -63,8 +64,8 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
         this.second = 0,
         this.millisecond = 0,
         this.microsecond = 0,
-        this.isUtc = false,
-      ]) : super(year, month, day, hour, minute, second, millisecond, microsecond);
+        bool isUtc = false,
+      ]) : _isUtc = isUtc, super(year, month, day, hour, minute, second, millisecond, microsecond);
 
 
   final List<int> _breaks = [
@@ -102,7 +103,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
         int millisecond = 0,
         int microsecond = 0,
       ]) {
-    return JaDateTime._raw(
+    return JaDateTime._internal(
       year,
       month,
       day,
@@ -116,7 +117,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
 
   /// Factory constructor for converting from DateTime
   factory JaDateTime.fromDateTime(DateTime dateTime) {
-    return JaDateTime._raw(
+    return JaDateTime._internal(
       dateTime.year,
       dateTime.month,
       dateTime.day,
@@ -152,7 +153,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
         int millisecond = 0,
         int microsecond = 0,
       ]) =>
-      JaDateTime._raw(
+      JaDateTime._internal(
         year,
         month,
         day,
@@ -240,7 +241,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
         }
       }
 
-      return JaDateTime._raw(
+      return JaDateTime._internal(
         year,
         month,
         day,
@@ -342,7 +343,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
     int monthG = m + 3 - 12 * floorDiv(m, 10);
     int yearG = 100 * b + d - 4800 + floorDiv(m, 10);
 
-    if (isUtc) {
+    if (_isUtc) {
       return DateTime.utc(
           yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
     }
@@ -375,7 +376,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
   /// Convert to local time
   @override
   JaDateTime toLocal() {
-    if (!isUtc) return this;
+    if (!_isUtc) return this;
     final localDt = toDateTime().toLocal();
     return JaDateTime.fromDateTime(localDt);
   }
@@ -383,7 +384,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
   /// Convert to UTC time
   @override
   JaDateTime toUtc() {
-    if (isUtc) return this;
+    if (_isUtc) return this;
     final utcDt = toDateTime().toUtc();
     return JaDateTime.fromDateTime(utcDt);
   }
@@ -399,8 +400,8 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
       if (k <= 185) {
         final int jm = 1 + (k ~/ 31);
         final int jd = (k % 31) + 1;
-        return JaDateTime._raw(
-            jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
+        return JaDateTime._internal(
+            jy, jm, jd, hour, minute, second, millisecond, microsecond, _isUtc);
       } else {
         k -= 186;
       }
@@ -411,8 +412,8 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
     }
     final int jm = 7 + (k ~/ 30);
     final int jd = (k % 30) + 1;
-    return JaDateTime._raw(
-        jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
+    return JaDateTime._internal(
+        jy, jm, jd, hour, minute, second, millisecond, microsecond, _isUtc);
   }
 
   /// Normalize values (overflow handling)
@@ -480,7 +481,7 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
       m -= 12;
       y += 1;
     }
-    return JaDateTime._raw(y, m, d, h, min, s, ms, us, isUtc);
+    return JaDateTime._internal(y, m, d, h, min, s, ms, us, _isUtc);
   }
 
   /// Helper method to get month length
@@ -563,8 +564,49 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface<JaDateTime
   int get secondsSinceEpoch => throw UnimplementedError();
 
   @override
-  // TODO: implement time
-  Duration get time => throw UnimplementedError();
+  String toString() {
+    String y = _fourDigits(year);
+    String m = _twoDigits(month);
+    String d = _twoDigits(day);
+    String h = _twoDigits(hour);
+    String min = _twoDigits(minute);
+    String sec = _twoDigits(second);
+    String ms = _threeDigits(millisecond);
+    String us = microsecond == 0 ? "" : _threeDigits(microsecond);
+    if (_isUtc) {
+      return "$y-$m-$d $h:$min:$sec.$ms${us}Z";
+    } else {
+      return "$y-$m-$d $h:$min:$sec.$ms$us";
+    }
+  }
+
+  String _twoDigits(int n) {
+    if (n >= 10) return "$n";
+    return "0$n";
+  }
+
+  String _threeDigits(int n) {
+    if (n >= 100) return "$n";
+    if (n >= 10) return "0$n";
+    return "00$n";
+  }
+
+  String _fourDigits(int n) {
+    int absN = n.abs();
+    String sign = n < 0 ? "-" : "";
+    if (absN >= 1000) return "$n";
+    if (absN >= 100) return "${sign}0$absN";
+    if (absN >= 10) return "${sign}00$absN";
+    return "${sign}000$absN";
+  }
+
+  String _sixDigits(int n) {
+    assert(n < -9999 || n > 9999);
+    int absN = n.abs();
+    String sign = n < 0 ? "-" : "+";
+    if (absN >= 100000) return "$sign$absN";
+    return "${sign}0$absN";
+  }
 }
 
 /// Helper private class to return results from cycle calculation
