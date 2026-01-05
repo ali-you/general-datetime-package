@@ -2,8 +2,6 @@ import 'package:general_datetime/general_datetime.dart';
 import 'package:general_datetime/src/temp/ja_date_time.dart';
 
 abstract class GeneralDateTimeInterface2<T> {
-
-
   static GeneralDateTimeInterface2 now<T extends GeneralDateTimeInterface2>() {
     // if (T == JalaliDateTime) return JalaliDateTime.now();
     // if (T == HijriDateTime) return HijriDateTime.now();

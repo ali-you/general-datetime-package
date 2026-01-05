@@ -12,10 +12,12 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
   JaDateTime now() => JaDateTime.now();
 
   @override
-  JaDateTime dateOnly(JaDateTime date) => JaDateTime(date.year, date.month, date.day);
+  JaDateTime dateOnly(JaDateTime date) =>
+      JaDateTime(date.year, date.month, date.day);
 
   @override
-  int monthDelta(JaDateTime startDate, JaDateTime endDate) => (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  int monthDelta(JaDateTime startDate, JaDateTime endDate) =>
+      (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
 
   @override
   JaDateTime addMonthsToMonthDate(JaDateTime monthDate, int monthsToAdd) {
@@ -58,7 +60,8 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
   JaDateTime getMonth(int year, int month) => JaDateTime(year, month);
 
   @override
-  JaDateTime getDay(int year, int month, int day) => JaDateTime(year, month, day);
+  JaDateTime getDay(int year, int month, int day) =>
+      JaDateTime(year, month, day);
 
   @override
   String formatMonthYear(JaDateTime date, MaterialLocalizations localizations) {
@@ -67,13 +70,15 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
   }
 
   @override
-  String formatMediumDate(JaDateTime date, MaterialLocalizations localizations) {
+  String formatMediumDate(
+      JaDateTime date, MaterialLocalizations localizations) {
     // return GeneralDateFormat.MMMMEEEEd().format(JalaliDateTime(date.year, date.month, date.day));
     return localizations.formatMediumDate(date);
   }
 
   @override
-  String formatShortMonthDay(DateTime date, MaterialLocalizations localizations) {
+  String formatShortMonthDay(
+      DateTime date, MaterialLocalizations localizations) {
     return localizations.formatShortMonthDay(date);
   }
 
@@ -93,7 +98,8 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
   }
 
   @override
-  JaDateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
+  JaDateTime? parseCompactDate(
+      String? inputString, MaterialLocalizations localizations) {
     return JaDateTime(1400);
     // return localizations.parseCompactDate(inputString);
   }

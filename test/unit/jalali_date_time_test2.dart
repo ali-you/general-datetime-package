@@ -26,26 +26,22 @@ void main() {
     });
 
     test('Normal Year Conversion', () {
-      final JaDateTime j =
-          JaDateTime.fromDateTime(DateTime(2025, 3, 1));
+      final JaDateTime j = JaDateTime.fromDateTime(DateTime(2025, 3, 1));
       expect(j.toString(), equals("1403-12-11 00:00:00.000"));
     });
 
     test('Leap Year Conversion', () {
-      final JaDateTime j =
-          JaDateTime.fromDateTime(DateTime(2024, 2, 29));
+      final JaDateTime j = JaDateTime.fromDateTime(DateTime(2024, 2, 29));
       expect(j.toString(), equals("1402-12-10 00:00:00.000"));
     });
 
     test('Beginning of Year Conversion', () {
-      final JaDateTime j =
-          JaDateTime.fromDateTime(DateTime(2025, 1, 1));
+      final JaDateTime j = JaDateTime.fromDateTime(DateTime(2025, 1, 1));
       expect(j.toString(), equals("1403-10-12 00:00:00.000"));
     });
 
     test('End of Year Conversion', () {
-      final JaDateTime j =
-          JaDateTime.fromDateTime(DateTime(2025, 12, 31));
+      final JaDateTime j = JaDateTime.fromDateTime(DateTime(2025, 12, 31));
       expect(j.toString(), equals("1404-10-10 00:00:00.000"));
     });
 
@@ -146,7 +142,7 @@ void main() {
     });
 
     test('Convert Shahrivar 31 (Valid 31-Day Month)', () {
-      JaDateTime j = JaDateTime.utc(1403, 6, 31); // Shahrivar ends on 31
+      JaDateTime j = JaDateTime(1403, 6, 31); // Shahrivar ends on 31
       DateTime g = j.toDateTime();
       expect(g, DateTime(2024, 9, 21));
     });
@@ -367,8 +363,7 @@ void main() {
     });
 
     test('fromMillisecondsSinceEpoch', () {
-      final JaDateTime j =
-          JaDateTime.fromMillisecondsSinceEpoch(1722782031520);
+      final JaDateTime j = JaDateTime.fromMillisecondsSinceEpoch(1722782031520);
       expect(j.year, isNotNull);
     });
 

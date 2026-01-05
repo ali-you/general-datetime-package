@@ -31,9 +31,32 @@ import '../../general_datetime.dart';
 /// ### Calendar Notes:
 /// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
 /// with highly accurate leap year rules and month lengths.
-class JaDateTime extends DateTime implements GeneralDateTimeInterface2<JaDateTime> {
-  /// Private constructor for raw inputs
-  ///
+class JaDateTime extends DateTime
+    implements GeneralDateTimeInterface2<JaDateTime> {
+  // Weekday constants that are returned by [weekday] method:
+  static const int monday = 1;
+  static const int tuesday = 2;
+  static const int wednesday = 3;
+  static const int thursday = 4;
+  static const int friday = 5;
+  static const int saturday = 6;
+  static const int sunday = 7;
+  static const int daysPerWeek = 7;
+
+  // Month constants that are returned by the [month] getter.
+  static const int farvardin = 1;
+  static const int ordibehesht = 2;
+  static const int khordad = 3;
+  static const int tir = 4;
+  static const int mordad = 5;
+  static const int shahrivar = 6;
+  static const int mehr = 7;
+  static const int aban = 8;
+  static const int azar = 9;
+  static const int dey = 10;
+  static const int bahman = 11;
+  static const int esfand = 12;
+  static const int monthsPerYear = 12;
 
   @override
   final int year;
@@ -52,21 +75,21 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface2<JaDateTim
   @override
   final int microsecond;
 
+  /// Private constructor for raw inputs
   final bool _isUtc;
 
-
   JaDateTime._internal(
-      this.year, [
-        this.month = 1,
-        this.day = 1,
-        this.hour = 0,
-        this.minute = 0,
-        this.second = 0,
-        this.millisecond = 0,
-        this.microsecond = 0,
-        bool isUtc = false,
-      ]) : _isUtc = isUtc, super(year, month, day, hour, minute, second, millisecond, microsecond);
-
+    this.year, [
+    this.month = 1,
+    this.day = 1,
+    this.hour = 0,
+    this.minute = 0,
+    this.second = 0,
+    this.millisecond = 0,
+    this.microsecond = 0,
+    bool isUtc = false,
+  ])  : _isUtc = isUtc,
+        super(year, month, day, hour, minute, second, millisecond, microsecond);
 
   final List<int> _breaks = [
     -61,
@@ -94,15 +117,15 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface2<JaDateTim
   /// Start: Factories section
   /// Factory constructor with normalization
   factory JaDateTime(
-      int year, [
-        int month = 1,
-        int day = 1,
-        int hour = 0,
-        int minute = 0,
-        int second = 0,
-        int millisecond = 0,
-        int microsecond = 0,
-      ]) {
+    int year, [
+    int month = 1,
+    int day = 1,
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
+  ]) {
     return JaDateTime._internal(
       year,
       month,
@@ -144,15 +167,15 @@ class JaDateTime extends DateTime implements GeneralDateTimeInterface2<JaDateTim
 
   /// Factory constructor in UTC with normalization
   factory JaDateTime.utc(
-      int year, [
-        int month = 1,
-        int day = 1,
-        int hour = 0,
-        int minute = 0,
-        int second = 0,
-        int millisecond = 0,
-        int microsecond = 0,
-      ]) =>
+    int year, [
+    int month = 1,
+    int day = 1,
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
+  ]) =>
       JaDateTime._internal(
         year,
         month,
