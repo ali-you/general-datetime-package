@@ -46,15 +46,9 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
     return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
   }
 
-  /// {@macro flutter.material.date.getDaysInMonth}
   @override
-  int getDaysInMonth(int year, int month) {
-    print("getDaysInMonth");
-    print(year);
-    print(month);
-    print(JaDateTime(year, month).monthLength);
-    return JaDateTime(year, month).monthLength;
-  }
+  int getDaysInMonth(int year, int month) =>
+      JaDateTime(year, month).monthLength;
 
   @override
   JaDateTime getMonth(int year, int month) => JaDateTime(year, month);
@@ -65,14 +59,12 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
 
   @override
   String formatMonthYear(JaDateTime date, MaterialLocalizations localizations) {
-    // return GeneralDateFormat.yMMMM().format(JalaliDateTime(date.year, date.month));
     return localizations.formatMonthYear(date);
   }
 
   @override
   String formatMediumDate(
       JaDateTime date, MaterialLocalizations localizations) {
-    // return GeneralDateFormat.MMMMEEEEd().format(JalaliDateTime(date.year, date.month, date.day));
     return localizations.formatMediumDate(date);
   }
 

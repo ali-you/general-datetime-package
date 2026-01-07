@@ -12,7 +12,7 @@ class _JalaliMaterialLocalizationsDelegate
 
   @override
   Future<MaterialLocalizations> load(Locale locale) =>
-      DefaultMaterialLocalizations.load(locale);
+      DefaultJalaliMaterialLocalizations.load(locale);
 
   @override
   bool shouldReload(_JalaliMaterialLocalizationsDelegate old) => false;
@@ -21,13 +21,13 @@ class _JalaliMaterialLocalizationsDelegate
   String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
 }
 
-class DefaultMaterialLocalizations implements MaterialLocalizations {
+class DefaultJalaliMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
   /// for US English (only).
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  const DefaultMaterialLocalizations();
+  const DefaultJalaliMaterialLocalizations();
 
   // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _shortWeekdays = <String>[
@@ -199,7 +199,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   DateTime? parseCompactDate(String? inputString) {
     if (inputString == null) return null;
 
-    // Assumes US dd/mm/yyyy format
+    // Assumes Iran dd/mm/yyyy format
     final List<String> inputParts = inputString.split('/');
     if (inputParts.length != 3) return null;
 
@@ -313,9 +313,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatDecimal(int number) {
-    if (number > -1000 && number < 1000) {
-      return number.toString();
-    }
+    if (number > -1000 && number < 1000) return number.toString();
 
     final String digits = number.abs().toString();
     final StringBuffer result = StringBuffer(number < 0 ? '-' : '');
@@ -607,10 +605,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
     return SynchronousFuture<MaterialLocalizations>(
-        const DefaultMaterialLocalizations());
+        const DefaultJalaliMaterialLocalizations());
   }
 
-  /// A [LocalizationsDelegate] that uses [DefaultMaterialLocalizations.load]
+  /// A [LocalizationsDelegate] that uses [DefaultJalaliMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].

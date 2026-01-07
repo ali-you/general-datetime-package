@@ -297,11 +297,11 @@ class JaDateTime extends DateTime
   @override
   String get name => "Jalali";
 
-  /// Calculate weekday (0=Saturday, 6=Friday)
+  /// Calculate weekday (1=Monday, 7=Saturday) according to DateTime
   @override
   int get weekday {
     DateTime gd = toDateTime();
-    return (gd.weekday) % 7;
+    return gd.weekday;
   }
 
   /// Get days in the current month
