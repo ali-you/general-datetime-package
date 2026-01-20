@@ -76,7 +76,7 @@ class JaDateTime extends DateTime
   final int microsecond;
 
   /// Private constructor for raw inputs
-  final bool _isUtc;
+  // final bool _isUtc;
 
   JaDateTime._internal(
     this.year, [
@@ -87,9 +87,38 @@ class JaDateTime extends DateTime
     this.second = 0,
     this.millisecond = 0,
     this.microsecond = 0,
+  ]) : super(year, month, day, hour, minute, second, millisecond, microsecond);
+
+  JaDateTime._internalUtc(
+    this.year, [
+    this.month = 1,
+    this.day = 1,
+    this.hour = 0,
+    this.minute = 0,
+    this.second = 0,
+    this.millisecond = 0,
+    this.microsecond = 0,
+  ]) : super.utc(
+            year, month, day, hour, minute, second, millisecond, microsecond);
+
+  factory JaDateTime._resolve(
+    int year, [
+    int month = 1,
+    int day = 1,
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
     bool isUtc = false,
-  ])  : _isUtc = isUtc,
-        super(year, month, day, hour, minute, second, millisecond, microsecond);
+  ]) {
+    if (isUtc) {
+      return JaDateTime._internalUtc(
+          year, month, day, hour, minute, second, millisecond, microsecond);
+    }
+    return JaDateTime._internal(
+        year, month, day, hour, minute, second, millisecond, microsecond);
+  }
 
   final List<int> _breaks = [
     -61,
@@ -140,7 +169,7 @@ class JaDateTime extends DateTime
 
   /// Factory constructor for converting from DateTime
   factory JaDateTime.fromDateTime(DateTime dateTime) {
-    return JaDateTime._internal(
+    return JaDateTime._resolve(
       dateTime.year,
       dateTime.month,
       dateTime.day,
@@ -176,17 +205,9 @@ class JaDateTime extends DateTime
     int millisecond = 0,
     int microsecond = 0,
   ]) =>
-      JaDateTime._internal(
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        true,
-      )._normalize();
+      JaDateTime._internalUtc(
+              year, month, day, hour, minute, second, millisecond, microsecond)
+          ._normalize();
 
   factory JaDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
       {bool isUtc = false}) {
@@ -264,7 +285,7 @@ class JaDateTime extends DateTime
         }
       }
 
-      return JaDateTime._internal(
+      return JaDateTime._resolve(
         year,
         month,
         day,
@@ -366,7 +387,7 @@ class JaDateTime extends DateTime
     int monthG = m + 3 - 12 * floorDiv(m, 10);
     int yearG = 100 * b + d - 4800 + floorDiv(m, 10);
 
-    if (_isUtc) {
+    if (isUtc) {
       return DateTime.utc(
           yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
     }
@@ -399,7 +420,7 @@ class JaDateTime extends DateTime
   /// Convert to local time
   @override
   JaDateTime toLocal() {
-    if (!_isUtc) return this;
+    if (!isUtc) return this;
     final localDt = toDateTime().toLocal();
     return JaDateTime.fromDateTime(localDt);
   }
@@ -407,7 +428,7 @@ class JaDateTime extends DateTime
   /// Convert to UTC time
   @override
   JaDateTime toUtc() {
-    if (_isUtc) return this;
+    if (isUtc) return this;
     final utcDt = toDateTime().toUtc();
     return JaDateTime.fromDateTime(utcDt);
   }
@@ -423,8 +444,9 @@ class JaDateTime extends DateTime
       if (k <= 185) {
         final int jm = 1 + (k ~/ 31);
         final int jd = (k % 31) + 1;
-        return JaDateTime._internal(
-            jy, jm, jd, hour, minute, second, millisecond, microsecond, _isUtc);
+
+        return JaDateTime._resolve(
+            jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
       } else {
         k -= 186;
       }
@@ -435,8 +457,8 @@ class JaDateTime extends DateTime
     }
     final int jm = 7 + (k ~/ 30);
     final int jd = (k % 30) + 1;
-    return JaDateTime._internal(
-        jy, jm, jd, hour, minute, second, millisecond, microsecond, _isUtc);
+    return JaDateTime._resolve(
+        jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
   }
 
   /// Normalize values (overflow handling)
@@ -504,7 +526,7 @@ class JaDateTime extends DateTime
       m -= 12;
       y += 1;
     }
-    return JaDateTime._internal(y, m, d, h, min, s, ms, us, _isUtc);
+    return JaDateTime._resolve(y, m, d, h, min, s, ms, us, isUtc);
   }
 
   /// Helper method to get month length
@@ -586,22 +608,22 @@ class JaDateTime extends DateTime
   // TODO: implement secondsSinceEpoch
   int get secondsSinceEpoch => throw UnimplementedError();
 
-  @override
-  String toString() {
-    String y = _fourDigits(year);
-    String m = _twoDigits(month);
-    String d = _twoDigits(day);
-    String h = _twoDigits(hour);
-    String min = _twoDigits(minute);
-    String sec = _twoDigits(second);
-    String ms = _threeDigits(millisecond);
-    String us = microsecond == 0 ? "" : _threeDigits(microsecond);
-    if (_isUtc) {
-      return "$y-$m-$d $h:$min:$sec.$ms${us}Z";
-    } else {
-      return "$y-$m-$d $h:$min:$sec.$ms$us";
-    }
-  }
+  // @override
+  // String toString() {
+  //   String y = _fourDigits(year);
+  //   String m = _twoDigits(month);
+  //   String d = _twoDigits(day);
+  //   String h = _twoDigits(hour);
+  //   String min = _twoDigits(minute);
+  //   String sec = _twoDigits(second);
+  //   String ms = _threeDigits(millisecond);
+  //   String us = microsecond == 0 ? "" : _threeDigits(microsecond);
+  //   if (_isUtc) {
+  //     return "$y-$m-$d $h:$min:$sec.$ms${us}Z";
+  //   } else {
+  //     return "$y-$m-$d $h:$min:$sec.$ms$us";
+  //   }
+  // }
 
   String _twoDigits(int n) {
     if (n >= 10) return "$n";

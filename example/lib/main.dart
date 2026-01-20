@@ -8,7 +8,8 @@ import 'package:general_datetime/src/localizations/default_jalali_material_local
 void main() {
   // Create a Gregorian date and convert it to Jalali:
   JalaliDateTime jDate = JalaliDateTime.fromDateTime(DateTime(2025, 3, 1));
-  print('Converted to Jalali: ${jDate.toString()}'); // e.g. "1403-12-11 00:00:00.000"
+  print(
+      'Converted to Jalali: ${jDate.toString()}'); // e.g. "1403-12-11 00:00:00.000"
 
   // Create a Jalali date directly (auto-normalization applies):
   JalaliDateTime directDate = JalaliDateTime(1403, 12, 11, 14, 30);
@@ -41,13 +42,11 @@ class AppStartup extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       localizationsDelegates: [
-
         DefaultJalaliMaterialLocalizations.delegate
 
         // GlobalMaterialLocalizations.delegate,
         // GlobalWidgetsLocalizations.delegate,
         // GlobalCupertinoLocalizations.delegate,
-
       ],
       locale: Locale('en'),
       supportedLocales: [Locale('en'), Locale('fa')],
@@ -63,11 +62,8 @@ class AppStartup extends StatelessWidget {
                 firstDate: DateTime(1400, 1, 1),
                 lastDate: DateTime(2500, 12, 31),
                 currentDate: DateTime.now(),
-                onDateChanged: (value) {
-          
-                },
+                onDateChanged: (value) {},
               ),
-          
               CalendarDatePicker(
                 initialDate: JaDateTime.now(),
                 firstDate: JaDateTime(1400, 1, 1),
