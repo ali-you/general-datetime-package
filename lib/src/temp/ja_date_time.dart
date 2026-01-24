@@ -608,50 +608,6 @@ class JaDateTime extends DateTime
   // TODO: implement secondsSinceEpoch
   int get secondsSinceEpoch => throw UnimplementedError();
 
-  // @override
-  // String toString() {
-  //   String y = _fourDigits(year);
-  //   String m = _twoDigits(month);
-  //   String d = _twoDigits(day);
-  //   String h = _twoDigits(hour);
-  //   String min = _twoDigits(minute);
-  //   String sec = _twoDigits(second);
-  //   String ms = _threeDigits(millisecond);
-  //   String us = microsecond == 0 ? "" : _threeDigits(microsecond);
-  //   if (_isUtc) {
-  //     return "$y-$m-$d $h:$min:$sec.$ms${us}Z";
-  //   } else {
-  //     return "$y-$m-$d $h:$min:$sec.$ms$us";
-  //   }
-  // }
-
-  String _twoDigits(int n) {
-    if (n >= 10) return "$n";
-    return "0$n";
-  }
-
-  String _threeDigits(int n) {
-    if (n >= 100) return "$n";
-    if (n >= 10) return "0$n";
-    return "00$n";
-  }
-
-  String _fourDigits(int n) {
-    int absN = n.abs();
-    String sign = n < 0 ? "-" : "";
-    if (absN >= 1000) return "$n";
-    if (absN >= 100) return "${sign}0$absN";
-    if (absN >= 10) return "${sign}00$absN";
-    return "${sign}000$absN";
-  }
-
-  String _sixDigits(int n) {
-    assert(n < -9999 || n > 9999);
-    int absN = n.abs();
-    String sign = n < 0 ? "-" : "+";
-    if (absN >= 100000) return "$sign$absN";
-    return "${sign}0$absN";
-  }
 }
 
 /// Helper private class to return results from cycle calculation
