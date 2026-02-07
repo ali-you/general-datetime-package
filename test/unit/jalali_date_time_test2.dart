@@ -462,6 +462,69 @@ void main() {
     });
   });
 
+  group('JaDateTime Critical Comparisons', () {
+    test('Same exact moment', () {
+      final JaDateTime a = JaDateTime(1402, 1, 1, 0, 0, 0);
+      final JaDateTime b = JaDateTime.fromDateTime(a.toDateTime());
+
+      expect(a.compareTo(b), 0);
+      expect(a.isAtSameMomentAs(b), true);
+      expect(a.isBefore(b), false);
+      expect(a.isAfter(b), false);
+    });
+
+    test('One millisecond before', () {
+      final JaDateTime a = JaDateTime(1402, 1, 1, 0, 0, 0, 0);
+      final JaDateTime b = JaDateTime.fromDateTime(
+        a.toDateTime().add(const Duration(milliseconds: 1)),
+      );
+
+      expect(a.compareTo(b) < 0, true);
+      expect(a.isBefore(b), true);
+      expect(a.isAfter(b), false);
+      expect(a.isAtSameMomentAs(b), false);
+    });
+
+    test('One millisecond after', () {
+      final JaDateTime a = JaDateTime(1402, 1, 1, 0, 0, 0, 1);
+      final JaDateTime b = JaDateTime(1402, 1, 1, 0, 0, 0, 0);
+
+      expect(a.compareTo(b) > 0, true);
+      expect(a.isAfter(b), true);
+      expect(a.isBefore(b), false);
+    });
+
+    test('Same day, different time', () {
+      final JaDateTime morning =
+      JaDateTime(1402, 5, 10, 8, 0, 0);
+      final JaDateTime evening =
+      JaDateTime(1402, 5, 10, 20, 0, 0);
+
+      expect(morning.isBefore(evening), true);
+      expect(evening.isAfter(morning), true);
+    });
+
+    test('Different month boundary', () {
+      final JaDateTime endOfMonth =
+      JaDateTime(1402, 6, 31, 23, 59, 59);
+      final JaDateTime startNextMonth =
+      JaDateTime(1402, 7, 1, 0, 0, 0);
+
+      expect(endOfMonth.isBefore(startNextMonth), true);
+    });
+
+    test('Negative year comparison', () {
+      final JaDateTime ancient =
+      JaDateTime(-1000, 1, 1);
+      final JaDateTime modern =
+      JaDateTime(1, 1, 1);
+
+      expect(ancient.isBefore(modern), true);
+      expect(modern.isAfter(ancient), true);
+    });
+  });
+
+
   ///TODO: implement this high precision test cases
   // group("Bidirectional conversion", () {
   //   test("Check DateTime/JaDateTime in a Row From 1,1,1 Jalali", () {
