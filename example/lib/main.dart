@@ -1,9 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:general_datetime/general_datetime.dart';
 import 'package:general_datetime/src/temp/ja_date_time.dart';
-import 'package:general_datetime/src/temp/jalali_delegate.dart';
-import 'package:general_datetime/src/localizations/default_jalali_material_localizations.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:
@@ -62,6 +59,7 @@ class AppStartup extends StatelessWidget {
                 firstDate: DateTime(1400, 1, 1),
                 lastDate: DateTime(2500, 12, 31),
                 currentDate: DateTime.now(),
+                calendarDelegate: GregorianCalendarDelegate(),
                 onDateChanged: (value) {},
               ),
               CalendarDatePicker(
@@ -76,7 +74,7 @@ class AppStartup extends StatelessWidget {
                   print(jDate.toDateTime());
                 },
                 calendarDelegate: JalaliDelegate(),
-              )
+              ),
             ],
           ),
         ),

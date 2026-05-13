@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:general_date_format/general_date_format.dart';
-import 'package:general_datetime/general_datetime.dart';
-import 'package:ui_kit/widgets/calendar/ja_date_time.dart';
 
-class JalaliDelegate extends CalendarDelegate<JaDateTime> {
+import '../temp/ja_date_time.dart';
+
+class JalaliDelegate extends CalendarDelegate<DateTime> {
   /// Creates a calendar delegate that uses the Gregorian calendar and the
   /// conventions of the current [MaterialLocalizations].
   const JalaliDelegate();
 
   @override
-  JaDateTime now() => JaDateTime.now();
+  DateTime now() => JaDateTime.now();
 
   @override
-  JaDateTime dateOnly(JaDateTime date) => JaDateTime(date.year, date.month, date.day);
+  DateTime dateOnly(DateTime date) =>
+      JaDateTime(date.year, date.month, date.day);
 
   @override
-  int monthDelta(JaDateTime startDate, JaDateTime endDate) => (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  int monthDelta(DateTime startDate, DateTime endDate) =>
+      (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
 
   @override
-  JaDateTime addMonthsToMonthDate(JaDateTime monthDate, int monthsToAdd) {
+  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
     return JaDateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 
   @override
-  JaDateTime addDaysToDate(JaDateTime date, int days) {
-    print("addDaysToDate");
-    print(date.toString());
-    print(days);
+  DateTime addDaysToDate(DateTime date, int days) {
     return JaDateTime(date.year, date.month, date.day + days);
   }
 
@@ -47,36 +45,31 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
     return (weekdayFromMonday - firstDayOfWeekIndex) % 7;
   }
 
-  /// {@macro flutter.material.date.getDaysInMonth}
   @override
-  int getDaysInMonth(int year, int month) {
-    print("getDaysInMonth");
-    print(year);
-    print(month);
-    print(JaDateTime(year, month).monthLength);
-    return JaDateTime(year, month).monthLength;
-  }
+  int getDaysInMonth(int year, int month) =>
+      JaDateTime(year, month).monthLength;
 
   @override
   JaDateTime getMonth(int year, int month) => JaDateTime(year, month);
 
   @override
-  JaDateTime getDay(int year, int month, int day) => JaDateTime(year, month, day);
+  JaDateTime getDay(int year, int month, int day) =>
+      JaDateTime(year, month, day);
 
   @override
-  String formatMonthYear(JaDateTime date, MaterialLocalizations localizations) {
-    print(date.toString());
-    return GeneralDateFormat.yMMMM().format(JalaliDateTime(date.year, date.month));
+  String formatMonthYear(DateTime date, MaterialLocalizations localizations) {
+    return localizations.formatMonthYear(date);
   }
 
   @override
-  String formatMediumDate(JaDateTime date, MaterialLocalizations localizations) {
-    return GeneralDateFormat.MMMMEEEEd().format(JalaliDateTime(date.year, date.month, date.day));
+  String formatMediumDate(
+      DateTime date, MaterialLocalizations localizations) {
     return localizations.formatMediumDate(date);
   }
 
   @override
-  String formatShortMonthDay(DateTime date, MaterialLocalizations localizations) {
+  String formatShortMonthDay(
+      DateTime date, MaterialLocalizations localizations) {
     return localizations.formatShortMonthDay(date);
   }
 
@@ -96,9 +89,9 @@ class JalaliDelegate extends CalendarDelegate<JaDateTime> {
   }
 
   @override
-  JaDateTime? parseCompactDate(String? inputString, MaterialLocalizations localizations) {
-    return JaDateTime(1400);
-    // return localizations.parseCompactDate(inputString);
+  DateTime? parseCompactDate(
+      String? inputString, MaterialLocalizations localizations) {
+    return localizations.parseCompactDate(inputString);
   }
 
   @override
