@@ -25,7 +25,7 @@
 ![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
 
 A Flutter/Dart Package for working with dates across several calendar systems. Using a unified
-interface, you can convert, manipulate, and compare dates in Gregorian, Jalali (Persian Calendar),
+interface, you can convert, manipulate, and compare dates in Gregorian, Persian Calendar,
 Hijri (Umm Al-Qura Calendar), and other
 calendar systems all while preserving time components and handling timezone, leap year, and negative
 value normalization gracefully.
@@ -59,7 +59,7 @@ value normalization gracefully.
   dates.
 
 - **Parsing and Formatting:**
-  Create custom datetime (JalaliDateTime, HijriDateTime) instances from formatted strings and output
+  Create custom datetime (PersianDateTime, HijriDateTime) instances from formatted strings and output
   a consistent string
   representation.
 
@@ -88,36 +88,36 @@ flutter pub add general_datetime
 ## Usage
 
 Import the package into your Dart code. The library exposes a unified interface for working with
-dates across multiple calendar systems. For example, you can work with the Jalali calendar using the
+dates across multiple calendar systems. For example, you can work with the Persian calendar using the
 provided implementation:
 
 ```dart
 import 'package:general_datetime/general_datetime.dart';
 
 void main() {
-  // Create a Gregorian date and convert it to Jalali:
-  JalaliDateTime jDate = JalaliDateTime.fromDateTime(DateTime(2025, 3, 1));
-  print('Converted to Jalali: ${jDate.toString()}'); // e.g. "1403-12-11 00:00:00.000"
+  // Create a Gregorian date and convert it to Persian dates:
+  PersianDateTime pDate = PersianDateTime.fromDateTime(DateTime(2025, 3, 1));
+  print('Converted to Persian date: ${pDate.toString()}'); // e.g. "1403-12-11 00:00:00.000"
 
-  // Create a Jalali date directly (auto-normalization applies):
-  JalaliDateTime directDate = JalaliDateTime(1403, 12, 11, 14, 30);
-  print('Direct Jalali: ${directDate.toString()}');
+  // Create a Persian date directly (auto-normalization applies):
+  PersianDateTime directDate = PersianDateTime(1403, 12, 11, 14, 30);
+  print('Direct Persian date: ${directDate.toString()}');
 
   // Perform arithmetic:
-  JalaliDateTime futureDate = jDate.add(Duration(days: 5, hours: 3));
+  PersianDateTime futureDate = pDate.add(Duration(days: 5, hours: 3));
   print('Future Date: ${futureDate.toString()}');
 
   // Compare dates:
-  bool isBefore = jDate.isBefore(JalaliDateTime(1403, 12, 12));
-  print('Is jDate before 1403-12-12? $isBefore');
+  bool isBefore = pDate.isBefore(PersianDateTime(1403, 12, 12));
+  print('Is pDate before 1403-12-12? $isBefore');
 
   // Parse a date string:
-  JalaliDateTime parsed = JalaliDateTime.parse("1403-12-11 14:30:45.123456Z");
+  PersianDateTime parsed = PersianDateTime.parse("1403-12-11 14:30:45.123456Z");
   print('Parsed Date: ${parsed.toString()}');
 
   // Time zone information:
-  print('Time Zone Name: ${jDate.timeZoneName}');
-  print('Time Zone Offset: ${jDate.timeZoneOffset}');
+  print('Time Zone Name: ${pDate.timeZoneName}');
+  print('Time Zone Offset: ${pDate.timeZoneOffset}');
 }
 ```
 
@@ -128,7 +128,7 @@ void main() {
 - ### Factory Constructors
 
     - `fromDateTime(DateTime datetime)`
-      Converts a Gregorian [DateTime] to a calendar-specific date (e.g. Jalali).
+      Converts a Gregorian [DateTime] to a calendar-specific date (e.g. PersianDateTime).
 
     - `now()`
       Returns the current date and time in the default calendar.
@@ -183,14 +183,14 @@ void main() {
 
     - Creates a calendar-specific instance representing the current date and time.
       This generic method allows you to get the current time in a specific calendar system, such as
-      Jalali or Hijri. It uses Dart’s runtime type comparison since generic types are not preserved
+      Persian dates or Hijri. It uses Dart’s runtime type comparison since generic types are not preserved
       at runtime.
 
 **Example**
 
 ```dart
 
-var nowJalali = GeneralDateTimeInterface.now<JalaliDateTime>();
+var nowPersian = GeneralDateTimeInterface.now<PersianDateTime>();
 ```
 
 > [!NOTE]
@@ -245,20 +245,20 @@ additional calendar systems.
 
 ## Calendars
 
-### Persian Calendar (Jalali)
+### Persian Calendar
 
-The Persian (Jalali) calendar is a solar calendar first formalized in 1079 CE under Omar Khayyam
+The Persian calendar (Jalali) is a solar calendar first formalized in 1079 CE under Omar Khayyam
 that measures years by the true motion of the Earth around the Sun, yielding an average year length
 of approximately 365.2424 days—more accurate over centuries than the Gregorian’s 365.2425-day
 average. It begins its era on the vernal equinox of 622 CE (the Hijra), and structures time into
 twelve months: the first six of 31 days, the next five of 30 days, and the final month of 29 days in
 a common year or 30 days in a leap year. Leap years follow an intricate 33-year cycle (with
 occasional 29- or 37-year adjustments), tracked in code by a series of “break points” that align
-groups of eight leap years within each cycle. Converting between Jalali and Gregorian dates uses the
+groups of eight leap years within each cycle. Converting between Persian dates and Gregorian dates uses the
 Julian Day Number (JDN) as an intermediary—counting days from a fixed epoch—then applying standard
 astronomical floor-division formulas to translate JDN to Gregorian and back. Overflow or negative
 values in any date or time component are normalized by carrying into higher or lower units, so that
-inputs like “month 13” or “day 0” correctly wrap into valid Jalali dates. This blend of astronomical
+inputs like “month 13” or “day 0” correctly wrap into valid Persian dates. This blend of astronomical
 anchoring, cycle-based leap determination, and normalization yields a calendar that keeps Nowruz (
 the spring equinox) synchronized with the real equinox with minimal drift over millennia.
 
