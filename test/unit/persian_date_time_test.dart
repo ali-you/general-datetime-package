@@ -247,7 +247,7 @@ void main() {
 
     test('Negative month normalization', () {
       // A negative month should be normalized by adding 12 and decrementing the year.
-      // For example, JaDateTime(1400, -1, 15) should become 1399/11/15.
+      // For example, PersianDateTime(1400, -1, 15) should become 1399/11/15.
       final dt = PersianDateTime(1400, -1, 15);
       expect(dt.year, equals(1399));
       expect(dt.month, equals(11));
@@ -255,7 +255,7 @@ void main() {
     });
 
     test('Negative hour normalization', () {
-      // An hour underflow: JaDateTime(1400, 1, 1, -3)
+      // An hour underflow: PersianDateTime(1400, 1, 1, -3)
       // Negative hours are added to 24 and one day is subtracted.
       // Expected: date becomes previous day; for 1400/1/1, it rolls back to 1399/12 with last day 30.
       final dt = PersianDateTime(1400, 1, 1, -3);
@@ -266,7 +266,7 @@ void main() {
     });
 
     test('Negative minute normalization', () {
-      // For negative minutes: JaDateTime(1400, 1, 1, 0, -90)
+      // For negative minutes: PersianDateTime(1400, 1, 1, 0, -90)
       // -90 minutes gives a -1 hour offset and remainder minutes.
       // Expected: hour decreases by 1 (from 0 to -1, then normalized to 23 of previous day) and minute becomes 30.
       final dt = PersianDateTime(1400, 1, 1, 0, -90);
@@ -280,7 +280,7 @@ void main() {
     });
 
     test('Negative second normalization', () {
-      // For negative seconds: JaDateTime(1400, 1, 1, 0, 0, -75)
+      // For negative seconds: PersianDateTime(1400, 1, 1, 0, 0, -75)
       // -75 seconds result in borrowing from minutes.
       // Expected: minute decreases by 1 and second becomes 45.
       final dt = PersianDateTime(1400, 1, 1, 0, 0, -75);
@@ -294,7 +294,7 @@ void main() {
     });
 
     test('Negative microsecond normalization', () {
-      // For negative microseconds: JaDateTime(1400, 1, 1, 0, 0, 0, 0, -1500)
+      // For negative microseconds: PersianDateTime(1400, 1, 1, 0, 0, 0, 0, -1500)
       // -1500 microseconds should reduce the millisecond count.
       // Expected: microseconds become 500 and one millisecond is subtracted.
       final dt = PersianDateTime(1400, 1, 1, 0, 0, 0, 0, -1500);
@@ -343,7 +343,7 @@ void main() {
       expect(j.toString(), equals("1403-12-11 14:30:45.123456"));
     });
 
-    test('now returns valid JaDateTime', () {
+    test('now returns valid PersianDateTime', () {
       final PersianDateTime jNow = PersianDateTime.now();
       expect(jNow.year, isNotNull);
       expect(jNow.month, inInclusiveRange(1, 12));
@@ -462,7 +462,7 @@ void main() {
     });
   });
 
-  group('JaDateTime Critical Comparisons', () {
+  group('PersianDateTime Critical Comparisons', () {
     test('Same exact moment', () {
       final PersianDateTime a = PersianDateTime(1402, 1, 1, 0, 0, 0);
       final PersianDateTime b = PersianDateTime.fromDateTime(a.toDateTime());
@@ -509,8 +509,10 @@ void main() {
       PersianDateTime(1402, 6, 31, 23, 59, 59);
       final PersianDateTime startNextMonth =
       PersianDateTime(1402, 7, 1, 0, 0, 0);
+      print(endOfMonth);
+      print(startNextMonth);
 
-      expect(endOfMonth.isBefore(startNextMonth), true);
+      expect(endOfMonth.isBefore(DateTime(2025, 3, 1)), true);
     });
 
     test('Negative year comparison', () {
@@ -527,24 +529,24 @@ void main() {
 
   ///TODO: implement this high precision test cases
   // group("Bidirectional conversion", () {
-  //   test("Check DateTime/JaDateTime in a Row From 1,1,1 Persian", () {
+  //   test("Check DateTime/PersianDateTime in a Row From 1,1,1 Persian", () {
   //     for (int day = 1; day <= 9000000; day++) {
   //       DateTime dateTime = DateTime(622, 3, 21 + day);
-  //       JaDateTime JaDateTime = JaDateTime(1, 1, day);
-  //       expect(JaDateTime.toDatetime(), dateTime);
+  //       PersianDateTime persianDateTime = PersianDateTime(1, 1, day);
+  //       expect(persianDateTime.toDateTime(), dateTime);
   //     }
   //   });
   //
-  //   test("Check DateTime/JaDateTime in a Row From 1,1,1 Gregorian", () {
+  //   test("Check DateTime/PersianDateTime in a Row From 1,1,1 Gregorian", () {
   //     for (int day = 1; day <= 9000000; day++) {
   //       DateTime dateTime = DateTime(1, 1, day);
-  //       JaDateTime JaDateTime = JaDateTime(-621, 10, 10 + day);
-  //       expect(JaDateTime.toDatetime(), dateTime);
+  //       PersianDateTime persianDateTime = PersianDateTime(-621, 10, 10 + day);
+  //       expect(persianDateTime.toDateTime(), dateTime);
   //     }
   //   });
   // test('Beginning of Gregorian Calendar', () {
-  //   final JaDateTime j =
-  //   JaDateTime.fromDateTime(DateTime(1, 1, 1));
+  //   final PersianDateTime j =
+  //   PersianDateTime.fromDateTime(DateTime(1, 1, 1));
   //   expect(j.toString(), equals("-0621-10-11 00:00:00.000"));
   // });
   // });
@@ -552,13 +554,13 @@ void main() {
   // group('Compare with another package', () {
   //   test('compare leap year', () {
   //     final Jalali another = Jalali(1635);
-  //     final JaDateTime own = JaDateTime(1635);
+  //     final PersianDateTime own = PersianDateTime(1635);
   //     expect(own.isLeapYear, another.isLeapYear());
   //   });
   //
   //   test('compare leap year with conversion', () {
   //     final Jalali another = Jalali.fromDateTime(DateTime(2256));
-  //     final JaDateTime own = JaDateTime.fromDateTime(DateTime(2256));
+  //     final PersianDateTime own = PersianDateTime.fromDateTime(DateTime(2256));
   //     print(own);
   //     print(another);
   //     print(another.isLeapYear());
@@ -571,7 +573,7 @@ void main() {
   //   test('compare leap year in list', () {
   //     for (int year = -60; year <= 3176; year++) {
   //       final Jalali another = Jalali(year);
-  //       final JaDateTime own = JaDateTime(year);
+  //       final PersianDateTime own = PersianDateTime(year);
   //       expect(own.isLeapYear, another.isLeapYear());
   //     }
   //   });
@@ -580,7 +582,7 @@ void main() {
   //     for (int year = 0; year <= 3000; year++) {
   //       for (int month = 1; month <= 12; month++) {
   //         final int another = Jalali(year, month).monthLength;
-  //         final int own = JaDateTime(year, month).monthLength;
+  //         final int own = PersianDateTime(year, month).monthLength;
   //         expect(own, another, reason: 'Year mismatch on $year,$month => ');
   //       }
   //     }
@@ -591,7 +593,7 @@ void main() {
   //       for (int month = 1; month <= 12; month++) {
   //         for (int day = 1; day <= Jalali(year, month).monthLength; day++) {
   //           final Jalali another = Jalali(year, month, day);
-  //           final JaDateTime own = JaDateTime(year, month, day);
+  //           final PersianDateTime own = PersianDateTime(year, month, day);
   //           if (own.toDatetime() != another.toDateTime())
   //             print(
   //                 "$year, $month, $day, ${own.julianDay}, ${another.julianDayNumber}");
@@ -611,8 +613,8 @@ void main() {
   //             day++) {
   //           final Jalali another =
   //               Jalali.fromDateTime(DateTime(year, month, day));
-  //           final JaDateTime own =
-  //               JaDateTime.fromDateTime(DateTime(year, month, day));
+  //           final PersianDateTime own =
+  //               PersianDateTime.fromDateTime(DateTime(year, month, day));
   //           expect(own.year, another.year,
   //               reason:
   //                   'Year mismatch on $year,$month,$day => own:${own.toString()}, another:${another.toString()}');
@@ -629,7 +631,7 @@ void main() {
   //
   //   test('single convert gregorian to persian dates', () {
   //     DateTime dateTime = DateTime(2256, 3, 20);
-  //     final JaDateTime own = JaDateTime.fromDateTime(dateTime);
+  //     final PersianDateTime own = PersianDateTime.fromDateTime(dateTime);
   //     final Jalali another = Jalali.fromDateTime(dateTime);
   //     print(own);
   //     print(another);

@@ -608,132 +608,141 @@ class PersianDateTime extends DateTime
   // TODO: implement secondsSinceEpoch
   int get secondsSinceEpoch => throw UnimplementedError();
 
-// int compareTo(dynamic other) {
-//   final DateTime selfDate = toDateTime();
-//   if (other is GeneralDateTimeInterface2) {
-//     return selfDate.compareTo(other.toDateTime());
-//   }
-//   if (other is DateTime) return selfDate.compareTo(other);
-//   throw ArgumentError(
-//       'compareTo function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-// }
-//
-// /// Checks whether this dateTime occurs before another.
-// /// This method compares this instance with [other], which can be either:
-// /// - Another object implementing [GeneralDateTimeInterface2], or
-// /// - A native [DateTime] instance.
-// /// Returns `true` if this dateTime is before [other], otherwise `false`.
-// /// Example:
-// /// ```dart
-// /// final a = PersianDateTime(1403, 4, 15, 10);
-// /// final b = PersianDateTime(1403, 4, 15, 12);
-// ///
-// /// a.isBefore(b); // true
-// /// b.isBefore(a); // false
-// ///
-// /// final native = DateTime(2025, 7, 6, 14);
-// /// b.isBefore(native); // true or false depending on internal conversion
-// /// ```
-// /// Throws [ArgumentError] if [other] is not a [GeneralDateTimeInterface2] or [DateTime].
-//
-// // bool isBefore(DateTime other);
-// bool isBefore(dynamic other) {
-//   final DateTime selfDate = toDateTime();
-//   if (other is GeneralDateTimeInterface2) {
-//     return selfDate.isBefore(other.toDateTime());
-//   }
-//   if (other is DateTime) return selfDate.isBefore(other);
-//   throw ArgumentError(
-//       'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-// }
-//
-// // bool isBefore(DateTime other) {
-// //   final DateTime selfDate = toDateTime();
-// //   if (other is JaDateTime) {
-// //     return selfDate.isBefore(other.toDateTime());
-// //   }
-// //   // if (other is GeneralDateTimeInterface) {
-// //   //   return selfDate.isBefore(other.toDateTime());
-// //   // }
-// //   // if (other is DateTime) return selfDate.isBefore(other);
-// //   throw ArgumentError(
-// //       'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-// // }
-//
-// /// Checks whether this dateTime occurs after another.
-// /// Compares this instance with [other], which can be either:
-// /// - An object implementing [GeneralDateTimeInterface2], or
-// /// - A native [DateTime] instance.
-// /// Returns `true` if this dateTime is after [other], otherwise `false`.
-// /// Example:
-// /// ```dart
-// /// final a = PersianDateTime(1403, 4, 15, 12);
-// /// final b = PersianDateTime(1403, 4, 15, 10);
-// ///
-// /// a.isAfter(b); // true
-// /// b.isAfter(a); // false
-// /// ```
-// /// Throws an [ArgumentError] if [other] is not a [GeneralDateTimeInterface2] or [DateTime].
-// bool isAfter(dynamic other) {
-//   final DateTime selfDate = toDateTime();
-//   if (other is GeneralDateTimeInterface2) {
-//     return selfDate.isAfter(other.toDateTime());
-//   }
-//   if (other is DateTime) return selfDate.isAfter(other);
-//   throw ArgumentError(
-//       'isAfter function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-// }
-//
-// /// Checks whether this dateTime represents the same moment as another.
-// /// Compares this instance with [other], which can be either:
-// /// - An object implementing [GeneralDateTimeInterface2], or
-// /// - A native [DateTime] instance.
-// /// Returns `true` if both datetimes represent the same point in time.
-// /// Example:
-// /// ```dart
-// /// final a = PersianDateTime(1403, 4, 15, 12, 30);
-// /// final b = PersianDateTime(1403, 4, 15, 12, 30);
-// ///
-// /// a.isAtSameMomentAs(b); // true
-// ///
-// /// final native = DateTime(2025, 7, 6, 14, 0);
-// /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
-// /// ```
-// /// Throws an [ArgumentError] if [other] is not a [GeneralDateTimeInterface2] or [DateTime].
-// bool isAtSameMomentAs(dynamic other) {
-//   final DateTime selfDate = toDateTime();
-//   if (other is GeneralDateTimeInterface2) {
-//     return selfDate.isAtSameMomentAs(other.toDateTime());
-//   }
-//   if (other is DateTime) return selfDate.isAtSameMomentAs(other);
-//   throw ArgumentError(
-//       'isAtSameMomentAs function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-// }
-//
-// /// Returns the difference between this dateTime and another.
-// /// Computes the [Duration] between this instance and [other], which can be either:
-// /// - An object implementing [GeneralDateTimeInterface2], or
-// /// - A native [DateTime] instance.
-// /// The result is positive if this dateTime is after [other], and negative if before.
-// /// Example:
-// /// ```dart
-// /// final a = PersianDateTime(1403, 4, 15, 12, 30);
-// /// final b = PersianDateTime(1403, 4, 15, 11, 0);
-// ///
-// /// final duration = a.difference(b); // 1 hour 30 minutes
-// /// duration.inMinutes; // 90
-// /// ```
-// /// Throws an [ArgumentError] if [other] is not a [GeneralDateTimeInterface2] or [DateTime].
-// Duration difference(dynamic other) {
-//   final DateTime selfDate = toDateTime();
-//   if (other is GeneralDateTimeInterface2) {
-//     return selfDate.difference(other.toDateTime());
-//   }
-//   if (other is DateTime) return selfDate.difference(other);
-//   throw ArgumentError(
-//       'difference function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
-// }
+  /// Compares this dateTime instance to another.
+  /// This method allows comparison between different types that implement
+  /// [GeneralDateTimeInterface2] as well as native [DateTime] objects.
+  /// Returns:
+  /// - A negative integer if `this` occurs before [other]
+  /// - Zero if `this` and [other] represent the same moment in time
+  /// - A positive integer if `this` occurs after [other]
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 10);
+  /// final b = PersianDateTime(1403, 4, 15, 12);
+  /// final c = DateTime(2024, 7, 5, 12);
+  ///
+  /// a.compareTo(b); // < 0
+  /// b.compareTo(a); // > 0
+  /// b.compareTo(b); // == 0
+  /// b.compareTo(c); // Compare to native DateTime
+  /// ```
 
+  @override
+  int compareTo(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface2) {
+      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+      return selfDate.compareTo(otherDate);
+    }
+    return selfDate.compareTo(other);
+  }
+
+  /// Checks whether this dateTime occurs before another.
+  /// This method compares this instance with [other], which can be either:
+  /// - Another object implementing [GeneralDateTimeInterface2], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if this dateTime is before [other], otherwise `false`.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 10);
+  /// final b = PersianDateTime(1403, 4, 15, 12);
+  ///
+  /// a.isBefore(b); // true
+  /// b.isBefore(a); // false
+  ///
+  /// final native = DateTime(2025, 7, 6, 14);
+  /// b.isBefore(native); // true or false depending on internal conversion
+  /// ```
+
+  @override
+  bool isBefore(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface2) {
+      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+      return selfDate.isBefore(otherDate);
+    }
+    return selfDate.isBefore(other);
+  }
+
+  /// Checks whether this dateTime occurs after another.
+  /// Compares this instance with [other], which can be either:
+  /// - An object implementing [GeneralDateTimeInterface2], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if this dateTime is after [other], otherwise `false`.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 12);
+  /// final b = PersianDateTime(1403, 4, 15, 10);
+  ///
+  /// a.isAfter(b); // true
+  /// b.isAfter(a); // false
+  ///
+  /// final native = DateTime(2025, 7, 6, 14);
+  /// b.isAfter(native); // true or false depending on internal conversion
+  /// ```
+
+  @override
+  bool isAfter(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface2) {
+      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+      return selfDate.isAfter(otherDate);
+    }
+    return selfDate.isAfter(other);
+  }
+
+  /// Checks whether this dateTime represents the same moment as another.
+  /// Compares this instance with [other], which can be either:
+  /// - An object implementing [GeneralDateTimeInterface2], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if both datetimes represent the same point in time.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+  /// final b = PersianDateTime(1403, 4, 15, 12, 30);
+  ///
+  /// a.isAtSameMomentAs(b); // true
+  ///
+  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
+  /// ```
+
+  @override
+  bool isAtSameMomentAs(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface2) {
+      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+      return selfDate.isAtSameMomentAs(otherDate);
+    }
+    return selfDate.isAtSameMomentAs(other);
+  }
+
+  /// Returns the difference between this dateTime and another.
+  /// Computes the [Duration] between this instance and [other], which can be either:
+  /// - An object implementing [GeneralDateTimeInterface2], or
+  /// - A native [DateTime] instance.
+  /// The result is positive if this dateTime is after [other], and negative if before.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+  /// final b = PersianDateTime(1403, 4, 15, 11, 0);
+  ///
+  /// final duration = a.difference(b); // 1 hour 30 minutes
+  /// duration.inMinutes; // 90
+  ///
+  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// a.difference(native);
+  /// ```
+
+  @override
+  Duration difference(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface2) {
+      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+      return selfDate.difference(otherDate);
+    }
+    return selfDate.difference(other);
+  }
 }
 
 /// Helper private class to return results from cycle calculation
