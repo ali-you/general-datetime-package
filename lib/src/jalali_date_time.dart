@@ -1,14 +1,14 @@
 import 'package:general_datetime/src/constants.dart';
 import 'package:general_datetime/src/gregorian_helper.dart';
 
-import 'general_date_time_interface.dart';
+import 'general_date_time_interface_temp.dart';
 
 /// Represents a date and time in the **Jalali (Persian/Iranian)** calendar system.
 ///
 /// This class provides conversion between Gregorian and Jalali dates,
 /// along with time component support (hour, minute, second, etc).
 ///
-/// It extends the [GeneralDateTimeInterface] to support consistent behavior
+/// It extends the [GeneralDateTimeInterfaceTemp] to support consistent behavior
 /// across multiple calendar types.
 ///
 /// ### Features:
@@ -30,7 +30,7 @@ import 'general_date_time_interface.dart';
 /// ### Calendar Notes:
 /// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
 /// with highly accurate leap year rules and month lengths.
-class JalaliDateTime extends GeneralDateTimeInterface<JalaliDateTime> {
+class JalaliDateTime extends GeneralDateTimeInterfaceTemp<JalaliDateTime> {
   /// Private constructor for raw inputs
   JalaliDateTime._raw(
     super.year, [

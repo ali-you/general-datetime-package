@@ -1,5 +1,5 @@
 import 'package:general_datetime/src/constants.dart';
-import 'package:general_datetime/src/general_date_time_interface_2.dart';
+import 'package:general_datetime/src/general_date_time_interface.dart';
 import 'package:general_datetime/src/gregorian_helper.dart';
 
 import '../general_datetime.dart';
@@ -9,7 +9,7 @@ import '../general_datetime.dart';
 /// This class provides conversion between Gregorian and Persian dates,
 /// along with time component support (hour, minute, second, etc).
 ///
-/// It extends the [GeneralDateTimeInterface] to support consistent behavior
+/// It extends the [GeneralDateTimeInterfaceTemp] to support consistent behavior
 /// across multiple calendar types.
 ///
 /// ### Features:
@@ -32,7 +32,7 @@ import '../general_datetime.dart';
 /// The Persian calendar is a solar calendar used in Iran and Afghanistan,
 /// with highly accurate leap year rules and month lengths.
 class PersianDateTime extends DateTime
-    implements GeneralDateTimeInterface2<PersianDateTime> {
+    implements GeneralDateTimeInterface<PersianDateTime> {
   // Weekday constants that are returned by [weekday] method:
   static const int monday = 1;
   static const int tuesday = 2;
@@ -74,9 +74,6 @@ class PersianDateTime extends DateTime
   final int millisecond;
   @override
   final int microsecond;
-
-  /// Private constructor for raw inputs
-  // final bool _isUtc;
 
   PersianDateTime._internal(
     this.year, [
@@ -604,13 +601,21 @@ class PersianDateTime extends DateTime
     return _CycleStats(leapCount: leapCount, lastBreak: lastBreak, jump: jump);
   }
 
+  /// Seconds since epoch
   @override
-  // TODO: implement secondsSinceEpoch
-  int get secondsSinceEpoch => throw UnimplementedError();
+  int get secondsSinceEpoch => toDateTime().millisecondsSinceEpoch ~/ 1000;
+
+  /// Milliseconds since epoch
+  @override
+  int get millisecondsSinceEpoch => toDateTime().millisecondsSinceEpoch;
+
+  /// Microseconds since epoch
+  @override
+  int get microsecondsSinceEpoch => toDateTime().microsecondsSinceEpoch;
 
   /// Compares this dateTime instance to another.
   /// This method allows comparison between different types that implement
-  /// [GeneralDateTimeInterface2] as well as native [DateTime] objects.
+  /// [GeneralDateTimeInterface] as well as native [DateTime] objects.
   /// Returns:
   /// - A negative integer if `this` occurs before [other]
   /// - Zero if `this` and [other] represent the same moment in time
@@ -630,8 +635,8 @@ class PersianDateTime extends DateTime
   @override
   int compareTo(DateTime other) {
     final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface2) {
-      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
       return selfDate.compareTo(otherDate);
     }
     return selfDate.compareTo(other);
@@ -639,7 +644,7 @@ class PersianDateTime extends DateTime
 
   /// Checks whether this dateTime occurs before another.
   /// This method compares this instance with [other], which can be either:
-  /// - Another object implementing [GeneralDateTimeInterface2], or
+  /// - Another object implementing [GeneralDateTimeInterface], or
   /// - A native [DateTime] instance.
   /// Returns `true` if this dateTime is before [other], otherwise `false`.
   /// Example:
@@ -657,8 +662,8 @@ class PersianDateTime extends DateTime
   @override
   bool isBefore(DateTime other) {
     final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface2) {
-      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
       return selfDate.isBefore(otherDate);
     }
     return selfDate.isBefore(other);
@@ -666,7 +671,7 @@ class PersianDateTime extends DateTime
 
   /// Checks whether this dateTime occurs after another.
   /// Compares this instance with [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface2], or
+  /// - An object implementing [GeneralDateTimeInterface], or
   /// - A native [DateTime] instance.
   /// Returns `true` if this dateTime is after [other], otherwise `false`.
   /// Example:
@@ -684,8 +689,8 @@ class PersianDateTime extends DateTime
   @override
   bool isAfter(DateTime other) {
     final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface2) {
-      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
       return selfDate.isAfter(otherDate);
     }
     return selfDate.isAfter(other);
@@ -693,7 +698,7 @@ class PersianDateTime extends DateTime
 
   /// Checks whether this dateTime represents the same moment as another.
   /// Compares this instance with [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface2], or
+  /// - An object implementing [GeneralDateTimeInterface], or
   /// - A native [DateTime] instance.
   /// Returns `true` if both datetimes represent the same point in time.
   /// Example:
@@ -710,8 +715,8 @@ class PersianDateTime extends DateTime
   @override
   bool isAtSameMomentAs(DateTime other) {
     final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface2) {
-      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
       return selfDate.isAtSameMomentAs(otherDate);
     }
     return selfDate.isAtSameMomentAs(other);
@@ -719,7 +724,7 @@ class PersianDateTime extends DateTime
 
   /// Returns the difference between this dateTime and another.
   /// Computes the [Duration] between this instance and [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface2], or
+  /// - An object implementing [GeneralDateTimeInterface], or
   /// - A native [DateTime] instance.
   /// The result is positive if this dateTime is after [other], and negative if before.
   /// Example:
@@ -737,8 +742,8 @@ class PersianDateTime extends DateTime
   @override
   Duration difference(DateTime other) {
     final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface2) {
-      DateTime otherDate = (other as GeneralDateTimeInterface2).toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
       return selfDate.difference(otherDate);
     }
     return selfDate.difference(other);

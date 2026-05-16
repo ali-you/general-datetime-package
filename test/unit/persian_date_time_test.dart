@@ -509,10 +509,7 @@ void main() {
       PersianDateTime(1402, 6, 31, 23, 59, 59);
       final PersianDateTime startNextMonth =
       PersianDateTime(1402, 7, 1, 0, 0, 0);
-      print(endOfMonth);
-      print(startNextMonth);
-
-      expect(endOfMonth.isBefore(DateTime(2025, 3, 1)), true);
+      expect(endOfMonth.isBefore(startNextMonth), true);
     });
 
     test('Negative year comparison', () {

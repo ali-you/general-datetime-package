@@ -4,7 +4,7 @@ import 'package:general_datetime/general_datetime.dart';
 void main() {
   group('Static Methods', () {
     test('Now Method', () {
-      print(GeneralDateTimeInterface.now<JalaliDateTime>());
+      print(GeneralDateTimeInterfaceTemp.now<JalaliDateTime>());
     });
   });
 }

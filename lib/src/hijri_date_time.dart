@@ -35,19 +35,92 @@ import 'constants.dart';
 /// calendar of Saudi Arabia, commonly used for religious observances.
 ///
 /// > Note: Dates may differ slightly from observational Hijri calendars used in other countries.
-class HijriDateTime extends GeneralDateTimeInterface {
+class HijriDateTime extends DateTime
+    implements GeneralDateTimeInterface<HijriDateTime> {
+  // Weekday constants that are returned by [weekday] method:
+  static const int monday = 1;
+  static const int tuesday = 2;
+  static const int wednesday = 3;
+  static const int thursday = 4;
+  static const int friday = 5;
+  static const int saturday = 6;
+  static const int sunday = 7;
+  static const int daysPerWeek = 7;
+
+  // Month constants that are returned by the [month] getter.
+  static const int farvardin = 1;
+  static const int ordibehesht = 2;
+  static const int khordad = 3;
+  static const int tir = 4;
+  static const int mordad = 5;
+  static const int shahrivar = 6;
+  static const int mehr = 7;
+  static const int aban = 8;
+  static const int azar = 9;
+  static const int dey = 10;
+  static const int bahman = 11;
+  static const int esfand = 12;
+  static const int monthsPerYear = 12;
+
+  @override
+  final int year;
+  @override
+  final int month;
+  @override
+  final int day;
+  @override
+  final int hour;
+  @override
+  final int minute;
+  @override
+  final int second;
+  @override
+  final int millisecond;
+  @override
+  final int microsecond;
+
   /// Private constructor for raw inputs
-  HijriDateTime._raw(
-    super.year, [
-    super.month,
-    super.day,
-    super.hour,
-    super.minute,
-    super.second,
-    super.millisecond,
-    super.microsecond,
-    super.isUtc,
-  ]);
+  HijriDateTime._internal(
+    this.year, [
+    this.month = 1,
+    this.day = 1,
+    this.hour = 0,
+    this.minute = 0,
+    this.second = 0,
+    this.millisecond = 0,
+    this.microsecond = 0,
+  ]) : super(year, month, day, hour, minute, second, millisecond, microsecond);
+
+  HijriDateTime._internalUtc(
+    this.year, [
+    this.month = 1,
+    this.day = 1,
+    this.hour = 0,
+    this.minute = 0,
+    this.second = 0,
+    this.millisecond = 0,
+    this.microsecond = 0,
+  ]) : super.utc(
+            year, month, day, hour, minute, second, millisecond, microsecond);
+
+  factory HijriDateTime._resolve(
+    int year, [
+    int month = 1,
+    int day = 1,
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
+    bool isUtc = false,
+  ]) {
+    if (isUtc) {
+      return HijriDateTime._internalUtc(
+          year, month, day, hour, minute, second, millisecond, microsecond);
+    }
+    return HijriDateTime._internal(
+        year, month, day, hour, minute, second, millisecond, microsecond);
+  }
 
   /// Start: Factories section
   /// Factory constructor with normalization
@@ -61,7 +134,7 @@ class HijriDateTime extends GeneralDateTimeInterface {
     int millisecond = 0,
     int microsecond = 0,
   ]) {
-    return HijriDateTime._raw(
+    return HijriDateTime._internal(
       year,
       month,
       day,
@@ -75,7 +148,7 @@ class HijriDateTime extends GeneralDateTimeInterface {
 
   /// Factory constructor for converting from DateTime
   factory HijriDateTime.fromDateTime(DateTime dateTime) {
-    return HijriDateTime._raw(
+    return HijriDateTime._resolve(
       dateTime.year,
       dateTime.month,
       dateTime.day,
@@ -111,17 +184,9 @@ class HijriDateTime extends GeneralDateTimeInterface {
     int millisecond = 0,
     int microsecond = 0,
   ]) =>
-      HijriDateTime._raw(
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        second,
-        millisecond,
-        microsecond,
-        true,
-      )._normalize();
+      HijriDateTime._internalUtc(
+              year, month, day, hour, minute, second, millisecond, microsecond)
+          ._normalize();
 
   factory HijriDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
       {bool isUtc = false}) {
@@ -199,7 +264,7 @@ class HijriDateTime extends GeneralDateTimeInterface {
         }
       }
 
-      return HijriDateTime._raw(
+      return HijriDateTime._resolve(
         year,
         month,
         day,
@@ -298,28 +363,28 @@ class HijriDateTime extends GeneralDateTimeInterface {
 
   /// Add a Duration to the Hijri date
   @override
-  GeneralDateTimeInterface add(Duration duration) {
+  HijriDateTime add(Duration duration) {
     DateTime result = toDateTime().add(duration);
     return HijriDateTime.fromDateTime(result);
   }
 
   /// Subtract a Duration from the Hijri date
   @override
-  GeneralDateTimeInterface subtract(Duration duration) {
+  HijriDateTime subtract(Duration duration) {
     DateTime result = toDateTime().subtract(duration);
     return HijriDateTime.fromDateTime(result);
   }
 
   /// Convert to local time
   @override
-  GeneralDateTimeInterface toLocal() {
+  HijriDateTime toLocal() {
     DateTime localDt = toDateTime().toLocal();
     return HijriDateTime.fromDateTime(localDt);
   }
 
   /// Convert to UTC time
   @override
-  GeneralDateTimeInterface toUtc() {
+  HijriDateTime toUtc() {
     DateTime utcDt = toDateTime().toUtc();
     return HijriDateTime.fromDateTime(utcDt);
   }
@@ -351,7 +416,7 @@ class HijriDateTime extends GeneralDateTimeInterface {
     double firstDayOfHijriMonth = _hijriToJD(hYear, hMonth, 1);
     int hDay = (jd - firstDayOfHijriMonth).floor() + 1;
 
-    return HijriDateTime._raw(hYear, hMonth, hDay, hour, minute, second,
+    return HijriDateTime._resolve(hYear, hMonth, hDay, hour, minute, second,
         millisecond, microsecond, isUtc);
   }
 
@@ -420,7 +485,7 @@ class HijriDateTime extends GeneralDateTimeInterface {
       m -= 12;
       y += 1;
     }
-    return HijriDateTime._raw(y, m, d, h, min, s, ms, us);
+    return HijriDateTime._resolve(y, m, d, h, min, s, ms, us);
   }
 
   /// Helper method to get month length
@@ -443,5 +508,154 @@ class HijriDateTime extends GeneralDateTimeInterface {
         ((3 + (11 * year)) / 30).floor() +
         1948440 -
         1;
+  }
+
+
+  /// Seconds since epoch
+  @override
+  int get secondsSinceEpoch => toDateTime().millisecondsSinceEpoch ~/ 1000;
+
+  /// Milliseconds since epoch
+  @override
+  int get millisecondsSinceEpoch => toDateTime().millisecondsSinceEpoch;
+
+  /// Microseconds since epoch
+  @override
+  int get microsecondsSinceEpoch => toDateTime().microsecondsSinceEpoch;
+
+  /// Compares this dateTime instance to another.
+  /// This method allows comparison between different types that implement
+  /// [GeneralDateTimeInterface] as well as native [DateTime] objects.
+  /// Returns:
+  /// - A negative integer if `this` occurs before [other]
+  /// - Zero if `this` and [other] represent the same moment in time
+  /// - A positive integer if `this` occurs after [other]
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 10);
+  /// final b = PersianDateTime(1403, 4, 15, 12);
+  /// final c = DateTime(2024, 7, 5, 12);
+  ///
+  /// a.compareTo(b); // < 0
+  /// b.compareTo(a); // > 0
+  /// b.compareTo(b); // == 0
+  /// b.compareTo(c); // Compare to native DateTime
+  /// ```
+
+  @override
+  int compareTo(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
+      return selfDate.compareTo(otherDate);
+    }
+    return selfDate.compareTo(other);
+  }
+
+  /// Checks whether this dateTime occurs before another.
+  /// This method compares this instance with [other], which can be either:
+  /// - Another object implementing [GeneralDateTimeInterface], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if this dateTime is before [other], otherwise `false`.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 10);
+  /// final b = PersianDateTime(1403, 4, 15, 12);
+  ///
+  /// a.isBefore(b); // true
+  /// b.isBefore(a); // false
+  ///
+  /// final native = DateTime(2025, 7, 6, 14);
+  /// b.isBefore(native); // true or false depending on internal conversion
+  /// ```
+
+  @override
+  bool isBefore(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
+      return selfDate.isBefore(otherDate);
+    }
+    return selfDate.isBefore(other);
+  }
+
+  /// Checks whether this dateTime occurs after another.
+  /// Compares this instance with [other], which can be either:
+  /// - An object implementing [GeneralDateTimeInterface], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if this dateTime is after [other], otherwise `false`.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 12);
+  /// final b = PersianDateTime(1403, 4, 15, 10);
+  ///
+  /// a.isAfter(b); // true
+  /// b.isAfter(a); // false
+  ///
+  /// final native = DateTime(2025, 7, 6, 14);
+  /// b.isAfter(native); // true or false depending on internal conversion
+  /// ```
+
+  @override
+  bool isAfter(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
+      return selfDate.isAfter(otherDate);
+    }
+    return selfDate.isAfter(other);
+  }
+
+  /// Checks whether this dateTime represents the same moment as another.
+  /// Compares this instance with [other], which can be either:
+  /// - An object implementing [GeneralDateTimeInterface], or
+  /// - A native [DateTime] instance.
+  /// Returns `true` if both datetimes represent the same point in time.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+  /// final b = PersianDateTime(1403, 4, 15, 12, 30);
+  ///
+  /// a.isAtSameMomentAs(b); // true
+  ///
+  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
+  /// ```
+
+  @override
+  bool isAtSameMomentAs(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
+      return selfDate.isAtSameMomentAs(otherDate);
+    }
+    return selfDate.isAtSameMomentAs(other);
+  }
+
+  /// Returns the difference between this dateTime and another.
+  /// Computes the [Duration] between this instance and [other], which can be either:
+  /// - An object implementing [GeneralDateTimeInterface], or
+  /// - A native [DateTime] instance.
+  /// The result is positive if this dateTime is after [other], and negative if before.
+  /// Example:
+  /// ```dart
+  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+  /// final b = PersianDateTime(1403, 4, 15, 11, 0);
+  ///
+  /// final duration = a.difference(b); // 1 hour 30 minutes
+  /// duration.inMinutes; // 90
+  ///
+  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// a.difference(native);
+  /// ```
+
+  @override
+  Duration difference(DateTime other) {
+    final DateTime selfDate = toDateTime();
+    if (other is GeneralDateTimeInterface) {
+      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
+      return selfDate.difference(otherDate);
+    }
+    return selfDate.difference(other);
   }
 }

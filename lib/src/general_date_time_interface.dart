@@ -1,40 +1,15 @@
 import 'package:general_datetime/general_datetime.dart';
 import 'package:general_datetime/src/persian_date_time.dart';
 
-abstract class GeneralDateTimeInterface<T>
-    implements Comparable<GeneralDateTimeInterface> {
-  GeneralDateTimeInterface(
-    this.year, [
-    this.month = 1,
-    this.day = 1,
-    this.hour = 0,
-    this.minute = 0,
-    this.second = 0,
-    this.millisecond = 0,
-    this.microsecond = 0,
-    this.isUtc = false,
-  ]);
-
+abstract class GeneralDateTimeInterface<T> {
   static GeneralDateTimeInterface now<T extends GeneralDateTimeInterface>() {
-    if (T == JalaliDateTime) return JalaliDateTime.now();
+    if (T == PersianDateTime) return PersianDateTime.now();
     if (T == HijriDateTime) return HijriDateTime.now();
     throw TypeError();
   }
 
-  final int year;
-  final int month;
-  final int day;
-
-  final int hour;
-  final int minute;
-  final int second;
-  final int millisecond;
-  final int microsecond;
-
-  final bool isUtc;
-
   /// The calendar name
-  /// for example "jalali" for Persian calendar
+  /// for example "Persian" for Persian calendar
   String get name;
 
   /// The time zone name.
@@ -103,13 +78,13 @@ abstract class GeneralDateTimeInterface<T>
   T toUtc();
 
   /// Seconds since epoch
-  int get secondsSinceEpoch => toDateTime().millisecondsSinceEpoch ~/ 1000;
+  int get secondsSinceEpoch;
 
   /// Milliseconds since epoch
-  int get millisecondsSinceEpoch => toDateTime().millisecondsSinceEpoch;
+  int get millisecondsSinceEpoch;
 
   /// Microseconds since epoch
-  int get microsecondsSinceEpoch => toDateTime().microsecondsSinceEpoch;
+  int get microsecondsSinceEpoch;
 
   /// Compares this dateTime instance to another.
   /// This method allows comparison between different types that implement
@@ -120,26 +95,16 @@ abstract class GeneralDateTimeInterface<T>
   /// - A positive integer if `this` occurs after [other]
   /// Example:
   /// ```dart
-  /// final a = JalaliDateTime(1403, 4, 15, 10);
-  /// final b = JalaliDateTime(1403, 4, 15, 12);
+  /// final a = PersianDateTime(1403, 4, 15, 10);
+  /// final b = PersianDateTime(1403, 4, 15, 12);
   /// final c = DateTime(2024, 7, 5, 12);
   ///
   /// a.compareTo(b); // < 0
   /// b.compareTo(a); // > 0
   /// b.compareTo(b); // == 0
-  /// b.compareTo(c); // works if toDateTime() maps them to the same moment
+  /// b.compareTo(c); // Compare to native DateTime
   /// ```
-  /// Throws [ArgumentError] if [other] is not a [GeneralDateTimeInterface] or [DateTime].
-  @override
-  int compareTo(dynamic other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      return selfDate.compareTo(other.toDateTime());
-    }
-    if (other is DateTime) return selfDate.compareTo(other);
-    throw ArgumentError(
-        'compareTo function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-  }
+  int compareTo(DateTime other);
 
   /// Checks whether this dateTime occurs before another.
   /// This method compares this instance with [other], which can be either:
@@ -148,8 +113,8 @@ abstract class GeneralDateTimeInterface<T>
   /// Returns `true` if this dateTime is before [other], otherwise `false`.
   /// Example:
   /// ```dart
-  /// final a = JalaliDateTime(1403, 4, 15, 10);
-  /// final b = JalaliDateTime(1403, 4, 15, 12);
+  /// final a = PersianDateTime(1403, 4, 15, 10);
+  /// final b = PersianDateTime(1403, 4, 15, 12);
   ///
   /// a.isBefore(b); // true
   /// b.isBefore(a); // false
@@ -157,31 +122,7 @@ abstract class GeneralDateTimeInterface<T>
   /// final native = DateTime(2025, 7, 6, 14);
   /// b.isBefore(native); // true or false depending on internal conversion
   /// ```
-  /// Throws [ArgumentError] if [other] is not a [GeneralDateTimeInterface] or [DateTime].
-
-  // bool isBefore(DateTime other);
-  bool isBefore(dynamic other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      return selfDate.isBefore(other.toDateTime());
-    }
-    if (other is DateTime) return selfDate.isBefore(other);
-    throw ArgumentError(
-        'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
-  // bool isBefore(DateTime other) {
-  //   final DateTime selfDate = toDateTime();
-  //   if (other is JaDateTime) {
-  //     return selfDate.isBefore(other.toDateTime());
-  //   }
-  //   // if (other is GeneralDateTimeInterface) {
-  //   //   return selfDate.isBefore(other.toDateTime());
-  //   // }
-  //   // if (other is DateTime) return selfDate.isBefore(other);
-  //   throw ArgumentError(
-  //       'isBefore function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-  // }
+  bool isBefore(DateTime other);
 
   /// Checks whether this dateTime occurs after another.
   /// Compares this instance with [other], which can be either:
@@ -190,48 +131,33 @@ abstract class GeneralDateTimeInterface<T>
   /// Returns `true` if this dateTime is after [other], otherwise `false`.
   /// Example:
   /// ```dart
-  /// final a = JalaliDateTime(1403, 4, 15, 12);
-  /// final b = JalaliDateTime(1403, 4, 15, 10);
+  /// final a = PersianDateTime(1403, 4, 15, 12);
+  /// final b = PersianDateTime(1403, 4, 15, 10);
   ///
   /// a.isAfter(b); // true
   /// b.isAfter(a); // false
+  ///
+  /// final native = DateTime(2025, 7, 6, 14);
+  /// b.isAfter(native); // true or false depending on internal conversion
   /// ```
-  /// Throws an [ArgumentError] if [other] is not a [GeneralDateTimeInterface] or [DateTime].
-  bool isAfter(dynamic other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      return selfDate.isAfter(other.toDateTime());
-    }
-    if (other is DateTime) return selfDate.isAfter(other);
-    throw ArgumentError(
-        'isAfter function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-  }
+  bool isAfter(DateTime other);
 
   /// Checks whether this dateTime represents the same moment as another.
   /// Compares this instance with [other], which can be either:
   /// - An object implementing [GeneralDateTimeInterface], or
   /// - A native [DateTime] instance.
-  /// Returns `true` if both datetimes represent the same point in time.
+  /// Returns `true` if both datetime represent the same point in time.
   /// Example:
   /// ```dart
-  /// final a = JalaliDateTime(1403, 4, 15, 12, 30);
-  /// final b = JalaliDateTime(1403, 4, 15, 12, 30);
+  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+  /// final b = PersianDateTime(1403, 4, 15, 12, 30);
   ///
   /// a.isAtSameMomentAs(b); // true
   ///
   /// final native = DateTime(2025, 7, 6, 14, 0);
   /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
   /// ```
-  /// Throws an [ArgumentError] if [other] is not a [GeneralDateTimeInterface] or [DateTime].
-  bool isAtSameMomentAs(dynamic other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      return selfDate.isAtSameMomentAs(other.toDateTime());
-    }
-    if (other is DateTime) return selfDate.isAtSameMomentAs(other);
-    throw ArgumentError(
-        'isAtSameMomentAs function expected GeneralDateTimeInterface or DateTime, but got ${other.runtimeType}');
-  }
+  bool isAtSameMomentAs(DateTime other);
 
   /// Returns the difference between this dateTime and another.
   /// Computes the [Duration] between this instance and [other], which can be either:
@@ -240,117 +166,14 @@ abstract class GeneralDateTimeInterface<T>
   /// The result is positive if this dateTime is after [other], and negative if before.
   /// Example:
   /// ```dart
-  /// final a = JalaliDateTime(1403, 4, 15, 12, 30);
-  /// final b = JalaliDateTime(1403, 4, 15, 11, 0);
+  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+  /// final b = PersianDateTime(1403, 4, 15, 11, 0);
   ///
   /// final duration = a.difference(b); // 1 hour 30 minutes
   /// duration.inMinutes; // 90
+  ///
+  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// a.difference(native);
   /// ```
-  /// Throws an [ArgumentError] if [other] is not a [GeneralDateTimeInterface] or [DateTime].
-  Duration difference(dynamic other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      return selfDate.difference(other.toDateTime());
-    }
-    if (other is DateTime) return selfDate.difference(other);
-    throw ArgumentError(
-        'difference function expected GeneralDatetimeInterface or DateTime, but got ${other.runtimeType}');
-  }
-
-  Duration get time => Duration(
-        hours: hour,
-        minutes: minute,
-        seconds: second,
-        microseconds: microsecond,
-        milliseconds: millisecond,
-      );
-
-  String toIso8601String() {
-    String y =
-        (year >= -9999 && year <= 9999) ? _fourDigits(year) : _sixDigits(year);
-    String m = _twoDigits(month);
-    String d = _twoDigits(day);
-    String h = _twoDigits(hour);
-    String min = _twoDigits(minute);
-    String sec = _twoDigits(second);
-    String ms = _threeDigits(millisecond);
-    String us = microsecond == 0 ? "" : _threeDigits(microsecond);
-    if (isUtc) {
-      return "$y-$m-${d}T$h:$min:$sec.$ms${us}Z";
-    } else {
-      return "$y-$m-${d}T$h:$min:$sec.$ms$us";
-    }
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GeneralDateTimeInterface &&
-          runtimeType == other.runtimeType &&
-          year == other.year &&
-          month == other.month &&
-          day == other.day &&
-          hour == other.hour &&
-          minute == other.minute &&
-          second == other.second &&
-          millisecond == other.millisecond &&
-          microsecond == other.microsecond &&
-          isUtc == other.isUtc;
-
-  @override
-  int get hashCode =>
-      year.hashCode ^
-      month.hashCode ^
-      day.hashCode ^
-      hour.hashCode ^
-      minute.hashCode ^
-      second.hashCode ^
-      millisecond.hashCode ^
-      microsecond.hashCode ^
-      isUtc.hashCode;
-
-  @override
-  String toString() {
-    String y = _fourDigits(year);
-    String m = _twoDigits(month);
-    String d = _twoDigits(day);
-    String h = _twoDigits(hour);
-    String min = _twoDigits(minute);
-    String sec = _twoDigits(second);
-    String ms = _threeDigits(millisecond);
-    String us = microsecond == 0 ? "" : _threeDigits(microsecond);
-    if (isUtc) {
-      return "$y-$m-$d $h:$min:$sec.$ms${us}Z";
-    } else {
-      return "$y-$m-$d $h:$min:$sec.$ms$us";
-    }
-  }
-
-  String _twoDigits(int n) {
-    if (n >= 10) return "$n";
-    return "0$n";
-  }
-
-  String _threeDigits(int n) {
-    if (n >= 100) return "$n";
-    if (n >= 10) return "0$n";
-    return "00$n";
-  }
-
-  String _fourDigits(int n) {
-    int absN = n.abs();
-    String sign = n < 0 ? "-" : "";
-    if (absN >= 1000) return "$n";
-    if (absN >= 100) return "${sign}0$absN";
-    if (absN >= 10) return "${sign}00$absN";
-    return "${sign}000$absN";
-  }
-
-  String _sixDigits(int n) {
-    assert(n < -9999 || n > 9999);
-    int absN = n.abs();
-    String sign = n < 0 ? "-" : "+";
-    if (absN >= 100000) return "$sign$absN";
-    return "${sign}0$absN";
-  }
+  Duration difference(DateTime other);
 }
