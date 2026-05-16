@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../temp/ja_date_time.dart';
+import '../persian_date_time.dart';
 
 class _JalaliMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
@@ -97,8 +97,8 @@ class DefaultJalaliMaterialLocalizations implements MaterialLocalizations {
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
   int _getDaysInMonth(int year, int month) {
-    if (month == JaDateTime.esfand) {
-      final bool isLeapYear = JaDateTime(year).isLeapYear;
+    if (month == PersianDateTime.esfand) {
+      final bool isLeapYear = PersianDateTime(year).isLeapYear;
       if (isLeapYear) return 30;
       return 29;
     }
@@ -215,7 +215,7 @@ class DefaultJalaliMaterialLocalizations implements MaterialLocalizations {
     }
 
     try {
-      return JaDateTime(year, month, day);
+      return PersianDateTime(year, month, day);
     } on ArgumentError {
       return null;
     }

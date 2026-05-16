@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:general_datetime/general_datetime.dart';
-import 'package:general_datetime/src/temp/ja_date_time.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Jalali:
@@ -63,17 +62,17 @@ class AppStartup extends StatelessWidget {
                 onDateChanged: (value) {},
               ),
               CalendarDatePicker(
-                initialDate: JaDateTime.now(),
-                firstDate: JaDateTime(1400, 1, 1),
-                lastDate: JaDateTime(1450, 12, 31),
-                currentDate: JaDateTime.now(),
+                initialDate: PersianDateTime.now(),
+                firstDate: PersianDateTime(1400, 1, 1),
+                lastDate: PersianDateTime(1450, 12, 31),
+                currentDate: PersianDateTime.now(),
                 onDateChanged: (value) {
                   print(value.toString());
-                  JaDateTime jDate = value as JaDateTime;
+                  PersianDateTime jDate = value as PersianDateTime;
                   print(jDate);
                   print(jDate.toDateTime());
                 },
-                calendarDelegate: JalaliDelegate(),
+                calendarDelegate: PersianCalendarDelegate(),
               ),
             ],
           ),

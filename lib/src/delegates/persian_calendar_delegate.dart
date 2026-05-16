@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../temp/ja_date_time.dart';
+import '../persian_date_time.dart';
 
-class JalaliDelegate extends CalendarDelegate<DateTime> {
+class PersianCalendarDelegate extends CalendarDelegate<DateTime> {
   /// Creates a calendar delegate that uses the Gregorian calendar and the
   /// conventions of the current [MaterialLocalizations].
-  const JalaliDelegate();
+  const PersianCalendarDelegate();
 
   @override
-  DateTime now() => JaDateTime.now();
+  DateTime now() => PersianDateTime.now();
 
   @override
   DateTime dateOnly(DateTime date) =>
-      JaDateTime(date.year, date.month, date.day);
+      PersianDateTime(date.year, date.month, date.day);
 
   @override
   int monthDelta(DateTime startDate, DateTime endDate) =>
@@ -20,18 +20,18 @@ class JalaliDelegate extends CalendarDelegate<DateTime> {
 
   @override
   DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
-    return JaDateTime(monthDate.year, monthDate.month + monthsToAdd);
+    return PersianDateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 
   @override
   DateTime addDaysToDate(DateTime date, int days) {
-    return JaDateTime(date.year, date.month, date.day + days);
+    return PersianDateTime(date.year, date.month, date.day + days);
   }
 
   @override
   int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
     // 0-based day of week for the month and year, with 0 representing Monday.
-    final int weekdayFromMonday = JaDateTime(year, month).weekday - 1;
+    final int weekdayFromMonday = PersianDateTime(year, month).weekday - 1;
 
     // 0-based start of week depending on the locale, with 0 representing Sunday.
     int firstDayOfWeekIndex = localizations.firstDayOfWeekIndex;
@@ -47,14 +47,14 @@ class JalaliDelegate extends CalendarDelegate<DateTime> {
 
   @override
   int getDaysInMonth(int year, int month) =>
-      JaDateTime(year, month).monthLength;
+      PersianDateTime(year, month).monthLength;
 
   @override
-  JaDateTime getMonth(int year, int month) => JaDateTime(year, month);
+  PersianDateTime getMonth(int year, int month) => PersianDateTime(year, month);
 
   @override
-  JaDateTime getDay(int year, int month, int day) =>
-      JaDateTime(year, month, day);
+  PersianDateTime getDay(int year, int month, int day) =>
+      PersianDateTime(year, month, day);
 
   @override
   String formatMonthYear(DateTime date, MaterialLocalizations localizations) {

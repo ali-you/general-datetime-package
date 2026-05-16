@@ -1,5 +1,5 @@
 import 'package:general_datetime/general_datetime.dart';
-import 'package:general_datetime/src/temp/ja_date_time.dart';
+import 'package:general_datetime/src/persian_date_time.dart';
 
 abstract class GeneralDateTimeInterface<T>
     implements Comparable<GeneralDateTimeInterface> {

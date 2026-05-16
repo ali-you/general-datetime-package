@@ -2,37 +2,37 @@ import 'package:general_datetime/src/constants.dart';
 import 'package:general_datetime/src/general_date_time_interface_2.dart';
 import 'package:general_datetime/src/gregorian_helper.dart';
 
-import '../../general_datetime.dart';
+import '../general_datetime.dart';
 
-/// Represents a date and time in the **Jalali (Persian/Iranian)** calendar system.
+/// Represents a date and time in the **Persian (Persian/Iranian)** calendar system.
 ///
-/// This class provides conversion between Gregorian and Jalali dates,
+/// This class provides conversion between Gregorian and Persian dates,
 /// along with time component support (hour, minute, second, etc).
 ///
 /// It extends the [GeneralDateTimeInterface] to support consistent behavior
 /// across multiple calendar types.
 ///
 /// ### Features:
-/// - Supports Jalali <-> Gregorian conversion.
+/// - Supports Persian <-> Gregorian conversion.
 /// - Time components (hour, minute, second, etc.) are supported.
 /// - Supports normalization of overflow values (e.g., 90 seconds becomes 1 minute 30 seconds).
 /// - Provides leap year check and weekday calculation.
-/// - Offers a consistent interface across calendars (Gregorian, Jalali, Hijri).
+/// - Offers a consistent interface across calendars (Gregorian, Persian, Hijri).
 ///
 /// ### Example:
 /// ```dart
-/// var now = JalaliDateTime.now(); // Get current Jalali date and time
+/// var now = PersianDateTime.now(); // Get current Persian date and time
 /// print(now); // 1403/1/19
 ///
-/// var jDate = JalaliDateTime(1402, 12, 30);
+/// var jDate = PersianDateTime(1402, 12, 30);
 /// print(jDate.toDateTime()); // Converts to equivalent Gregorian date
 /// ```
 ///
 /// ### Calendar Notes:
-/// The Jalali calendar is a solar calendar used in Iran and Afghanistan,
+/// The Persian calendar is a solar calendar used in Iran and Afghanistan,
 /// with highly accurate leap year rules and month lengths.
-class JaDateTime extends DateTime
-    implements GeneralDateTimeInterface2<JaDateTime> {
+class PersianDateTime extends DateTime
+    implements GeneralDateTimeInterface2<PersianDateTime> {
   // Weekday constants that are returned by [weekday] method:
   static const int monday = 1;
   static const int tuesday = 2;
@@ -78,7 +78,7 @@ class JaDateTime extends DateTime
   /// Private constructor for raw inputs
   // final bool _isUtc;
 
-  JaDateTime._internal(
+  PersianDateTime._internal(
     this.year, [
     this.month = 1,
     this.day = 1,
@@ -89,7 +89,7 @@ class JaDateTime extends DateTime
     this.microsecond = 0,
   ]) : super(year, month, day, hour, minute, second, millisecond, microsecond);
 
-  JaDateTime._internalUtc(
+  PersianDateTime._internalUtc(
     this.year, [
     this.month = 1,
     this.day = 1,
@@ -101,7 +101,7 @@ class JaDateTime extends DateTime
   ]) : super.utc(
             year, month, day, hour, minute, second, millisecond, microsecond);
 
-  factory JaDateTime._resolve(
+  factory PersianDateTime._resolve(
     int year, [
     int month = 1,
     int day = 1,
@@ -113,10 +113,10 @@ class JaDateTime extends DateTime
     bool isUtc = false,
   ]) {
     if (isUtc) {
-      return JaDateTime._internalUtc(
+      return PersianDateTime._internalUtc(
           year, month, day, hour, minute, second, millisecond, microsecond);
     }
-    return JaDateTime._internal(
+    return PersianDateTime._internal(
         year, month, day, hour, minute, second, millisecond, microsecond);
   }
 
@@ -145,7 +145,7 @@ class JaDateTime extends DateTime
 
   /// Start: Factories section
   /// Factory constructor with normalization
-  factory JaDateTime(
+  factory PersianDateTime(
     int year, [
     int month = 1,
     int day = 1,
@@ -155,7 +155,7 @@ class JaDateTime extends DateTime
     int millisecond = 0,
     int microsecond = 0,
   ]) {
-    return JaDateTime._internal(
+    return PersianDateTime._internal(
       year,
       month,
       day,
@@ -168,8 +168,8 @@ class JaDateTime extends DateTime
   }
 
   /// Factory constructor for converting from DateTime
-  factory JaDateTime.fromDateTime(DateTime dateTime) {
-    return JaDateTime._resolve(
+  factory PersianDateTime.fromDateTime(DateTime dateTime) {
+    return PersianDateTime._resolve(
       dateTime.year,
       dateTime.month,
       dateTime.day,
@@ -179,23 +179,23 @@ class JaDateTime extends DateTime
       dateTime.millisecond,
       dateTime.microsecond,
       dateTime.isUtc,
-    )._toJalali();
+    )._toPersian();
   }
 
   /// Factory constructor for current date and time
-  factory JaDateTime.now() {
+  factory PersianDateTime.now() {
     final DateTime dt = DateTime.now();
-    return JaDateTime.fromDateTime(dt);
+    return PersianDateTime.fromDateTime(dt);
   }
 
   /// Factory constructor for current date and time in UTC
-  factory JaDateTime.timestamp() {
+  factory PersianDateTime.timestamp() {
     final DateTime dt = DateTime.now().toUtc();
-    return JaDateTime.fromDateTime(dt);
+    return PersianDateTime.fromDateTime(dt);
   }
 
   /// Factory constructor in UTC with normalization
-  factory JaDateTime.utc(
+  factory PersianDateTime.utc(
     int year, [
     int month = 1,
     int day = 1,
@@ -205,35 +205,35 @@ class JaDateTime extends DateTime
     int millisecond = 0,
     int microsecond = 0,
   ]) =>
-      JaDateTime._internalUtc(
+      PersianDateTime._internalUtc(
               year, month, day, hour, minute, second, millisecond, microsecond)
           ._normalize();
 
-  factory JaDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
+  factory PersianDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         secondsSinceEpoch * 1000,
         isUtc: isUtc);
-    return JaDateTime.fromDateTime(dt);
+    return PersianDateTime.fromDateTime(dt);
   }
 
-  factory JaDateTime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
+  factory PersianDateTime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
         millisecondsSinceEpoch,
         isUtc: isUtc);
-    return JaDateTime.fromDateTime(dt);
+    return PersianDateTime.fromDateTime(dt);
   }
 
-  factory JaDateTime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
+  factory PersianDateTime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
       {bool isUtc = false}) {
     final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
         microsecondsSinceEpoch,
         isUtc: isUtc);
-    return JaDateTime.fromDateTime(dt);
+    return PersianDateTime.fromDateTime(dt);
   }
 
-  factory JaDateTime.parse(String formattedString) {
+  factory PersianDateTime.parse(String formattedString) {
     Match? match = Constants.parseFormat.firstMatch(formattedString);
     if (match != null) {
       int parseIntOrZero(String? matched) {
@@ -285,7 +285,7 @@ class JaDateTime extends DateTime
         }
       }
 
-      return JaDateTime._resolve(
+      return PersianDateTime._resolve(
         year,
         month,
         day,
@@ -303,9 +303,9 @@ class JaDateTime extends DateTime
 
   /// End: Factories section
 
-  static JaDateTime? tryParse(String formattedString) {
+  static PersianDateTime? tryParse(String formattedString) {
     try {
-      return JaDateTime.parse(formattedString);
+      return PersianDateTime.parse(formattedString);
     } on FormatException {
       return null;
     }
@@ -316,7 +316,7 @@ class JaDateTime extends DateTime
 
   /// The calendar name
   @override
-  String get name => "Jalali";
+  String get name => "Persian";
 
   /// Calculate weekday (1=Monday, 7=Saturday) according to DateTime
   @override
@@ -329,7 +329,7 @@ class JaDateTime extends DateTime
   @override
   int get monthLength => _monthLength(year, month);
 
-  /// This computes the day count within the Jalali year.
+  /// This computes the day count within the Persian year.
   @override
   int get dayOfYear {
     int dayCount = 0;
@@ -368,9 +368,9 @@ class JaDateTime extends DateTime
     return 1948321 + totalDays;
   }
 
-  /// Conversion from JalaliDateTime to DateTime (Jalali to Gregorian)
+  /// Conversion from PersianDateTime to DateTime (Persian to Gregorian)
   /// This method uses an approximate conversion via Julian day calculations.
-  /// For a given Jalali date, we compute its Julian Day Number (JD) using
+  /// For a given Persian date, we compute its Julian Day Number (JD) using
   /// an approximation formula and then convert the JD to the Gregorian date.
   @override
   DateTime toDateTime() {
@@ -403,38 +403,38 @@ class JaDateTime extends DateTime
     );
   }
 
-  /// Add a Duration to the Jalali date
+  /// Add a Duration to the Persian date
   @override
-  JaDateTime add(Duration duration) {
+  PersianDateTime add(Duration duration) {
     final DateTime result = toDateTime().add(duration);
-    return JaDateTime.fromDateTime(result);
+    return PersianDateTime.fromDateTime(result);
   }
 
-  /// Subtract a Duration from the Jalali date
+  /// Subtract a Duration from the Persian date
   @override
-  JaDateTime subtract(Duration duration) {
+  PersianDateTime subtract(Duration duration) {
     final DateTime result = toDateTime().subtract(duration);
-    return JaDateTime.fromDateTime(result);
+    return PersianDateTime.fromDateTime(result);
   }
 
   /// Convert to local time
   @override
-  JaDateTime toLocal() {
+  PersianDateTime toLocal() {
     if (!isUtc) return this;
     final localDt = toDateTime().toLocal();
-    return JaDateTime.fromDateTime(localDt);
+    return PersianDateTime.fromDateTime(localDt);
   }
 
   /// Convert to UTC time
   @override
-  JaDateTime toUtc() {
+  PersianDateTime toUtc() {
     if (isUtc) return this;
     final utcDt = toDateTime().toUtc();
-    return JaDateTime.fromDateTime(utcDt);
+    return PersianDateTime.fromDateTime(utcDt);
   }
 
-  /// Convert from Gregorian to Jalali
-  JaDateTime _toJalali() {
+  /// Convert from Gregorian to Persian
+  PersianDateTime _toPersian() {
     int jy = year - 621;
     int jdn1f = _gregorianHelper.julianDay(year, 3, _startYearMarch(jy));
     int jdn = _gregorianHelper.julianDay(year, month, day);
@@ -445,7 +445,7 @@ class JaDateTime extends DateTime
         final int jm = 1 + (k ~/ 31);
         final int jd = (k % 31) + 1;
 
-        return JaDateTime._resolve(
+        return PersianDateTime._resolve(
             jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
       } else {
         k -= 186;
@@ -457,12 +457,12 @@ class JaDateTime extends DateTime
     }
     final int jm = 7 + (k ~/ 30);
     final int jd = (k % 30) + 1;
-    return JaDateTime._resolve(
+    return PersianDateTime._resolve(
         jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
   }
 
   /// Normalize values (overflow handling)
-  JaDateTime _normalize() {
+  PersianDateTime _normalize() {
     int y = year, m = month, d = day;
     int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
     // Normalize microseconds to milliseconds
@@ -526,7 +526,7 @@ class JaDateTime extends DateTime
       m -= 12;
       y += 1;
     }
-    return JaDateTime._resolve(y, m, d, h, min, s, ms, us, isUtc);
+    return PersianDateTime._resolve(y, m, d, h, min, s, ms, us, isUtc);
   }
 
   /// Helper method to get month length
@@ -545,7 +545,7 @@ class JaDateTime extends DateTime
     return _leapAndCycle(jy) == 0;
   }
 
-  /// Shared internal helper to calculate leap status from Jalali logic.
+  /// Shared internal helper to calculate leap status from Persian logic.
   int _leapAndCycle(int jy) {
     if (jy < -61 || jy >= 3178) {
       int base = jy > 0 ? 474 : 473;
@@ -625,8 +625,8 @@ class JaDateTime extends DateTime
 // /// Returns `true` if this dateTime is before [other], otherwise `false`.
 // /// Example:
 // /// ```dart
-// /// final a = JalaliDateTime(1403, 4, 15, 10);
-// /// final b = JalaliDateTime(1403, 4, 15, 12);
+// /// final a = PersianDateTime(1403, 4, 15, 10);
+// /// final b = PersianDateTime(1403, 4, 15, 12);
 // ///
 // /// a.isBefore(b); // true
 // /// b.isBefore(a); // false
@@ -667,8 +667,8 @@ class JaDateTime extends DateTime
 // /// Returns `true` if this dateTime is after [other], otherwise `false`.
 // /// Example:
 // /// ```dart
-// /// final a = JalaliDateTime(1403, 4, 15, 12);
-// /// final b = JalaliDateTime(1403, 4, 15, 10);
+// /// final a = PersianDateTime(1403, 4, 15, 12);
+// /// final b = PersianDateTime(1403, 4, 15, 10);
 // ///
 // /// a.isAfter(b); // true
 // /// b.isAfter(a); // false
@@ -691,8 +691,8 @@ class JaDateTime extends DateTime
 // /// Returns `true` if both datetimes represent the same point in time.
 // /// Example:
 // /// ```dart
-// /// final a = JalaliDateTime(1403, 4, 15, 12, 30);
-// /// final b = JalaliDateTime(1403, 4, 15, 12, 30);
+// /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+// /// final b = PersianDateTime(1403, 4, 15, 12, 30);
 // ///
 // /// a.isAtSameMomentAs(b); // true
 // ///
@@ -717,8 +717,8 @@ class JaDateTime extends DateTime
 // /// The result is positive if this dateTime is after [other], and negative if before.
 // /// Example:
 // /// ```dart
-// /// final a = JalaliDateTime(1403, 4, 15, 12, 30);
-// /// final b = JalaliDateTime(1403, 4, 15, 11, 0);
+// /// final a = PersianDateTime(1403, 4, 15, 12, 30);
+// /// final b = PersianDateTime(1403, 4, 15, 11, 0);
 // ///
 // /// final duration = a.difference(b); // 1 hour 30 minutes
 // /// duration.inMinutes; // 90
