@@ -508,7 +508,6 @@ class HijriDateTime extends DateTime
         1;
   }
 
-
   /// Seconds since epoch
   @override
   int get secondsSinceEpoch => toDateTime().millisecondsSinceEpoch ~/ 1000;

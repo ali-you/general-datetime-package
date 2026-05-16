@@ -14,7 +14,8 @@ abstract class GeneralDateTimeInterfaceTemp<T>
     this.isUtc = false,
   ]);
 
-  static GeneralDateTimeInterfaceTemp now<T extends GeneralDateTimeInterfaceTemp>() {
+  static GeneralDateTimeInterfaceTemp
+      now<T extends GeneralDateTimeInterfaceTemp>() {
     if (T == JalaliDateTime) return JalaliDateTime.now();
     // if (T == HijriDateTime) return HijriDateTime.now();
     throw TypeError();

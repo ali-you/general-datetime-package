@@ -62,8 +62,7 @@ class PersianCalendarDelegate extends CalendarDelegate<DateTime> {
   }
 
   @override
-  String formatMediumDate(
-      DateTime date, MaterialLocalizations localizations) {
+  String formatMediumDate(DateTime date, MaterialLocalizations localizations) {
     return localizations.formatMediumDate(date);
   }
 

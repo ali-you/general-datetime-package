@@ -26,22 +26,26 @@ void main() {
     });
 
     test('Normal Year Conversion', () {
-      final PersianDateTime j = PersianDateTime.fromDateTime(DateTime(2025, 3, 1));
+      final PersianDateTime j =
+          PersianDateTime.fromDateTime(DateTime(2025, 3, 1));
       expect(j.toString(), equals("1403-12-11 00:00:00.000"));
     });
 
     test('Leap Year Conversion', () {
-      final PersianDateTime j = PersianDateTime.fromDateTime(DateTime(2024, 2, 29));
+      final PersianDateTime j =
+          PersianDateTime.fromDateTime(DateTime(2024, 2, 29));
       expect(j.toString(), equals("1402-12-10 00:00:00.000"));
     });
 
     test('Beginning of Year Conversion', () {
-      final PersianDateTime j = PersianDateTime.fromDateTime(DateTime(2025, 1, 1));
+      final PersianDateTime j =
+          PersianDateTime.fromDateTime(DateTime(2025, 1, 1));
       expect(j.toString(), equals("1403-10-12 00:00:00.000"));
     });
 
     test('End of Year Conversion', () {
-      final PersianDateTime j = PersianDateTime.fromDateTime(DateTime(2025, 12, 31));
+      final PersianDateTime j =
+          PersianDateTime.fromDateTime(DateTime(2025, 12, 31));
       expect(j.toString(), equals("1404-10-10 00:00:00.000"));
     });
 
@@ -363,7 +367,8 @@ void main() {
     });
 
     test('fromMillisecondsSinceEpoch', () {
-      final PersianDateTime j = PersianDateTime.fromMillisecondsSinceEpoch(1722782031520);
+      final PersianDateTime j =
+          PersianDateTime.fromMillisecondsSinceEpoch(1722782031520);
       expect(j.year, isNotNull);
     });
 
@@ -495,10 +500,8 @@ void main() {
     });
 
     test('Same day, different time', () {
-      final PersianDateTime morning =
-      PersianDateTime(1402, 5, 10, 8, 0, 0);
-      final PersianDateTime evening =
-      PersianDateTime(1402, 5, 10, 20, 0, 0);
+      final PersianDateTime morning = PersianDateTime(1402, 5, 10, 8, 0, 0);
+      final PersianDateTime evening = PersianDateTime(1402, 5, 10, 20, 0, 0);
 
       expect(morning.isBefore(evening), true);
       expect(evening.isAfter(morning), true);
@@ -506,23 +509,20 @@ void main() {
 
     test('Different month boundary', () {
       final PersianDateTime endOfMonth =
-      PersianDateTime(1402, 6, 31, 23, 59, 59);
+          PersianDateTime(1402, 6, 31, 23, 59, 59);
       final PersianDateTime startNextMonth =
-      PersianDateTime(1402, 7, 1, 0, 0, 0);
+          PersianDateTime(1402, 7, 1, 0, 0, 0);
       expect(endOfMonth.isBefore(startNextMonth), true);
     });
 
     test('Negative year comparison', () {
-      final PersianDateTime ancient =
-      PersianDateTime(-1000, 1, 1);
-      final PersianDateTime modern =
-      PersianDateTime(1, 1, 1);
+      final PersianDateTime ancient = PersianDateTime(-1000, 1, 1);
+      final PersianDateTime modern = PersianDateTime(1, 1, 1);
 
       expect(ancient.isBefore(modern), true);
       expect(modern.isAfter(ancient), true);
     });
   });
-
 
   ///TODO: implement this high precision test cases
   // group("Bidirectional conversion", () {
