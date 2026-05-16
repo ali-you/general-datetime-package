@@ -1,8 +1,6 @@
+import 'shared/constants.dart';
+import 'general_date_time_interface.dart';
 import 'dart:math';
-
-import 'package:general_datetime/src/general_date_time_interface.dart';
-
-import 'constants.dart';
 
 /// Represents a date and time in the **Hijri (Islamic)** calendar system
 /// using the **Umm al-Qura** calculation method.

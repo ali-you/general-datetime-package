@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/src/jalali_date_time.dart';
-import 'package:general_datetime/src/gregorian_helper.dart';
+import 'package:general_datetime/src/shared/gregorian_helper.dart';
 
 void main() {
   group('Gregorian to Jalali Conversion Single Date', () {

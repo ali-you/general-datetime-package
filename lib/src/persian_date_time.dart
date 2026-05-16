@@ -1,8 +1,6 @@
-import 'package:general_datetime/src/constants.dart';
-import 'package:general_datetime/src/general_date_time_interface.dart';
-import 'package:general_datetime/src/gregorian_helper.dart';
-
-import '../general_datetime.dart';
+import 'shared/constants.dart';
+import 'general_date_time_interface.dart';
+import 'shared/gregorian_helper.dart';
 
 /// Represents a date and time in the **Persian (Persian/Iranian)** calendar system.
 ///

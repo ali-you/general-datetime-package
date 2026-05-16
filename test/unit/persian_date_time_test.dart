@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
-import 'package:general_datetime/src/gregorian_helper.dart';
+import 'package:general_datetime/src/shared/gregorian_helper.dart';
 import 'package:general_datetime/src/persian_date_time.dart';
 
 void main() {

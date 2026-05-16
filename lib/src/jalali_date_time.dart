@@ -1,5 +1,5 @@
-import 'package:general_datetime/src/constants.dart';
-import 'package:general_datetime/src/gregorian_helper.dart';
+import 'package:general_datetime/src/shared/constants.dart';
+import 'package:general_datetime/src/shared/gregorian_helper.dart';
 
 import 'general_date_time_interface_temp.dart';
 
