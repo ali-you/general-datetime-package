@@ -1,0 +1,1 @@
+export 'src/localizations/default_persian_calendar_material_localizations.dart';

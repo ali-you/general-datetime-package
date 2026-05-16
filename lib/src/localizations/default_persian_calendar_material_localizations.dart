@@ -3,31 +3,32 @@ import 'package:flutter/material.dart';
 
 import '../persian_date_time.dart';
 
-class _JalaliMaterialLocalizationsDelegate
+class _PersianCalendarMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
-  const _JalaliMaterialLocalizationsDelegate();
+  const _PersianCalendarMaterialLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => locale.languageCode == 'en';
 
   @override
   Future<MaterialLocalizations> load(Locale locale) =>
-      DefaultJalaliMaterialLocalizations.load(locale);
+      DefaultPersianCalendarMaterialLocalizations.load(locale);
 
   @override
-  bool shouldReload(_JalaliMaterialLocalizationsDelegate old) => false;
+  bool shouldReload(_PersianCalendarMaterialLocalizationsDelegate old) => false;
 
   @override
   String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
 }
 
-class DefaultJalaliMaterialLocalizations implements MaterialLocalizations {
+class DefaultPersianCalendarMaterialLocalizations
+    implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
   /// for US English (only).
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  const DefaultJalaliMaterialLocalizations();
+  const DefaultPersianCalendarMaterialLocalizations();
 
   // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _shortWeekdays = <String>[
@@ -605,15 +606,15 @@ class DefaultJalaliMaterialLocalizations implements MaterialLocalizations {
   /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
     return SynchronousFuture<MaterialLocalizations>(
-        const DefaultJalaliMaterialLocalizations());
+        const DefaultPersianCalendarMaterialLocalizations());
   }
 
-  /// A [LocalizationsDelegate] that uses [DefaultJalaliMaterialLocalizations.load]
+  /// A [LocalizationsDelegate] that uses [DefaultPersianCalendarMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
   static const LocalizationsDelegate<MaterialLocalizations> delegate =
-      _JalaliMaterialLocalizationsDelegate();
+      _PersianCalendarMaterialLocalizationsDelegate();
 
   @override
   String remainingTextFieldCharacterCount(int remaining) {

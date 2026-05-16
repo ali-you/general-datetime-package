@@ -1,4 +1,4 @@
-import 'package:general_datetime/general_datetime.dart';
+import 'jalali_date_time.dart';
 
 abstract class GeneralDateTimeInterfaceTemp<T>
     implements Comparable<GeneralDateTimeInterfaceTemp> {
