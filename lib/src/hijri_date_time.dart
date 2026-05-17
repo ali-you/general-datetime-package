@@ -12,7 +12,7 @@ import 'dart:math';
 /// with other date systems like Gregorian and Jalali.
 ///
 /// ### Features:
-/// - Supports Jalali <-> Gregorian conversion.
+/// - Supports Hijri <-> Gregorian conversion.
 /// - Time components (hour, minute, second, etc.) are supported.
 /// - Supports normalization of overflow values (e.g., 90 seconds becomes 1 minute 30 seconds).
 /// - Provides leap year check and weekday calculation.
@@ -46,18 +46,18 @@ class HijriDateTime extends DateTime
   static const int daysPerWeek = 7;
 
   // Month constants that are returned by the [month] getter.
-  static const int farvardin = 1;
-  static const int ordibehesht = 2;
-  static const int khordad = 3;
-  static const int tir = 4;
-  static const int mordad = 5;
-  static const int shahrivar = 6;
-  static const int mehr = 7;
-  static const int aban = 8;
-  static const int azar = 9;
-  static const int dey = 10;
-  static const int bahman = 11;
-  static const int esfand = 12;
+  static const int muharram = 1;
+  static const int safar = 2;
+  static const int rabi1 = 3;
+  static const int rabi2 = 4;
+  static const int jumada1 = 5;
+  static const int jumada2 = 6;
+  static const int rajab = 7;
+  static const int shaban = 8;
+  static const int ramadan = 9;
+  static const int shawwal = 10;
+  static const int dhuqidah = 11;
+  static const int dhuhijjah = 12;
   static const int monthsPerYear = 12;
 
   @override
@@ -292,11 +292,11 @@ class HijriDateTime extends DateTime
   @override
   String get name => "Hijri";
 
-  /// Calculate weekday (0=Saturday, 6=Friday)
+  /// Calculate weekday (1=Monday, 7=Sunday)
   @override
   int get weekday {
     DateTime gregorian = toDateTime();
-    return (gregorian.weekday) % 7;
+    return gregorian.weekday;
   }
 
   /// Get days in the current month
@@ -529,9 +529,9 @@ class HijriDateTime extends DateTime
   /// - A positive integer if `this` occurs after [other]
   /// Example:
   /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 10);
-  /// final b = PersianDateTime(1403, 4, 15, 12);
-  /// final c = DateTime(2024, 7, 5, 12);
+  /// final a = HijriDateTime(1445, 9, 15, 10);
+  /// final b = HijriDateTime(1445, 9, 15, 12);
+  /// final c = DateTime(2024, 3, 25, 12);
   ///
   /// a.compareTo(b); // < 0
   /// b.compareTo(a); // > 0
@@ -556,13 +556,13 @@ class HijriDateTime extends DateTime
   /// Returns `true` if this dateTime is before [other], otherwise `false`.
   /// Example:
   /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 10);
-  /// final b = PersianDateTime(1403, 4, 15, 12);
+  /// final a = HijriDateTime(1445, 9, 15, 10);
+  /// final b = HijriDateTime(1445, 9, 15, 12);
   ///
   /// a.isBefore(b); // true
   /// b.isBefore(a); // false
   ///
-  /// final native = DateTime(2025, 7, 6, 14);
+  /// final native = DateTime(2025, 3, 26, 14);
   /// b.isBefore(native); // true or false depending on internal conversion
   /// ```
 
@@ -583,13 +583,13 @@ class HijriDateTime extends DateTime
   /// Returns `true` if this dateTime is after [other], otherwise `false`.
   /// Example:
   /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 12);
-  /// final b = PersianDateTime(1403, 4, 15, 10);
+  /// final a = HijriDateTime(1445, 9, 15, 12);
+  /// final b = HijriDateTime(1445, 9, 15, 10);
   ///
   /// a.isAfter(b); // true
   /// b.isAfter(a); // false
   ///
-  /// final native = DateTime(2025, 7, 6, 14);
+  /// final native = DateTime(2025, 3, 26, 14);
   /// b.isAfter(native); // true or false depending on internal conversion
   /// ```
 
@@ -610,12 +610,12 @@ class HijriDateTime extends DateTime
   /// Returns `true` if both datetimes represent the same point in time.
   /// Example:
   /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
-  /// final b = PersianDateTime(1403, 4, 15, 12, 30);
+  /// final a = HijriDateTime(1445, 9, 15, 12, 30);
+  /// final b = HijriDateTime(1445, 9, 15, 12, 30);
   ///
   /// a.isAtSameMomentAs(b); // true
   ///
-  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// final native = DateTime(2025, 3, 26, 14, 0);
   /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
   /// ```
 
@@ -636,13 +636,13 @@ class HijriDateTime extends DateTime
   /// The result is positive if this dateTime is after [other], and negative if before.
   /// Example:
   /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
-  /// final b = PersianDateTime(1403, 4, 15, 11, 0);
+  /// final a = HijriDateTime(1445, 9, 15, 12, 30);
+  /// final b = HijriDateTime(1445, 9, 15, 11, 0);
   ///
   /// final duration = a.difference(b); // 1 hour 30 minutes
   /// duration.inMinutes; // 90
   ///
-  /// final native = DateTime(2025, 7, 6, 14, 0);
+  /// final native = DateTime(2025, 3, 26, 14, 0);
   /// a.difference(native);
   /// ```
 

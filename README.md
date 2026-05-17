@@ -63,6 +63,9 @@ value normalization gracefully.
   a consistent string
   representation.
 
+- **Flutter Integration:**
+  Full support for `MaterialLocalizations` and `CalendarDelegate` for both Persian and Hijri calendars, allowing easy integration with Flutter's `DatePicker`.
+
 ## Installation
 
 To use this plugin, you can add it to your Flutter project in one of two ways:
@@ -88,8 +91,9 @@ flutter pub add general_datetime
 ## Usage
 
 Import the package into your Dart code. The library exposes a unified interface for working with
-dates across multiple calendar systems. For example, you can work with the Persian calendar using the
-provided implementation:
+dates across multiple calendar systems.
+
+### Persian Calendar Example
 
 ```dart
 import 'package:general_datetime/general_datetime.dart';
@@ -102,22 +106,80 @@ void main() {
   // Create a Persian date directly (auto-normalization applies):
   PersianDateTime directDate = PersianDateTime(1403, 12, 11, 14, 30);
   print('Direct Persian date: ${directDate.toString()}');
+}
+```
 
+### Hijri Calendar Example
+
+```dart
+import 'package:general_datetime/general_datetime.dart';
+
+void main() {
+  // Create a Gregorian date and convert it to Hijri dates:
+  HijriDateTime hDate = HijriDateTime.fromDateTime(DateTime(2025, 3, 1));
+  print('Converted to Hijri date: ${hDate.toString()}'); // e.g. "1446-08-30 00:00:00.000"
+
+  // Create a Hijri date directly:
+  HijriDateTime directDate = HijriDateTime(1446, 9, 1);
+  print('Direct Hijri date: ${directDate.toString()}');
+}
+```
+
+### Flutter Integration (Delegates & Localization)
+
+To use these calendars with Flutter's built-in `CalendarDatePicker` or other Material widgets, you need to provide the appropriate `localizationsDelegates` and `calendarDelegate`.
+
+#### 1. Setup Localization Delegates
+
+In your `MaterialApp`, add the package's localization delegates:
+
+```dart
+import 'package:general_datetime/default_localizations.dart';
+
+MaterialApp(
+  localizationsDelegates: [
+    DefaultPersianCalendarMaterialLocalizations.delegate,
+    DefaultHijriCalendarMaterialLocalizations.delegate,
+    // ... other delegates
+  ],
+  // ...
+)
+```
+
+#### 2. Use CalendarDelegate in DatePicker
+
+Pass the corresponding `CalendarDelegate` to the `CalendarDatePicker` widget:
+
+```dart
+import 'package:general_datetime/delegates.dart';
+
+CalendarDatePicker(
+  initialDate: HijriDateTime.now(),
+  firstDate: HijriDateTime(1440, 1, 1),
+  lastDate: HijriDateTime(1460, 12, 31),
+  calendarDelegate: HijriCalendarDelegate(), // Or PersianCalendarDelegate()
+  onDateChanged: (DateTime date) {
+    print("Selected date: $date");
+  },
+)
+```
+
+### Generic Usage
+
+```dart
+void main() {
   // Perform arithmetic:
-  PersianDateTime futureDate = pDate.add(Duration(days: 5, hours: 3));
-  print('Future Date: ${futureDate.toString()}');
+  var futureDate = someDate.add(Duration(days: 5, hours: 3));
 
   // Compare dates:
-  bool isBefore = pDate.isBefore(PersianDateTime(1403, 12, 12));
-  print('Is pDate before 1403-12-12? $isBefore');
+  bool isBefore = someDate.isBefore(otherDate);
 
   // Parse a date string:
-  PersianDateTime parsed = PersianDateTime.parse("1403-12-11 14:30:45.123456Z");
-  print('Parsed Date: ${parsed.toString()}');
+  var parsed = HijriDateTime.parse("1446-09-01 14:30:45.123456Z");
 
   // Time zone information:
-  print('Time Zone Name: ${pDate.timeZoneName}');
-  print('Time Zone Offset: ${pDate.timeZoneOffset}');
+  print('Time Zone Name: ${someDate.timeZoneName}');
+  print('Time Zone Offset: ${someDate.timeZoneOffset}');
 }
 ```
 
@@ -128,7 +190,7 @@ void main() {
 - ### Factory Constructors
 
     - `fromDateTime(DateTime datetime)`
-      Converts a Gregorian [DateTime] to a calendar-specific date (e.g. PersianDateTime).
+      Converts a Gregorian [DateTime] to a calendar-specific date (e.g. PersianDateTime, HijriDateTime).
 
     - `now()`
       Returns the current date and time in the default calendar.
@@ -189,8 +251,8 @@ void main() {
 **Example**
 
 ```dart
-
 var nowPersian = GeneralDateTimeInterface.now<PersianDateTime>();
+var nowHijri = GeneralDateTimeInterface.now<HijriDateTime>();
 ```
 
 > [!NOTE]
@@ -207,41 +269,6 @@ additional calendar systems.
 > conversion function (e.g., _toCustomCalendar()) that converts from the base calendar (usually
 > Gregorian) to your custom calendar. These helper functions must be private and only used within
 > the factory constructors so that users always receive a fully normalized, valid date instance.
-
-> [!TIP]
-> When adding support for a new calendar, it’s recommended to implement factory constructors that
-> use a private “raw” constructor. This raw factory should create an instance with unmodified input
-> data. Then, call private helper methods (e.g., _normalize() and a conversion method such as
-> _toCustomCalendar()) to validate and adjust the values. This approach keeps raw data creation
-> separate from data manipulation, making the code more modular and easier to debug.
-
-[//]: # (> [!NOTE])
-
-[//]: # (> Useful information that users should know, even when skimming content.)
-
-[//]: # ()
-
-[//]: # (> [!TIP])
-
-[//]: # (> Helpful advice for doing things better or more easily.)
-
-[//]: # ()
-
-[//]: # (> [!IMPORTANT])
-
-[//]: # (> Key information users need to know to achieve their goal.)
-
-[//]: # ()
-
-[//]: # (> [!WARNING])
-
-[//]: # (> Urgent info that needs immediate user attention to avoid problems.)
-
-[//]: # ()
-
-[//]: # (> [!CAUTION])
-
-[//]: # (> Advises about risks or negative outcomes of certain actions.)
 
 ## Calendars
 
@@ -264,6 +291,12 @@ the spring equinox) synchronized with the real equinox with minimal drift over m
 
 Read
 more: [Persian Calendar (EMP) paper](https://www.astro.uni.torun.pl/~kb/Papers/EMP/PersianC-EMP.htm)
+
+### Hijri Calendar (Umm al-Qura)
+
+The Hijri calendar is a lunar calendar consisting of 12 months in a year of 354 or 355 days. This implementation uses the **Umm al-Qura** calculation method, which is the official calendar of Saudi Arabia and is widely used for religious and administrative purposes. It is based on astronomical calculations of the moon's position. 
+
+Leap years in this system are determined by a 30-year cycle where years 2, 5, 7, 10, 13, 16, 18, 21, 24, 26, and 29 are leap years. Similar to the Persian implementation, it uses Julian Day Numbers for precise conversion between Gregorian and Hijri systems and supports full normalization for overflow and underflow in all date and time components.
 
 ## Contributions
 

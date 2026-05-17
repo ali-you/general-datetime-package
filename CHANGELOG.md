@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.0]
+- Added `DefaultHijriCalendarMaterialLocalizations` for Hijri calendar support in Material widgets.
+- Added `HijriCalendarDelegate` for Hijri calendar integration.
+- Exported new Hijri localizations and delegates.
+- Updated `README.md` and documentation
+
 ## [2.0.0]
 - Migrated all interfaces to the `DateTime` wrapper.
 - Updated `README.md` with new initialization snippets.
