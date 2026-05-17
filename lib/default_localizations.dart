@@ -1,1 +1,2 @@
+export 'src/localizations/default_hijri_calendar_material_localizations.dart';
 export 'src/localizations/default_persian_calendar_material_localizations.dart';

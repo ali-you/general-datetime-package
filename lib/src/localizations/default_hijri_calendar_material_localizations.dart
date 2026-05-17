@@ -1,34 +1,34 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../persian_date_time.dart';
+import '../hijri_date_time.dart';
 
-class _PersianCalendarMaterialLocalizationsDelegate
+class _HijriCalendarMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
-  const _PersianCalendarMaterialLocalizationsDelegate();
+  const _HijriCalendarMaterialLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => locale.languageCode == 'en';
 
   @override
   Future<MaterialLocalizations> load(Locale locale) =>
-      DefaultPersianCalendarMaterialLocalizations.load(locale);
+      DefaultHijriCalendarMaterialLocalizations.load(locale);
 
   @override
-  bool shouldReload(_PersianCalendarMaterialLocalizationsDelegate old) => false;
+  bool shouldReload(_HijriCalendarMaterialLocalizationsDelegate old) => false;
 
   @override
   String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
 }
 
-class DefaultPersianCalendarMaterialLocalizations
+class DefaultHijriCalendarMaterialLocalizations
     implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
   /// for US English (only).
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  const DefaultPersianCalendarMaterialLocalizations();
+  const DefaultHijriCalendarMaterialLocalizations();
 
   // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _shortWeekdays = <String>[
@@ -63,61 +63,43 @@ class DefaultPersianCalendarMaterialLocalizations
   ];
 
   static const List<String> _shortMonths = <String>[
-    'Far',
-    'Ord',
-    'Kho',
-    'Tir',
-    'Mor',
+    'Muh',
+    'Saf',
+    'Ra1',
+    'Ra2',
+    'Ju1',
+    'Ju2',
+    'Raj',
     'Sha',
-    'Meh',
-    'Aba',
-    'Aza',
-    'Dey',
-    'Bah',
-    'Esf',
+    'Ram',
+    'Shaw',
+    'DhuQ',
+    'DhuH',
   ];
 
   static const List<String> _months = <String>[
-    'Farvardin',
-    'Ordibehesht',
-    'Khordad',
-    'Tir',
-    'Mordad',
-    'Shahrivar',
-    'Mehr',
-    'Aban',
-    'Azar',
-    'Dey',
-    'Bahman',
-    'Esfand',
+    'Muharram',
+    'Safar',
+    "Rabi' al-Awwal",
+    "Rabi' al-Thani",
+    'Jumada al-Awwal',
+    'Jumada al-Thani',
+    'Rajab',
+    "Sha'ban",
+    'Ramadan',
+    'Shawwal',
+    'Dhu al-Qi\'dah',
+    'Dhu al-Hijjah',
   ];
 
-  /// Returns the number of days in a month, according to the proleptic
-  /// Gregorian calendar.
-  ///
-  /// This applies the leap year logic introduced by the Gregorian reforms of
-  /// 1582. It will not give valid results for dates prior to that time.
+  /// Returns the number of days in a month.
   int _getDaysInMonth(int year, int month) {
-    if (month == PersianDateTime.esfand) {
-      final bool isLeapYear = PersianDateTime(year).isLeapYear;
+    if (month == 12) {
+      final bool isLeapYear = HijriDateTime(year).isLeapYear;
       if (isLeapYear) return 30;
       return 29;
     }
-    const List<int> daysInMonth = <int>[
-      31,
-      31,
-      31,
-      31,
-      31,
-      31,
-      30,
-      30,
-      30,
-      30,
-      30,
-      -1
-    ];
-    return daysInMonth[month - 1];
+    return (month % 2 == 1) ? 30 : 29;
   }
 
   @override
@@ -157,7 +139,7 @@ class DefaultPersianCalendarMaterialLocalizations
 
   @override
   String formatCompactDate(DateTime date) {
-    // Assumes IR dd/mm/yyyy format
+    // Assumes dd/mm/yyyy format
     final String month = _formatTwoDigitZeroPad(date.month);
     final String day = _formatTwoDigitZeroPad(date.day);
     final String year = date.year.toString().padLeft(4, '0');
@@ -200,7 +182,7 @@ class DefaultPersianCalendarMaterialLocalizations
   DateTime? parseCompactDate(String? inputString) {
     if (inputString == null) return null;
 
-    // Assumes Iran dd/mm/yyyy format
+    // Assumes dd/mm/yyyy format
     final List<String> inputParts = inputString.split('/');
     if (inputParts.length != 3) return null;
 
@@ -216,7 +198,7 @@ class DefaultPersianCalendarMaterialLocalizations
     }
 
     try {
-      return PersianDateTime(year, month, day);
+      return HijriDateTime(year, month, day);
     } on ArgumentError {
       return null;
     }
@@ -606,15 +588,15 @@ class DefaultPersianCalendarMaterialLocalizations
   /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
     return SynchronousFuture<MaterialLocalizations>(
-        const DefaultPersianCalendarMaterialLocalizations());
+        const DefaultHijriCalendarMaterialLocalizations());
   }
 
-  /// A [LocalizationsDelegate] that uses [DefaultPersianCalendarMaterialLocalizations.load]
+  /// A [LocalizationsDelegate] that uses [DefaultHijriCalendarMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
   static const LocalizationsDelegate<MaterialLocalizations> delegate =
-      _PersianCalendarMaterialLocalizationsDelegate();
+      _HijriCalendarMaterialLocalizationsDelegate();
 
   @override
   String remainingTextFieldCharacterCount(int remaining) {
