@@ -1,5 +1,4 @@
 import 'package:general_datetime/general_datetime.dart';
-import 'package:general_datetime/src/persian_date_time.dart';
 
 abstract class GeneralDateTimeInterface<T> {
   static GeneralDateTimeInterface now<T extends GeneralDateTimeInterface>() {
