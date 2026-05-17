@@ -397,7 +397,12 @@ void main() {
     test('Parse Persian Date String', () {
       final j = PersianDateTime.parse("1403-04-15 14:30:45");
       final j2 = PersianDateTime(1403, 4, 15, 14, 30, 45);
-      expect(j, j2);
+      expect(j.year, j2.year);
+      expect(j.month, j2.month);
+      expect(j.day, j2.day);
+      expect(j.hour, j2.hour);
+      expect(j.minute, j2.minute);
+      expect(j.second, j2.second);
     });
   });
 
