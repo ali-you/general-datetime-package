@@ -1,14 +1,8 @@
 # Changelog
 
-## [2.0.0] - 2024-07-05
-
-### ⚠️ Breaking Changes
+## [2.0.0]
 - Migrated all interfaces to the `DateTime` wrapper.
-
-### 📚 Documentation
 - Updated `README.md` with new initialization snippets.
-
-### 🛠 Internal Changes
 - Added 15 new test cases in `DateTimeTests.kt` covering timezone offsets and leap years.
 
 ## [1.2.2]
