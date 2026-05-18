@@ -18,9 +18,6 @@
 <a href="https://github.com/ali-you/general-datetime-package">
    <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/general-datetime-package">
 </a>
-<a href="https://github.com/ali-you/general-datetime-package">
-   <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/general-datetime-package">
-</a>
 
 ![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
 
@@ -202,23 +199,6 @@ You can extend `GeneralDateTimeInterface` to support additional calendar systems
 > Ensure you implement a robust `_normalize()` method to handle invalid inputs (e.g., month 13, day 32) and a conversion path via Julian Day Number for accuracy.
 
 ## Calendars
-
-### Persian Calendar
-
-The Persian calendar (Jalali) is a solar calendar first formalized in 1079 CE under Omar Khayyam
-that measures years by the true motion of the Earth around the Sun, yielding an average year length
-of approximately 365.2424 days—more accurate over centuries than the Gregorian’s 365.2425-day
-average. It begins its era on the vernal equinox of 622 CE (the Hijra), and structures time into
-twelve months: the first six of 31 days, the next five of 30 days, and the final month of 29 days in
-a common year or 30 days in a leap year. Leap years follow an intricate 33-year cycle (with
-occasional 29- or 37-year adjustments), tracked in code by a series of “break points” that align
-groups of eight leap years within each cycle. Converting between Persian dates and Gregorian dates uses the
-Julian Day Number (JDN) as an intermediary—counting days from a fixed epoch—then applying standard
-astronomical floor-division formulas to translate JDN to Gregorian and back. Overflow or negative
-values in any date or time component are normalized by carrying into higher or lower units, so that
-inputs like “month 13” or “day 0” correctly wrap into valid Persian dates. This blend of astronomical
-anchoring, cycle-based leap determination, and normalization yields a calendar that keeps Nowruz (
-the spring equinox) synchronized with the real equinox with minimal drift over millennia.
 
 ### Persian Calendar
 
