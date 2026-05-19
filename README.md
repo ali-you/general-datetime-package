@@ -29,14 +29,6 @@ value normalization gracefully.
 
 ## Related Packages
 
-A Flutter/Dart Package for working with dates across several calendar systems. Using a unified
-interface, you can convert, manipulate, and compare dates in Gregorian, Persian (Jalali),
-Hijri (Umm Al-Qura), and other
-calendar systems—all while preserving time components and handling timezone, leap year, and negative
-value normalization gracefully.
-
-## Related Packages
-
 | Version                                                                                                                      | Package                                                             | Description                                                             |
 |------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|-------------------------------------------------------------------------|
 | [![general_date_format](https://img.shields.io/pub/v/general_date_format.svg)](https://pub.dev/packages/general_date_format) | [general_date_format](https://pub.dev/packages/general_date_format) | Date formatting for multiple calendar systems with localization support |
