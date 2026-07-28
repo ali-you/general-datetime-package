@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- Replaced the approximate tabular Hijri implementation with the official
+  Unicode ICU/OpenJDK Umm al-Qura month data for AH 1300 through AH 1600.
+- Rebuilt Hijri conversion, normalization, parsing, UTC/local handling, epoch
+  factories, arithmetic, equality, and `copyWith` around the true native
+  `DateTime` instant.
+- Made unsupported Umm al-Qura dates fail explicitly instead of silently
+  extrapolating another Islamic calendar.
+- Made `HijriCalendarDelegate` own Hijri formatting and parsing so it remains
+  correct under Gregorian or Persian ambient Material localizations.
+- Added exhaustive calendar, boundary, precision, parsing, delegate, and widget
+  tests, independently cross-validated with ICU and OpenJDK.
+- Raised the declared Flutter minimum to 3.32.0, where `CalendarDelegate` is
+  available on the stable channel.
+
 ## [2.1.0]
 - Added `DefaultHijriCalendarMaterialLocalizations` for Hijri calendar support in Material widgets.
 - Added `HijriCalendarDelegate` for Hijri calendar integration.

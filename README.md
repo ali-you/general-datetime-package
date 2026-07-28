@@ -109,7 +109,7 @@ void main() {
 void main() {
   // Create a Gregorian date and convert it to Hijri dates:
   HijriDateTime hDate = HijriDateTime.fromDateTime(DateTime(2025, 3, 1));
-  print(hDate.toString()); // 1446-08-30 00:00:00.000
+  print(hDate.toString()); // 1446-09-01 00:00:00.000
 
   // Create a Hijri date directly:
   HijriDateTime directDate = HijriDateTime(1446, 9, 1);
@@ -118,26 +118,11 @@ void main() {
 
 ## Flutter Integration (Localization & Delegates)
 
-To use these calendars with Flutter's Material widgets like `CalendarDatePicker`, you need to configure `localizationsDelegates` and `calendarDelegate`.
+Use the matching `CalendarDelegate` with Flutter Material date pickers. The
+Hijri delegate owns its Umm al-Qura formatting and parsing, so it does not need
+a replacement global `MaterialLocalizations`.
 
-### 1. Configure MaterialApp
-
-Add the localization delegates to your `MaterialApp`:
-
-```dart
-import 'package:general_datetime/default_localizations.dart';
-
-MaterialApp(
-  localizationsDelegates: [
-    DefaultPersianCalendarMaterialLocalizations.delegate,
-    DefaultHijriCalendarMaterialLocalizations.delegate,
-    // Add other delegates...
-  ],
-  // ...
-)
-```
-
-### 2. Use with CalendarDatePicker
+### Use with CalendarDatePicker
 
 Pass the corresponding delegate to change the calendar system:
 
@@ -145,17 +130,21 @@ Pass the corresponding delegate to change the calendar system:
 import 'package:general_datetime/delegates.dart';
 
 CalendarDatePicker(
-  initialDate: PersianDateTime.now(),
-  firstDate: PersianDateTime(1400, 1, 1),
-  lastDate: PersianDateTime(1450, 12, 31),
-  calendarDelegate: PersianCalendarDelegate(),
+  initialDate: HijriDateTime.now(),
+  firstDate: HijriDateTime(1440, 1, 1),
+  lastDate: HijriDateTime(1460, 12, 29),
+  calendarDelegate: HijriCalendarDelegate(),
   onDateChanged: (DateTime date) {
     print("Selected: $date");
   },
 )
 ```
 
-For Hijri, use `HijriCalendarDelegate()` and `HijriDateTime`.
+Do not register the Persian and Hijri replacement localization delegates in the
+same `MaterialApp`: both provide `MaterialLocalizations`, so Flutter can load
+only one of them for a locale. If a Persian picker needs the legacy Persian
+localization, wrap that picker in `Localizations.override`. The Hijri delegate
+works independently of whichever Material localization is active.
 
 ## API Overview
 
@@ -188,7 +177,8 @@ var nowHijri = GeneralDateTimeInterface.now<HijriDateTime>();
 You can extend `GeneralDateTimeInterface` to support additional calendar systems.
 
 > [!IMPORTANT]
-> Ensure you implement a robust `_normalize()` method to handle invalid inputs (e.g., month 13, day 32) and a conversion path via Julian Day Number for accuracy.
+> Ensure custom calendars define their supported range, normalization rules,
+> and an independently verified conversion model.
 
 ## Calendars
 
@@ -214,9 +204,20 @@ more: [Persian Calendar (EMP) paper](https://www.astro.uni.torun.pl/~kb/Papers/E
 
 ### Hijri Calendar (Umm al-Qura)
 
-The Hijri calendar is a lunar calendar consisting of 12 months in a year of 354 or 355 days. This implementation uses the **Umm al-Qura** calculation method, which is the official calendar of Saudi Arabia and is widely used for religious and administrative purposes. It is based on astronomical calculations of the moon's position. 
+The Hijri calendar is lunar and has 12 months. This implementation uses the
+published **Umm al-Qura** month data used by Unicode ICU and OpenJDK, rather
+than the repeating 30-year arithmetic Islamic calendar. The verified range is
+AH 1300-01-01 through AH 1600-12-30 (Gregorian 1882-11-12 through
+2174-11-25). Dates outside that finite range throw `RangeError`; the
+implementation never silently falls back to a different Hijri calendar.
 
-Leap years in this system are determined by a 30-year cycle where years 2, 5, 7, 10, 13, 16, 18, 21, 24, 26, and 29 are leap years. Similar to the Persian implementation, it uses Julian Day Numbers for precise conversion between Gregorian and Hijri systems and supports full normalization for overflow and underflow in all date and time components.
+Month lengths and 354/355-day years come directly from the Umm al-Qura data.
+Gregorian conversion, UTC/local behavior, parsing, epoch constructors,
+arithmetic, and overflow normalization all preserve the native `DateTime`
+instant at microsecond precision.
+
+Data provenance and the Unicode license notice are recorded in
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## Contributions
 

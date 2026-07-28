@@ -1,51 +1,33 @@
-import 'shared/constants.dart';
 import 'general_date_time_interface.dart';
-import 'dart:math';
+import 'shared/constants.dart';
+import 'shared/umm_al_qura_data.dart';
 
-/// Represents a date and time in the **Hijri (Islamic)** calendar system
-/// using the **Umm al-Qura** calculation method.
+/// A date and time in Saudi Arabia's Umm al-Qura calendar.
 ///
-/// This class allows seamless handling of Islamic calendar dates,
-/// with full time component support (hour, minute, second, etc.).
+/// Umm al-Qura is a published, data-backed calendar. It is not the arithmetic
+/// (civil/tabular) Islamic calendar, and it must not be extrapolated with a
+/// repeating leap-year formula. This implementation therefore supports only
+/// the verified data range AH [minimumYear] through AH [maximumYear].
+/// Unsupported dates throw [RangeError] instead of silently changing calendar
+/// systems.
 ///
-/// It extends [GeneralDateTimeInterface] to maintain consistency
-/// with other date systems like Gregorian and Jalali.
-///
-/// ### Features:
-/// - Supports Hijri <-> Gregorian conversion.
-/// - Time components (hour, minute, second, etc.) are supported.
-/// - Supports normalization of overflow values (e.g., 90 seconds becomes 1 minute 30 seconds).
-/// - Provides leap year check and weekday calculation.
-/// - Offers a consistent interface across calendars (Gregorian, Jalali, Hijri).
-///
-/// ### Example:
-/// ```dart
-/// var now = HijriDateTime.now(); // Current Hijri date (Umm al-Qura)
-/// print(now); // 1446/9/28
-///
-/// var hDate = HijriDateTime(1445, 10, 1);
-/// print(hDate.toDateTime()); // Converts to corresponding Gregorian date
-/// ```
-///
-/// ### Calendar Notes:
-/// The Hijri calendar is a **lunar calendar** consisting of 12 months.
-/// The Umm al-Qura system is based on astronomical calculations and is the official
-/// calendar of Saudi Arabia, commonly used for religious observances.
-///
-/// > Note: Dates may differ slightly from observational Hijri calendars used in other countries.
+/// Instances retain the exact native [DateTime] instant internally. Calendar
+/// fields such as [year], [month], and [day] are exposed in Umm al-Qura, while
+/// epoch values, equality, time-zone data, and comparisons use the true
+/// Gregorian instant.
 class HijriDateTime extends DateTime
     implements GeneralDateTimeInterface<HijriDateTime> {
-  // Weekday constants that are returned by [weekday] method:
-  static const int monday = 1;
-  static const int tuesday = 2;
-  static const int wednesday = 3;
-  static const int thursday = 4;
-  static const int friday = 5;
-  static const int saturday = 6;
-  static const int sunday = 7;
-  static const int daysPerWeek = 7;
+  // Weekday constants returned by [weekday].
+  static const int monday = DateTime.monday;
+  static const int tuesday = DateTime.tuesday;
+  static const int wednesday = DateTime.wednesday;
+  static const int thursday = DateTime.thursday;
+  static const int friday = DateTime.friday;
+  static const int saturday = DateTime.saturday;
+  static const int sunday = DateTime.sunday;
+  static const int daysPerWeek = DateTime.daysPerWeek;
 
-  // Month constants that are returned by the [month] getter.
+  // Month constants returned by [month].
   static const int muharram = 1;
   static const int safar = 2;
   static const int rabi1 = 3;
@@ -60,68 +42,73 @@ class HijriDateTime extends DateTime
   static const int dhuhijjah = 12;
   static const int monthsPerYear = 12;
 
+  /// First supported Umm al-Qura year.
+  static const int minimumYear = UmmAlQuraData.minimumYear;
+
+  /// Last supported Umm al-Qura year.
+  static const int maximumYear = UmmAlQuraData.maximumYear;
+
+  static const int _microsecondsPerMillisecond = 1000;
+  static const int _microsecondsPerSecond = 1000000;
+  static const int _microsecondsPerMinute = 60 * _microsecondsPerSecond;
+  static const int _microsecondsPerHour = 60 * _microsecondsPerMinute;
+  static const int _microsecondsPerDay = 24 * _microsecondsPerHour;
+
+  static final DateTime _gregorianEpoch = DateTime.utc(
+    UmmAlQuraData.epochGregorianYear,
+    UmmAlQuraData.epochGregorianMonth,
+    UmmAlQuraData.epochGregorianDay,
+  );
+
+  /// Cumulative days at the start of each supported year, plus a final end
+  /// sentinel. Entry zero is the start of AH 1300.
+  static final List<int> _yearStartDays = _buildYearStartDays();
+
+  static int get _supportedDayCount => _yearStartDays.last;
+
   @override
   final int year;
+
   @override
   final int month;
+
   @override
   final int day;
+
   @override
   final int hour;
+
   @override
   final int minute;
+
   @override
   final int second;
+
   @override
   final int millisecond;
+
   @override
   final int microsecond;
 
-  /// Private constructor for raw inputs
-  HijriDateTime._internal(
-    this.year, [
-    this.month = 1,
-    this.day = 1,
-    this.hour = 0,
-    this.minute = 0,
-    this.second = 0,
-    this.millisecond = 0,
-    this.microsecond = 0,
-  ]) : super(year, month, day, hour, minute, second, millisecond, microsecond);
+  final int _dayOffset;
 
-  HijriDateTime._internalUtc(
-    this.year, [
-    this.month = 1,
-    this.day = 1,
-    this.hour = 0,
-    this.minute = 0,
-    this.second = 0,
-    this.millisecond = 0,
-    this.microsecond = 0,
-  ]) : super.utc(
-            year, month, day, hour, minute, second, millisecond, microsecond);
+  HijriDateTime._fromResolved(_ResolvedHijriDateTime resolved)
+      : year = resolved.year,
+        month = resolved.month,
+        day = resolved.day,
+        hour = resolved.dateTime.hour,
+        minute = resolved.dateTime.minute,
+        second = resolved.dateTime.second,
+        millisecond = resolved.dateTime.millisecond,
+        microsecond = resolved.dateTime.microsecond,
+        _dayOffset = resolved.dayOffset,
+        super.fromMicrosecondsSinceEpoch(
+          resolved.dateTime.microsecondsSinceEpoch,
+          isUtc: resolved.dateTime.isUtc,
+        );
 
-  factory HijriDateTime._resolve(
-    int year, [
-    int month = 1,
-    int day = 1,
-    int hour = 0,
-    int minute = 0,
-    int second = 0,
-    int millisecond = 0,
-    int microsecond = 0,
-    bool isUtc = false,
-  ]) {
-    if (isUtc) {
-      return HijriDateTime._internalUtc(
-          year, month, day, hour, minute, second, millisecond, microsecond);
-    }
-    return HijriDateTime._internal(
-        year, month, day, hour, minute, second, millisecond, microsecond);
-  }
-
-  /// Start: Factories section
-  /// Factory constructor with normalization
+  /// Creates a local Umm al-Qura date, normalizing overflowing components in
+  /// the same style as [DateTime.new].
   factory HijriDateTime(
     int year, [
     int month = 1,
@@ -132,46 +119,38 @@ class HijriDateTime extends DateTime
     int millisecond = 0,
     int microsecond = 0,
   ]) {
-    return HijriDateTime._internal(
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-    )._normalize();
+    return HijriDateTime._fromResolved(
+      _resolveHijriFields(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        isUtc: false,
+      ),
+    );
   }
 
-  /// Factory constructor for converting from DateTime
+  /// Converts a native Gregorian [dateTime] to Umm al-Qura without losing its
+  /// instant, precision, or UTC/local representation.
   factory HijriDateTime.fromDateTime(DateTime dateTime) {
-    return HijriDateTime._resolve(
-      dateTime.year,
-      dateTime.month,
-      dateTime.day,
-      dateTime.hour,
-      dateTime.minute,
-      dateTime.second,
-      dateTime.millisecond,
-      dateTime.microsecond,
-      dateTime.isUtc,
-    )._toHijri();
+    return HijriDateTime._fromResolved(
+      _resolveDateTime(_nativeCopy(dateTime)),
+    );
   }
 
-  /// Factory constructor for current date and time
-  factory HijriDateTime.now() {
-    DateTime dt = DateTime.now();
-    return HijriDateTime.fromDateTime(dt);
-  }
+  /// The current local date and time in Umm al-Qura.
+  factory HijriDateTime.now() => HijriDateTime.fromDateTime(DateTime.now());
 
-  /// Factory constructor for current date and time in UTC
-  factory HijriDateTime.timestamp() {
-    final DateTime dt = DateTime.now().toUtc();
-    return HijriDateTime.fromDateTime(dt);
-  }
+  /// The current UTC date and time in Umm al-Qura.
+  factory HijriDateTime.timestamp() =>
+      HijriDateTime.fromDateTime(DateTime.timestamp());
 
-  /// Factory constructor in UTC with normalization
+  /// Creates a UTC Umm al-Qura date, normalizing overflowing components in the
+  /// same style as [DateTime.utc].
   factory HijriDateTime.utc(
     int year, [
     int month = 1,
@@ -181,88 +160,9 @@ class HijriDateTime extends DateTime
     int second = 0,
     int millisecond = 0,
     int microsecond = 0,
-  ]) =>
-      HijriDateTime._internalUtc(
-              year, month, day, hour, minute, second, millisecond, microsecond)
-          ._normalize();
-
-  factory HijriDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
-      {bool isUtc = false}) {
-    final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
-        secondsSinceEpoch * 1000,
-        isUtc: isUtc);
-    return HijriDateTime.fromDateTime(dt);
-  }
-
-  factory HijriDateTime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
-      {bool isUtc = false}) {
-    final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
-        millisecondsSinceEpoch,
-        isUtc: isUtc);
-    return HijriDateTime.fromDateTime(dt);
-  }
-
-  factory HijriDateTime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
-      {bool isUtc = false}) {
-    final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
-        microsecondsSinceEpoch,
-        isUtc: isUtc);
-    return HijriDateTime.fromDateTime(dt);
-  }
-
-  factory HijriDateTime.parse(String formattedString) {
-    Match? match = Constants.parseFormat.firstMatch(formattedString);
-    if (match != null) {
-      int parseIntOrZero(String? matched) {
-        if (matched == null) return 0;
-        return int.parse(matched);
-      }
-
-      int parseMilliAndMicroseconds(String? matched) {
-        if (matched == null) return 0;
-        int result = 0;
-        for (int i = 0; i < 6; i++) {
-          result *= 10;
-          if (i < matched.length) {
-            result += matched.codeUnitAt(i) ^ 0x30;
-          }
-        }
-        return result;
-      }
-
-      int year = int.parse(match[1]!);
-      int month = int.parse(match[2]!);
-      int day = int.parse(match[3]!);
-      int hour = parseIntOrZero(match[4]);
-      int minute = parseIntOrZero(match[5]);
-      int second = parseIntOrZero(match[6]);
-      int milliAndMicro = parseMilliAndMicroseconds(match[7]);
-      int millisecond = milliAndMicro ~/ 1000;
-      int microsecond = milliAndMicro % 1000;
-
-      bool isUtc = false;
-      if (match[8] != null) {
-        isUtc = true;
-        String? tzSign = match[9];
-        if (tzSign != null) {
-          int sign = (tzSign == '-') ? -1 : 1;
-          int hourDiff = int.parse(match[10]!);
-          int minuteDiff = parseIntOrZero(match[11]);
-          int totalDiff = sign * (hourDiff * 60 + minuteDiff);
-
-          minute -= totalDiff;
-          while (minute < 0) {
-            minute += 60;
-            hour -= 1;
-          }
-          while (minute >= 60) {
-            minute -= 60;
-            hour += 1;
-          }
-        }
-      }
-
-      return HijriDateTime._resolve(
+  ]) {
+    return HijriDateTime._fromResolved(
+      _resolveHijriFields(
         year,
         month,
         day,
@@ -271,15 +171,127 @@ class HijriDateTime extends DateTime
         second,
         millisecond,
         microsecond,
-        isUtc,
+        isUtc: true,
+      ),
+    );
+  }
+
+  factory HijriDateTime.fromSecondsSinceEpoch(
+    int secondsSinceEpoch, {
+    bool isUtc = false,
+  }) {
+    return HijriDateTime.fromMicrosecondsSinceEpoch(
+      secondsSinceEpoch * _microsecondsPerSecond,
+      isUtc: isUtc,
+    );
+  }
+
+  factory HijriDateTime.fromMillisecondsSinceEpoch(
+    int millisecondsSinceEpoch, {
+    bool isUtc = false,
+  }) {
+    return HijriDateTime.fromMicrosecondsSinceEpoch(
+      millisecondsSinceEpoch * _microsecondsPerMillisecond,
+      isUtc: isUtc,
+    );
+  }
+
+  factory HijriDateTime.fromMicrosecondsSinceEpoch(
+    int microsecondsSinceEpoch, {
+    bool isUtc = false,
+  }) {
+    return HijriDateTime.fromDateTime(
+      DateTime.fromMicrosecondsSinceEpoch(
+        microsecondsSinceEpoch,
+        isUtc: isUtc,
+      ),
+    );
+  }
+
+  /// Parses a Hijri ISO-8601-like string.
+  ///
+  /// A trailing `Z` or numeric offset produces a UTC result. Calendar and time
+  /// overflows are normalized, but the final date must remain in the supported
+  /// Umm al-Qura range.
+  factory HijriDateTime.parse(String formattedString) {
+    final Match? match = Constants.parseFormat.firstMatch(formattedString);
+    if (match == null) {
+      throw FormatException('Invalid Hijri date format', formattedString);
+    }
+
+    int parseIntOrZero(String? value) => value == null ? 0 : int.parse(value);
+
+    int parseFraction(String? value) {
+      if (value == null) return 0;
+      int result = 0;
+      for (int index = 0; index < 6; index++) {
+        result *= 10;
+        if (index < value.length) {
+          result += value.codeUnitAt(index) ^ 0x30;
+        }
+      }
+      return result;
+    }
+
+    try {
+      final int year = int.parse(match[1]!);
+      final int month = int.parse(match[2]!);
+      final int day = int.parse(match[3]!);
+      final int hour = parseIntOrZero(match[4]);
+      final int minute = parseIntOrZero(match[5]);
+      final int second = parseIntOrZero(match[6]);
+      final int fraction = parseFraction(match[7]);
+      final int millisecond = fraction ~/ _microsecondsPerMillisecond;
+      final int microsecond = fraction % _microsecondsPerMillisecond;
+
+      if (match[8] == null) {
+        return HijriDateTime(
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          second,
+          millisecond,
+          microsecond,
+        );
+      }
+
+      final HijriDateTime wallTime = HijriDateTime.utc(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
       );
-    } else {
-      throw FormatException("Invalid date format", formattedString);
+
+      final String? signText = match[9];
+      if (signText == null) return wallTime;
+
+      final int offsetHour = int.parse(match[10]!);
+      final int offsetMinute = parseIntOrZero(match[11]);
+      if (offsetHour > 23 || offsetMinute > 59) {
+        throw const FormatException('Invalid time-zone offset');
+      }
+
+      final int sign = signText == '-' ? -1 : 1;
+      final Duration offset = Duration(
+        minutes: sign * (offsetHour * 60 + offsetMinute),
+      );
+      return HijriDateTime.fromDateTime(wallTime.toDateTime().subtract(offset));
+    } on RangeError {
+      throw FormatException(
+        'Hijri date is outside the supported Umm al-Qura range',
+        formattedString,
+      );
     }
   }
 
-  /// End: Factories section
-
+  /// Parses [formattedString], returning `null` for invalid or unsupported
+  /// dates.
   static HijriDateTime? tryParse(String formattedString) {
     try {
       return HijriDateTime.parse(formattedString);
@@ -288,371 +300,398 @@ class HijriDateTime extends DateTime
     }
   }
 
-  /// The calendar name
-  @override
-  String get name => "Hijri";
+  /// The first supported Gregorian calendar date, in UTC.
+  static DateTime get minimumGregorianDate => DateTime.utc(
+        UmmAlQuraData.epochGregorianYear,
+        UmmAlQuraData.epochGregorianMonth,
+        UmmAlQuraData.epochGregorianDay,
+      );
 
-  /// Calculate weekday (1=Monday, 7=Sunday)
-  @override
-  int get weekday {
-    DateTime gregorian = toDateTime();
-    return gregorian.weekday;
+  /// The last supported Gregorian calendar date, in UTC.
+  static DateTime get maximumGregorianDate =>
+      minimumGregorianDate.add(Duration(days: _supportedDayCount - 1));
+
+  /// Whether the Gregorian wall date of [dateTime] is available in this
+  /// implementation's Umm al-Qura data.
+  static bool isSupportedDateTime(DateTime dateTime) {
+    final DateTime nativeDateTime = _nativeCopy(dateTime);
+    final int offset = _gregorianDayOffset(nativeDateTime);
+    return offset >= 0 && offset < _supportedDayCount;
   }
 
-  /// Get days in the current month
-  @override
-  int get monthLength => _monthLength(year, month);
+  /// Whether [year], [month], and [day] form a strict (non-normalized)
+  /// supported Umm al-Qura date.
+  static bool isValidDate(int year, int month, int day) {
+    if (year < minimumYear || year > maximumYear) return false;
+    if (month < 1 || month > monthsPerYear) return false;
+    return day >= 1 && day <= daysInMonth(year, month);
+  }
 
-  /// This computes the day count within the Hijri year.
+  /// Returns the official Umm al-Qura length of [month] in [year].
+  static int daysInMonth(int year, int month) {
+    _requireSupportedYear(year);
+    RangeError.checkValueInInterval(month, 1, monthsPerYear, 'month');
+    final int bits = UmmAlQuraData.yearMonthLengthBits[year - minimumYear];
+    return bits & (1 << (monthsPerYear - month)) == 0 ? 29 : 30;
+  }
+
+  /// The calendar name.
   @override
-  int get dayOfYear {
-    int dayCount = 0;
-    for (int m = 1; m < month; m++) {
-      dayCount += _monthLength(year, m);
+  String get name => 'Hijri';
+
+  /// Weekday using [DateTime.monday] through [DateTime.sunday].
+  @override
+  int get weekday => toDateTime().weekday;
+
+  /// Official length of this Umm al-Qura month.
+  @override
+  int get monthLength => daysInMonth(year, month);
+
+  /// One-based day within the Umm al-Qura year.
+  @override
+  int get dayOfYear => _monthStartDay(year, month) + day;
+
+  /// Number of days in this Umm al-Qura year.
+  int get yearLength => _yearLength(year);
+
+  /// Whether this Umm al-Qura year contains 355 days.
+  @override
+  bool get isLeapYear => yearLength == 355;
+
+  /// Gregorian Julian day number for this calendar date.
+  @override
+  int get julianDay => UmmAlQuraData.epochJulianDay + _dayOffset;
+
+  /// Converts this value to a native Gregorian [DateTime].
+  @override
+  DateTime toDateTime() => DateTime.fromMicrosecondsSinceEpoch(
+        microsecondsSinceEpoch,
+        isUtc: isUtc,
+      );
+
+  /// Adds an exact duration and converts the resulting instant to Umm al-Qura.
+  @override
+  HijriDateTime add(Duration duration) =>
+      HijriDateTime.fromDateTime(toDateTime().add(duration));
+
+  /// Subtracts an exact duration and converts the resulting instant to
+  /// Umm al-Qura.
+  @override
+  HijriDateTime subtract(Duration duration) =>
+      HijriDateTime.fromDateTime(toDateTime().subtract(duration));
+
+  /// Converts this instant to local time.
+  @override
+  HijriDateTime toLocal() =>
+      isUtc ? HijriDateTime.fromDateTime(toDateTime().toLocal()) : this;
+
+  /// Converts this instant to UTC.
+  @override
+  HijriDateTime toUtc() =>
+      isUtc ? this : HijriDateTime.fromDateTime(toDateTime().toUtc());
+
+  @override
+  int compareTo(DateTime other) =>
+      toDateTime().compareTo(_nativeComparisonValue(other));
+
+  @override
+  bool isBefore(DateTime other) =>
+      toDateTime().isBefore(_nativeComparisonValue(other));
+
+  @override
+  bool isAfter(DateTime other) =>
+      toDateTime().isAfter(_nativeComparisonValue(other));
+
+  @override
+  bool isAtSameMomentAs(DateTime other) =>
+      toDateTime().isAtSameMomentAs(_nativeComparisonValue(other));
+
+  @override
+  Duration difference(DateTime other) =>
+      toDateTime().difference(_nativeComparisonValue(other));
+
+  /// Seconds since the Unix epoch.
+  @override
+  int get secondsSinceEpoch =>
+      millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+
+  /// Creates a copy with selected Umm al-Qura wall-clock fields replaced.
+  ///
+  /// This shadows Dart's [DateTimeCopyWith.copyWith] extension so the result
+  /// remains a [HijriDateTime].
+  HijriDateTime copyWith({
+    int? year,
+    int? month,
+    int? day,
+    int? hour,
+    int? minute,
+    int? second,
+    int? millisecond,
+    int? microsecond,
+    bool? isUtc,
+  }) {
+    final bool resultIsUtc = isUtc ?? this.isUtc;
+    final List<int> fields = <int>[
+      year ?? this.year,
+      month ?? this.month,
+      day ?? this.day,
+      hour ?? this.hour,
+      minute ?? this.minute,
+      second ?? this.second,
+      millisecond ?? this.millisecond,
+      microsecond ?? this.microsecond,
+    ];
+    return resultIsUtc
+        ? HijriDateTime.utc(
+            fields[0],
+            fields[1],
+            fields[2],
+            fields[3],
+            fields[4],
+            fields[5],
+            fields[6],
+            fields[7],
+          )
+        : HijriDateTime(
+            fields[0],
+            fields[1],
+            fields[2],
+            fields[3],
+            fields[4],
+            fields[5],
+            fields[6],
+            fields[7],
+          );
+  }
+
+  @override
+  String toString() => _formatIso8601(separator: ' ');
+
+  @override
+  String toIso8601String() => _formatIso8601(separator: 'T');
+
+  String _formatIso8601({required String separator}) {
+    final String fraction = microsecond == 0
+        ? _threeDigits(millisecond)
+        : '${_threeDigits(millisecond)}${_threeDigits(microsecond)}';
+    return '${_fourDigits(year)}-${_twoDigits(month)}-${_twoDigits(day)}'
+        '$separator${_twoDigits(hour)}:${_twoDigits(minute)}:'
+        '${_twoDigits(second)}.$fraction${isUtc ? 'Z' : ''}';
+  }
+
+  static _ResolvedHijriDateTime _resolveHijriFields(
+    int year,
+    int month,
+    int day,
+    int hour,
+    int minute,
+    int second,
+    int millisecond,
+    int microsecond, {
+    required bool isUtc,
+  }) {
+    final int monthIndex = month - 1;
+    final int normalizedYear = year + _floorDiv(monthIndex, monthsPerYear);
+    final int normalizedMonth = _floorMod(monthIndex, monthsPerYear) + 1;
+
+    // Keep the end sentinel available during normalization. For example,
+    // AH 1600-13-00 is the same date as AH 1600-12-30 and can be resolved
+    // without inventing month data for AH 1601.
+    final int monthStartOffset;
+    if (normalizedYear == maximumYear + 1 && normalizedMonth == 1) {
+      monthStartOffset = _supportedDayCount;
+    } else {
+      _requireSupportedYear(normalizedYear);
+      monthStartOffset = _yearStartDays[normalizedYear - minimumYear] +
+          _monthStartDay(normalizedYear, normalizedMonth);
     }
-    return dayCount + day;
+
+    int dayOffset = monthStartOffset + day - 1;
+
+    final int timeMicroseconds = hour * _microsecondsPerHour +
+        minute * _microsecondsPerMinute +
+        second * _microsecondsPerSecond +
+        millisecond * _microsecondsPerMillisecond +
+        microsecond;
+    dayOffset += _floorDiv(timeMicroseconds, _microsecondsPerDay);
+    _requireSupportedDayOffset(dayOffset);
+
+    int remaining = _floorMod(timeMicroseconds, _microsecondsPerDay);
+    final int normalizedHour = remaining ~/ _microsecondsPerHour;
+    remaining %= _microsecondsPerHour;
+    final int normalizedMinute = remaining ~/ _microsecondsPerMinute;
+    remaining %= _microsecondsPerMinute;
+    final int normalizedSecond = remaining ~/ _microsecondsPerSecond;
+    remaining %= _microsecondsPerSecond;
+    final int normalizedMillisecond = remaining ~/ _microsecondsPerMillisecond;
+    final int normalizedMicrosecond = remaining % _microsecondsPerMillisecond;
+
+    final DateTime gregorianDate = _gregorianEpoch.add(
+      Duration(days: dayOffset),
+    );
+    final DateTime dateTime = isUtc
+        ? DateTime.utc(
+            gregorianDate.year,
+            gregorianDate.month,
+            gregorianDate.day,
+            normalizedHour,
+            normalizedMinute,
+            normalizedSecond,
+            normalizedMillisecond,
+            normalizedMicrosecond,
+          )
+        : DateTime(
+            gregorianDate.year,
+            gregorianDate.month,
+            gregorianDate.day,
+            normalizedHour,
+            normalizedMinute,
+            normalizedSecond,
+            normalizedMillisecond,
+            normalizedMicrosecond,
+          );
+
+    // Resolve once more from native wall fields. This preserves DateTime's
+    // behavior for local times changed by daylight-saving transitions.
+    return _resolveDateTime(dateTime);
   }
 
-  /// Check if the year is a leap year
-  @override
-  bool get isLeapYear {
-    return (((11 * year) + 14) % 30) < 11;
-  }
+  static _ResolvedHijriDateTime _resolveDateTime(DateTime dateTime) {
+    final int dayOffset = _gregorianDayOffset(dateTime);
+    _requireSupportedDayOffset(dayOffset);
 
-  /// Julian Day Number getter
-  /// For HijriDateTime we use the computed JD (rounded down).
-  @override
-  int get julianDay => _hijriToJD(year, month, day).floor();
-
-  /// Conversion from HijriDateTime(Umm al-Qura) to DateTime (Hijri to Gregorian)
-  /// This method uses an approximate conversion via Julian day calculations.
-  /// For a given Hijri date, we compute its Julian Day Number (JD) using
-  /// an approximation formula and then convert the JD to the Gregorian date.
-  /// This method uses the Fliegel-Van Flandern algorithm.
-  @override
-  DateTime toDateTime() {
-    int l = julianDay + 68569;
-    int n = (4 * l) ~/ 146097;
-    l = l - ((146097 * n + 3) ~/ 4);
-    int i = (4000 * (l + 1)) ~/ 1461001;
-    l = l - (1461 * i) ~/ 4 + 31;
-    int j1 = (80 * l) ~/ 2447;
-    int dayG = l - (2447 * j1) ~/ 80;
-    l = j1 ~/ 11;
-    int monthG = j1 + 2 - 12 * l;
-    int yearG = 100 * (n - 49) + i + l;
-
-    if (isUtc) {
-      return DateTime.utc(
-          yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
+    int low = 0;
+    int high = UmmAlQuraData.yearMonthLengthBits.length;
+    while (low < high) {
+      final int middle = (low + high) >> 1;
+      if (_yearStartDays[middle + 1] <= dayOffset) {
+        low = middle + 1;
+      } else {
+        high = middle;
+      }
     }
 
-    return DateTime(
-      yearG,
-      monthG,
-      dayG,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
+    final int year = minimumYear + low;
+    int dayWithinYear = dayOffset - _yearStartDays[low];
+    int month = 1;
+    while (true) {
+      final int length = daysInMonth(year, month);
+      if (dayWithinYear < length) break;
+      dayWithinYear -= length;
+      month++;
+    }
+
+    return _ResolvedHijriDateTime(
+      dateTime: dateTime,
+      year: year,
+      month: month,
+      day: dayWithinYear + 1,
+      dayOffset: dayOffset,
     );
   }
 
-  /// Add a Duration to the Hijri date
-  @override
-  HijriDateTime add(Duration duration) {
-    DateTime result = toDateTime().add(duration);
-    return HijriDateTime.fromDateTime(result);
+  static DateTime _nativeCopy(DateTime dateTime) =>
+      DateTime.fromMicrosecondsSinceEpoch(
+        dateTime.microsecondsSinceEpoch,
+        isUtc: dateTime.isUtc,
+      );
+
+  static DateTime _nativeComparisonValue(DateTime dateTime) {
+    if (dateTime case final GeneralDateTimeInterface customDateTime) {
+      return customDateTime.toDateTime();
+    }
+    return dateTime;
   }
 
-  /// Subtract a Duration from the Hijri date
-  @override
-  HijriDateTime subtract(Duration duration) {
-    DateTime result = toDateTime().subtract(duration);
-    return HijriDateTime.fromDateTime(result);
+  static int _gregorianDayOffset(DateTime dateTime) => DateTime.utc(
+        dateTime.year,
+        dateTime.month,
+        dateTime.day,
+      ).difference(_gregorianEpoch).inDays;
+
+  static int _monthStartDay(int year, int month) {
+    int result = 0;
+    for (int currentMonth = 1; currentMonth < month; currentMonth++) {
+      result += daysInMonth(year, currentMonth);
+    }
+    return result;
   }
 
-  /// Convert to local time
-  @override
-  HijriDateTime toLocal() {
-    DateTime localDt = toDateTime().toLocal();
-    return HijriDateTime.fromDateTime(localDt);
+  static int _yearLength(int year) {
+    _requireSupportedYear(year);
+    return _yearStartDays[year - minimumYear + 1] -
+        _yearStartDays[year - minimumYear];
   }
 
-  /// Convert to UTC time
-  @override
-  HijriDateTime toUtc() {
-    DateTime utcDt = toDateTime().toUtc();
-    return HijriDateTime.fromDateTime(utcDt);
-  }
-
-  /// Conversion from Gregorian to Hijri (Umm al-Qura)
-  /// This method converts the current Gregorian date (stored in the instance)
-  /// to a Hijri date according to an approximate algorithm. It computes the
-  /// Julian Day Number (JD) of the Gregorian date and then derives the Hijri date.
-  HijriDateTime _toHijri() {
-    int gy = year;
-    int gm = month;
-    int gd = day;
-    // Convert Gregorian date to Julian Day Number (JD)
-    int a = ((14 - gm) ~/ 12);
-    int y = gy + 4800 - a;
-    int m = gm + 12 * a - 3;
-    double jd = gd +
-        ((153 * m + 2) ~/ 5) +
-        365 * y +
-        (y ~/ 4) -
-        (y ~/ 100) +
-        (y ~/ 400) -
-        32045;
-    // Adjust JD to align with Islamic epoch.
-    // The following formula is an approximation.
-    int hYear = ((30 * (jd - 1948439.5) + 10646) / 10631).floor();
-    double firstDayOfHijriYear = _hijriToJD(hYear, 1, 1);
-    int hMonth = min(12, ((jd - firstDayOfHijriYear) / 29.5).ceil() + 1);
-    double firstDayOfHijriMonth = _hijriToJD(hYear, hMonth, 1);
-    int hDay = (jd - firstDayOfHijriMonth).floor() + 1;
-
-    return HijriDateTime._resolve(hYear, hMonth, hDay, hour, minute, second,
-        millisecond, microsecond, isUtc);
-  }
-
-  /// **Normalize values (overflow handling)**
-  HijriDateTime _normalize() {
-    int y = year, m = month, d = day;
-    int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
-    // Normalize microseconds to milliseconds.
-    ms += us ~/ 1000;
-    us = us.remainder(1000);
-    if (us < 0) {
-      us += 1000;
-      ms -= 1;
-    }
-    // Normalize milliseconds to seconds.
-    s += ms ~/ 1000;
-    ms = ms.remainder(1000);
-    if (ms < 0) {
-      ms += 1000;
-      s -= 1;
-    }
-    // Normalize seconds to minutes.
-    min += s ~/ 60;
-    s = s.remainder(60);
-    if (s < 0) {
-      s += 60;
-      min -= 1;
-    }
-    // Normalize minutes to hours.
-    h += min ~/ 60;
-    min = min.remainder(60);
-    if (min < 0) {
-      min += 60;
-      h -= 1;
-    }
-    // Normalize hours to days.
-    d += h ~/ 24;
-    h = h.remainder(24);
-    if (h < 0) {
-      h += 24;
-      d -= 1;
-    }
-    // Normalize days within Hijri month boundaries.
-    while (d < 1) {
-      m -= 1;
-      if (m < 1) {
-        m = 12;
-        y -= 1;
+  static List<int> _buildYearStartDays() {
+    final List<int> starts = <int>[0];
+    int cumulativeDays = 0;
+    for (final int bits in UmmAlQuraData.yearMonthLengthBits) {
+      int thirtyDayMonths = 0;
+      int remainingBits = bits;
+      while (remainingBits != 0) {
+        thirtyDayMonths += remainingBits & 1;
+        remainingBits >>= 1;
       }
-      d += _monthLength(y, m);
+      cumulativeDays += 12 * 29 + thirtyDayMonths;
+      starts.add(cumulativeDays);
     }
-    while (d > _monthLength(y, m)) {
-      d -= _monthLength(y, m);
-      m++;
-      if (m > 12) {
-        m = 1;
-        y += 1;
-      }
-    }
-    // Normalize months to years.
-    while (m < 1) {
-      m += 12;
-      y -= 1;
-    }
-    while (m > 12) {
-      m -= 12;
-      y += 1;
-    }
-    return HijriDateTime._resolve(y, m, d, h, min, s, ms, us);
+    return List<int>.unmodifiable(starts);
   }
 
-  /// Helper method to get month length
-  /// In the Umm al-Qura calendar, months are typically alternately 30 and 29 days,
-  /// with the last month having 30 days in a leap year.
-  int _monthLength(int year, int month) {
-    if (month == 12 && isLeapYear) return 30;
-    return (month % 2 == 1) ? 30 : 29;
-  }
-
-  /// Helper method to convert Hijri date to Julian Day Number (JD)
-  /// The following formula is an approximation adapted for the Umm al-Qura system.
-  double _hijriToJD(int year, int month, int day) {
-    // Using an approximation formula for the Islamic calendar:
-    // JD = day + ceil(29.5 * (month - 1)) + (year - 1) * 354 +
-    //      floor((3 + (11 * year)) / 30) + 1948440 - 1
-    return day +
-        (29.5 * (month - 1)).ceilToDouble() +
-        (year - 1) * 354 +
-        ((3 + (11 * year)) / 30).floor() +
-        1948440 -
-        1;
-  }
-
-  /// Seconds since epoch
-  @override
-  int get secondsSinceEpoch => toDateTime().millisecondsSinceEpoch ~/ 1000;
-
-  /// Milliseconds since epoch
-  @override
-  int get millisecondsSinceEpoch => toDateTime().millisecondsSinceEpoch;
-
-  /// Microseconds since epoch
-  @override
-  int get microsecondsSinceEpoch => toDateTime().microsecondsSinceEpoch;
-
-  /// Compares this dateTime instance to another.
-  /// This method allows comparison between different types that implement
-  /// [GeneralDateTimeInterface] as well as native [DateTime] objects.
-  /// Returns:
-  /// - A negative integer if `this` occurs before [other]
-  /// - Zero if `this` and [other] represent the same moment in time
-  /// - A positive integer if `this` occurs after [other]
-  /// Example:
-  /// ```dart
-  /// final a = HijriDateTime(1445, 9, 15, 10);
-  /// final b = HijriDateTime(1445, 9, 15, 12);
-  /// final c = DateTime(2024, 3, 25, 12);
-  ///
-  /// a.compareTo(b); // < 0
-  /// b.compareTo(a); // > 0
-  /// b.compareTo(b); // == 0
-  /// b.compareTo(c); // Compare to native DateTime
-  /// ```
-
-  @override
-  int compareTo(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.compareTo(otherDate);
+  static void _requireSupportedYear(int year) {
+    if (year < minimumYear || year > maximumYear) {
+      throw RangeError.range(
+        year,
+        minimumYear,
+        maximumYear,
+        'year',
+        'Umm al-Qura data is available only for AH '
+            '$minimumYear through AH $maximumYear',
+      );
     }
-    return selfDate.compareTo(other);
   }
 
-  /// Checks whether this dateTime occurs before another.
-  /// This method compares this instance with [other], which can be either:
-  /// - Another object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// Returns `true` if this dateTime is before [other], otherwise `false`.
-  /// Example:
-  /// ```dart
-  /// final a = HijriDateTime(1445, 9, 15, 10);
-  /// final b = HijriDateTime(1445, 9, 15, 12);
-  ///
-  /// a.isBefore(b); // true
-  /// b.isBefore(a); // false
-  ///
-  /// final native = DateTime(2025, 3, 26, 14);
-  /// b.isBefore(native); // true or false depending on internal conversion
-  /// ```
-
-  @override
-  bool isBefore(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.isBefore(otherDate);
+  static void _requireSupportedDayOffset(int dayOffset) {
+    if (dayOffset < 0 || dayOffset >= _supportedDayCount) {
+      throw RangeError(
+        'Date is outside the supported Umm al-Qura range '
+        '(AH $minimumYear-01-01 through AH $maximumYear-12-'
+        '${daysInMonth(maximumYear, 12)})',
+      );
     }
-    return selfDate.isBefore(other);
   }
 
-  /// Checks whether this dateTime occurs after another.
-  /// Compares this instance with [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// Returns `true` if this dateTime is after [other], otherwise `false`.
-  /// Example:
-  /// ```dart
-  /// final a = HijriDateTime(1445, 9, 15, 12);
-  /// final b = HijriDateTime(1445, 9, 15, 10);
-  ///
-  /// a.isAfter(b); // true
-  /// b.isAfter(a); // false
-  ///
-  /// final native = DateTime(2025, 3, 26, 14);
-  /// b.isAfter(native); // true or false depending on internal conversion
-  /// ```
-
-  @override
-  bool isAfter(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.isAfter(otherDate);
-    }
-    return selfDate.isAfter(other);
+  static int _floorDiv(int value, int divisor) {
+    final int quotient = value ~/ divisor;
+    final int remainder = value.remainder(divisor);
+    return remainder < 0 ? quotient - 1 : quotient;
   }
 
-  /// Checks whether this dateTime represents the same moment as another.
-  /// Compares this instance with [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// Returns `true` if both datetimes represent the same point in time.
-  /// Example:
-  /// ```dart
-  /// final a = HijriDateTime(1445, 9, 15, 12, 30);
-  /// final b = HijriDateTime(1445, 9, 15, 12, 30);
-  ///
-  /// a.isAtSameMomentAs(b); // true
-  ///
-  /// final native = DateTime(2025, 3, 26, 14, 0);
-  /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
-  /// ```
-
-  @override
-  bool isAtSameMomentAs(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.isAtSameMomentAs(otherDate);
-    }
-    return selfDate.isAtSameMomentAs(other);
+  static int _floorMod(int value, int divisor) {
+    final int remainder = value.remainder(divisor);
+    return remainder < 0 ? remainder + divisor : remainder;
   }
 
-  /// Returns the difference between this dateTime and another.
-  /// Computes the [Duration] between this instance and [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// The result is positive if this dateTime is after [other], and negative if before.
-  /// Example:
-  /// ```dart
-  /// final a = HijriDateTime(1445, 9, 15, 12, 30);
-  /// final b = HijriDateTime(1445, 9, 15, 11, 0);
-  ///
-  /// final duration = a.difference(b); // 1 hour 30 minutes
-  /// duration.inMinutes; // 90
-  ///
-  /// final native = DateTime(2025, 3, 26, 14, 0);
-  /// a.difference(native);
-  /// ```
+  static String _twoDigits(int value) => value.toString().padLeft(2, '0');
 
-  @override
-  Duration difference(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.difference(otherDate);
-    }
-    return selfDate.difference(other);
-  }
+  static String _threeDigits(int value) => value.toString().padLeft(3, '0');
+
+  static String _fourDigits(int value) => value.toString().padLeft(4, '0');
+}
+
+final class _ResolvedHijriDateTime {
+  const _ResolvedHijriDateTime({
+    required this.dateTime,
+    required this.year,
+    required this.month,
+    required this.day,
+    required this.dayOffset,
+  });
+
+  final DateTime dateTime;
+  final int year;
+  final int month;
+  final int day;
+  final int dayOffset;
 }

@@ -18,7 +18,8 @@ class _HijriCalendarMaterialLocalizationsDelegate
   bool shouldReload(_HijriCalendarMaterialLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
+  String toString() =>
+      'DefaultHijriCalendarMaterialLocalizations.delegate(en_US)';
 }
 
 class DefaultHijriCalendarMaterialLocalizations
@@ -93,14 +94,8 @@ class DefaultHijriCalendarMaterialLocalizations
   ];
 
   /// Returns the number of days in a month.
-  int _getDaysInMonth(int year, int month) {
-    if (month == 12) {
-      final bool isLeapYear = HijriDateTime(year).isLeapYear;
-      if (isLeapYear) return 30;
-      return 29;
-    }
-    return (month % 2 == 1) ? 30 : 29;
-  }
+  int _getDaysInMonth(int year, int month) =>
+      HijriDateTime.daysInMonth(year, month);
 
   @override
   String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
@@ -192,12 +187,11 @@ class DefaultHijriCalendarMaterialLocalizations
     final int? month = int.tryParse(inputParts[1], radix: 10);
     if (month == null || month < 1 || month > 12) return null;
 
-    final int? day = int.tryParse(inputParts[0], radix: 10);
-    if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
-      return null;
-    }
-
     try {
+      final int? day = int.tryParse(inputParts[0], radix: 10);
+      if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
+        return null;
+      }
       return HijriDateTime(year, month, day);
     } on ArgumentError {
       return null;
@@ -585,7 +579,6 @@ class DefaultHijriCalendarMaterialLocalizations
   /// The [locale] parameter is ignored.
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
-  /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
     return SynchronousFuture<MaterialLocalizations>(
         const DefaultHijriCalendarMaterialLocalizations());
@@ -594,7 +587,9 @@ class DefaultHijriCalendarMaterialLocalizations
   /// A [LocalizationsDelegate] that uses [DefaultHijriCalendarMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
+  /// Add this explicitly only when the entire localization scope uses Hijri
+  /// date formatting. `HijriCalendarDelegate` already owns its date formatting
+  /// and parsing, so most apps do not need this replacement localization.
   static const LocalizationsDelegate<MaterialLocalizations> delegate =
       _HijriCalendarMaterialLocalizationsDelegate();
 
