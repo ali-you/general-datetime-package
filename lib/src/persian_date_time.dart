@@ -1,47 +1,32 @@
-import 'shared/constants.dart';
 import 'general_date_time_interface.dart';
-import 'shared/gregorian_helper.dart';
+import 'shared/constants.dart';
+import 'shared/iranian_calendar_data.dart';
 
-/// Represents a date and time in the **Persian (Persian/Iranian)** calendar system.
+/// A date and time in Iran's official Solar Hijri (Persian) calendar.
 ///
-/// This class provides conversion between Gregorian and Persian dates,
-/// along with time component support (hour, minute, second, etc).
+/// The Iranian calendar is determined astronomically, not by an indefinitely
+/// repeating arithmetic leap-year cycle. This implementation is therefore
+/// data-backed by the official University of Tehran Calendar Center table and
+/// supports only Solar Hijri [minimumYear] through [maximumYear]. Unsupported
+/// dates throw [RangeError] instead of silently changing calendar models.
 ///
-/// It extends the [GeneralDateTimeInterfaceTemp] to support consistent behavior
-/// across multiple calendar types.
-///
-/// ### Features:
-/// - Supports Persian <-> Gregorian conversion.
-/// - Time components (hour, minute, second, etc.) are supported.
-/// - Supports normalization of overflow values (e.g., 90 seconds becomes 1 minute 30 seconds).
-/// - Provides leap year check and weekday calculation.
-/// - Offers a consistent interface across calendars (Gregorian, Persian, Hijri).
-///
-/// ### Example:
-/// ```dart
-/// var now = PersianDateTime.now(); // Get current Persian date and time
-/// print(now); // 1403/1/19
-///
-/// var jDate = PersianDateTime(1402, 12, 30);
-/// print(jDate.toDateTime()); // Converts to equivalent Gregorian date
-/// ```
-///
-/// ### Calendar Notes:
-/// The Persian calendar is a solar calendar used in Iran and Afghanistan,
-/// with highly accurate leap year rules and month lengths.
+/// Instances retain the exact native [DateTime] instant internally. Calendar
+/// fields such as [year], [month], and [day] are exposed in Solar Hijri, while
+/// epoch values, equality, time-zone data, and comparisons use the true
+/// Gregorian instant.
 class PersianDateTime extends DateTime
     implements GeneralDateTimeInterface<PersianDateTime> {
-  // Weekday constants that are returned by [weekday] method:
-  static const int monday = 1;
-  static const int tuesday = 2;
-  static const int wednesday = 3;
-  static const int thursday = 4;
-  static const int friday = 5;
-  static const int saturday = 6;
-  static const int sunday = 7;
-  static const int daysPerWeek = 7;
+  // Weekday constants returned by [weekday].
+  static const int monday = DateTime.monday;
+  static const int tuesday = DateTime.tuesday;
+  static const int wednesday = DateTime.wednesday;
+  static const int thursday = DateTime.thursday;
+  static const int friday = DateTime.friday;
+  static const int saturday = DateTime.saturday;
+  static const int sunday = DateTime.sunday;
+  static const int daysPerWeek = DateTime.daysPerWeek;
 
-  // Month constants that are returned by the [month] getter.
+  // Month constants returned by [month].
   static const int farvardin = 1;
   static const int ordibehesht = 2;
   static const int khordad = 3;
@@ -56,90 +41,73 @@ class PersianDateTime extends DateTime
   static const int esfand = 12;
   static const int monthsPerYear = 12;
 
+  /// First Solar Hijri year covered by the official source table.
+  static const int minimumYear = IranianCalendarData.minimumYear;
+
+  /// Last Solar Hijri year covered by the official source table.
+  static const int maximumYear = IranianCalendarData.maximumYear;
+
+  static const int _microsecondsPerMillisecond = 1000;
+  static const int _microsecondsPerSecond = 1000000;
+  static const int _microsecondsPerMinute = 60 * _microsecondsPerSecond;
+  static const int _microsecondsPerHour = 60 * _microsecondsPerMinute;
+  static const int _microsecondsPerDay = 24 * _microsecondsPerHour;
+
+  static final DateTime _gregorianEpoch = DateTime.utc(
+    IranianCalendarData.epochGregorianYear,
+    IranianCalendarData.epochGregorianMonth,
+    IranianCalendarData.epochGregorianDay,
+  );
+
+  /// Cumulative days at the start of each supported year, plus an end
+  /// sentinel after [maximumYear].
+  static final List<int> _yearStartDays = _buildYearStartDays();
+
+  static int get _supportedDayCount => _yearStartDays.last;
+
   @override
   final int year;
+
   @override
   final int month;
+
   @override
   final int day;
+
   @override
   final int hour;
+
   @override
   final int minute;
+
   @override
   final int second;
+
   @override
   final int millisecond;
+
   @override
   final int microsecond;
 
-  PersianDateTime._internal(
-    this.year, [
-    this.month = 1,
-    this.day = 1,
-    this.hour = 0,
-    this.minute = 0,
-    this.second = 0,
-    this.millisecond = 0,
-    this.microsecond = 0,
-  ]) : super(year, month, day, hour, minute, second, millisecond, microsecond);
+  final int _dayOffset;
 
-  PersianDateTime._internalUtc(
-    this.year, [
-    this.month = 1,
-    this.day = 1,
-    this.hour = 0,
-    this.minute = 0,
-    this.second = 0,
-    this.millisecond = 0,
-    this.microsecond = 0,
-  ]) : super.utc(
-            year, month, day, hour, minute, second, millisecond, microsecond);
+  PersianDateTime._fromResolved(_ResolvedPersianDateTime resolved)
+      : year = resolved.year,
+        month = resolved.month,
+        day = resolved.day,
+        hour = resolved.dateTime.hour,
+        minute = resolved.dateTime.minute,
+        second = resolved.dateTime.second,
+        millisecond = resolved.dateTime.millisecond,
+        microsecond = resolved.dateTime.microsecond,
+        _dayOffset = resolved.dayOffset,
+        super.fromMicrosecondsSinceEpoch(
+          resolved.dateTime.microsecondsSinceEpoch,
+          isUtc: resolved.dateTime.isUtc,
+        );
 
-  factory PersianDateTime._resolve(
-    int year, [
-    int month = 1,
-    int day = 1,
-    int hour = 0,
-    int minute = 0,
-    int second = 0,
-    int millisecond = 0,
-    int microsecond = 0,
-    bool isUtc = false,
-  ]) {
-    if (isUtc) {
-      return PersianDateTime._internalUtc(
-          year, month, day, hour, minute, second, millisecond, microsecond);
-    }
-    return PersianDateTime._internal(
-        year, month, day, hour, minute, second, millisecond, microsecond);
-  }
-
-  final List<int> _breaks = [
-    -61,
-    9,
-    38,
-    199,
-    426,
-    686,
-    756,
-    818,
-    1111,
-    1181,
-    1210,
-    1635,
-    2060,
-    2097,
-    2192,
-    2262,
-    2324,
-    2394,
-    2456,
-    3178
-  ];
-
-  /// Start: Factories section
-  /// Factory constructor with normalization
+  /// Creates a local Solar Hijri date, normalizing overflowing components in
+  /// the same style as [DateTime.new].
   factory PersianDateTime(
     int year, [
     int month = 1,
@@ -150,46 +118,38 @@ class PersianDateTime extends DateTime
     int millisecond = 0,
     int microsecond = 0,
   ]) {
-    return PersianDateTime._internal(
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
-    )._normalize();
+    return PersianDateTime._fromResolved(
+      _resolvePersianFields(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+        isUtc: false,
+      ),
+    );
   }
 
-  /// Factory constructor for converting from DateTime
+  /// Converts a native Gregorian [dateTime] to Solar Hijri without losing its
+  /// instant, precision, or UTC/local representation.
   factory PersianDateTime.fromDateTime(DateTime dateTime) {
-    return PersianDateTime._resolve(
-      dateTime.year,
-      dateTime.month,
-      dateTime.day,
-      dateTime.hour,
-      dateTime.minute,
-      dateTime.second,
-      dateTime.millisecond,
-      dateTime.microsecond,
-      dateTime.isUtc,
-    )._toPersian();
+    return PersianDateTime._fromResolved(
+      _resolveDateTime(_nativeCopy(dateTime)),
+    );
   }
 
-  /// Factory constructor for current date and time
-  factory PersianDateTime.now() {
-    final DateTime dt = DateTime.now();
-    return PersianDateTime.fromDateTime(dt);
-  }
+  /// The current local date and time in Solar Hijri.
+  factory PersianDateTime.now() => PersianDateTime.fromDateTime(DateTime.now());
 
-  /// Factory constructor for current date and time in UTC
-  factory PersianDateTime.timestamp() {
-    final DateTime dt = DateTime.now().toUtc();
-    return PersianDateTime.fromDateTime(dt);
-  }
+  /// The current UTC date and time in Solar Hijri.
+  factory PersianDateTime.timestamp() =>
+      PersianDateTime.fromDateTime(DateTime.timestamp());
 
-  /// Factory constructor in UTC with normalization
+  /// Creates a UTC Solar Hijri date, normalizing overflowing components in
+  /// the same style as [DateTime.utc].
   factory PersianDateTime.utc(
     int year, [
     int month = 1,
@@ -199,88 +159,9 @@ class PersianDateTime extends DateTime
     int second = 0,
     int millisecond = 0,
     int microsecond = 0,
-  ]) =>
-      PersianDateTime._internalUtc(
-              year, month, day, hour, minute, second, millisecond, microsecond)
-          ._normalize();
-
-  factory PersianDateTime.fromSecondsSinceEpoch(int secondsSinceEpoch,
-      {bool isUtc = false}) {
-    final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
-        secondsSinceEpoch * 1000,
-        isUtc: isUtc);
-    return PersianDateTime.fromDateTime(dt);
-  }
-
-  factory PersianDateTime.fromMillisecondsSinceEpoch(int millisecondsSinceEpoch,
-      {bool isUtc = false}) {
-    final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
-        millisecondsSinceEpoch,
-        isUtc: isUtc);
-    return PersianDateTime.fromDateTime(dt);
-  }
-
-  factory PersianDateTime.fromMicrosecondsSinceEpoch(int microsecondsSinceEpoch,
-      {bool isUtc = false}) {
-    final DateTime dt = DateTime.fromMicrosecondsSinceEpoch(
-        microsecondsSinceEpoch,
-        isUtc: isUtc);
-    return PersianDateTime.fromDateTime(dt);
-  }
-
-  factory PersianDateTime.parse(String formattedString) {
-    Match? match = Constants.parseFormat.firstMatch(formattedString);
-    if (match != null) {
-      int parseIntOrZero(String? matched) {
-        if (matched == null) return 0;
-        return int.parse(matched);
-      }
-
-      int parseMilliAndMicroseconds(String? matched) {
-        if (matched == null) return 0;
-        int result = 0;
-        for (int i = 0; i < 6; i++) {
-          result *= 10;
-          if (i < matched.length) {
-            result += matched.codeUnitAt(i) ^ 0x30;
-          }
-        }
-        return result;
-      }
-
-      int year = int.parse(match[1]!);
-      int month = int.parse(match[2]!);
-      int day = int.parse(match[3]!);
-      int hour = parseIntOrZero(match[4]);
-      int minute = parseIntOrZero(match[5]);
-      int second = parseIntOrZero(match[6]);
-      int milliAndMicro = parseMilliAndMicroseconds(match[7]);
-      int millisecond = milliAndMicro ~/ 1000;
-      int microsecond = milliAndMicro % 1000;
-
-      bool isUtc = false;
-      if (match[8] != null) {
-        isUtc = true;
-        String? tzSign = match[9];
-        if (tzSign != null) {
-          int sign = (tzSign == '-') ? -1 : 1;
-          int hourDiff = int.parse(match[10]!);
-          int minuteDiff = parseIntOrZero(match[11]);
-          int totalDiff = sign * (hourDiff * 60 + minuteDiff);
-
-          minute -= totalDiff;
-          while (minute < 0) {
-            minute += 60;
-            hour -= 1;
-          }
-          while (minute >= 60) {
-            minute -= 60;
-            hour += 1;
-          }
-        }
-      }
-
-      return PersianDateTime._resolve(
+  ]) {
+    return PersianDateTime._fromResolved(
+      _resolvePersianFields(
         year,
         month,
         day,
@@ -289,15 +170,129 @@ class PersianDateTime extends DateTime
         second,
         millisecond,
         microsecond,
-        isUtc,
+        isUtc: true,
+      ),
+    );
+  }
+
+  factory PersianDateTime.fromSecondsSinceEpoch(
+    int secondsSinceEpoch, {
+    bool isUtc = false,
+  }) {
+    return PersianDateTime.fromMicrosecondsSinceEpoch(
+      secondsSinceEpoch * _microsecondsPerSecond,
+      isUtc: isUtc,
+    );
+  }
+
+  factory PersianDateTime.fromMillisecondsSinceEpoch(
+    int millisecondsSinceEpoch, {
+    bool isUtc = false,
+  }) {
+    return PersianDateTime.fromMicrosecondsSinceEpoch(
+      millisecondsSinceEpoch * _microsecondsPerMillisecond,
+      isUtc: isUtc,
+    );
+  }
+
+  factory PersianDateTime.fromMicrosecondsSinceEpoch(
+    int microsecondsSinceEpoch, {
+    bool isUtc = false,
+  }) {
+    return PersianDateTime.fromDateTime(
+      DateTime.fromMicrosecondsSinceEpoch(
+        microsecondsSinceEpoch,
+        isUtc: isUtc,
+      ),
+    );
+  }
+
+  /// Parses a Solar Hijri ISO-8601-like string.
+  ///
+  /// A trailing `Z` or numeric offset produces a UTC result. Calendar and time
+  /// overflows are normalized, but the final date must remain in the official
+  /// supported range.
+  factory PersianDateTime.parse(String formattedString) {
+    final Match? match = Constants.parseFormat.firstMatch(formattedString);
+    if (match == null) {
+      throw FormatException('Invalid Persian date format', formattedString);
+    }
+
+    int parseIntOrZero(String? value) => value == null ? 0 : int.parse(value);
+
+    int parseFraction(String? value) {
+      if (value == null) return 0;
+      int result = 0;
+      for (int index = 0; index < 6; index++) {
+        result *= 10;
+        if (index < value.length) {
+          result += value.codeUnitAt(index) ^ 0x30;
+        }
+      }
+      return result;
+    }
+
+    try {
+      final int year = int.parse(match[1]!);
+      final int month = int.parse(match[2]!);
+      final int day = int.parse(match[3]!);
+      final int hour = parseIntOrZero(match[4]);
+      final int minute = parseIntOrZero(match[5]);
+      final int second = parseIntOrZero(match[6]);
+      final int fraction = parseFraction(match[7]);
+      final int millisecond = fraction ~/ _microsecondsPerMillisecond;
+      final int microsecond = fraction % _microsecondsPerMillisecond;
+
+      if (match[8] == null) {
+        return PersianDateTime(
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          second,
+          millisecond,
+          microsecond,
+        );
+      }
+
+      final PersianDateTime wallTime = PersianDateTime.utc(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
       );
-    } else {
-      throw FormatException("Invalid date format", formattedString);
+
+      final String? signText = match[9];
+      if (signText == null) return wallTime;
+
+      final int offsetHour = int.parse(match[10]!);
+      final int offsetMinute = parseIntOrZero(match[11]);
+      if (offsetHour > 23 || offsetMinute > 59) {
+        throw const FormatException('Invalid time-zone offset');
+      }
+
+      final int sign = signText == '-' ? -1 : 1;
+      final Duration offset = Duration(
+        minutes: sign * (offsetHour * 60 + offsetMinute),
+      );
+      return PersianDateTime.fromDateTime(
+        wallTime.toDateTime().subtract(offset),
+      );
+    } on RangeError {
+      throw FormatException(
+        'Persian date is outside the official supported range',
+        formattedString,
+      );
     }
   }
 
-  /// End: Factories section
-
+  /// Parses [formattedString], returning `null` for invalid or unsupported
+  /// dates.
   static PersianDateTime? tryParse(String formattedString) {
     try {
       return PersianDateTime.parse(formattedString);
@@ -306,459 +301,391 @@ class PersianDateTime extends DateTime
     }
   }
 
-  /// private variable to implement gregorian calculations
-  final GregorianHelper _gregorianHelper = GregorianHelper();
+  /// The first supported Gregorian calendar date, in UTC.
+  static DateTime get minimumGregorianDate => DateTime.utc(
+        IranianCalendarData.epochGregorianYear,
+        IranianCalendarData.epochGregorianMonth,
+        IranianCalendarData.epochGregorianDay,
+      );
 
-  /// The calendar name
-  @override
-  String get name => "Persian";
+  /// The last supported Gregorian calendar date, in UTC.
+  static DateTime get maximumGregorianDate =>
+      minimumGregorianDate.add(Duration(days: _supportedDayCount - 1));
 
-  /// Calculate weekday (1=Monday, 7=Saturday) according to DateTime
-  @override
-  int get weekday {
-    DateTime gd = toDateTime();
-    return gd.weekday;
+  /// Whether the Gregorian wall date of [dateTime] is covered by the official
+  /// source table.
+  static bool isSupportedDateTime(DateTime dateTime) {
+    final DateTime nativeDateTime = _nativeCopy(dateTime);
+    final int offset = _gregorianDayOffset(nativeDateTime);
+    return offset >= 0 && offset < _supportedDayCount;
   }
 
-  /// Get days in the current month
-  @override
-  int get monthLength => _monthLength(year, month);
+  /// Whether [year], [month], and [day] form a strict (non-normalized)
+  /// supported Solar Hijri date.
+  static bool isValidDate(int year, int month, int day) {
+    if (year < minimumYear || year > maximumYear) return false;
+    if (month < 1 || month > monthsPerYear) return false;
+    return day >= 1 && day <= daysInMonth(year, month);
+  }
 
-  /// This computes the day count within the Persian year.
+  /// Returns the official length of [month] in [year].
+  static int daysInMonth(int year, int month) {
+    _requireSupportedYear(year);
+    RangeError.checkValueInInterval(month, 1, monthsPerYear, 'month');
+    if (month <= 6) return 31;
+    if (month <= 11) return 30;
+    return IranianCalendarData.isLeapYear(year) ? 30 : 29;
+  }
+
+  /// The calendar name.
   @override
-  int get dayOfYear {
-    int dayCount = 0;
-    for (int m = 1; m < month; m++) {
-      dayCount += _monthLength(year, m);
+  String get name => 'Persian';
+
+  /// Weekday using [DateTime.monday] through [DateTime.sunday].
+  @override
+  int get weekday => toDateTime().weekday;
+
+  /// Official length of this Solar Hijri month.
+  @override
+  int get monthLength => daysInMonth(year, month);
+
+  /// One-based day within the Solar Hijri year.
+  @override
+  int get dayOfYear => _monthStartDay(year, month) + day;
+
+  /// Number of days in this Solar Hijri year.
+  int get yearLength => _yearLength(year);
+
+  /// Whether this official Solar Hijri year contains 366 days.
+  @override
+  bool get isLeapYear => IranianCalendarData.isLeapYear(year);
+
+  /// Gregorian Julian day number for this calendar date.
+  @override
+  int get julianDay => IranianCalendarData.epochJulianDay + _dayOffset;
+
+  /// Converts this value to a native Gregorian [DateTime].
+  @override
+  DateTime toDateTime() => DateTime.fromMicrosecondsSinceEpoch(
+        microsecondsSinceEpoch,
+        isUtc: isUtc,
+      );
+
+  /// Adds an exact duration and converts the resulting instant to Solar Hijri.
+  @override
+  PersianDateTime add(Duration duration) =>
+      PersianDateTime.fromDateTime(toDateTime().add(duration));
+
+  /// Subtracts an exact duration and converts the resulting instant to Solar
+  /// Hijri.
+  @override
+  PersianDateTime subtract(Duration duration) =>
+      PersianDateTime.fromDateTime(toDateTime().subtract(duration));
+
+  /// Converts this instant to local time.
+  @override
+  PersianDateTime toLocal() =>
+      isUtc ? PersianDateTime.fromDateTime(toDateTime().toLocal()) : this;
+
+  /// Converts this instant to UTC.
+  @override
+  PersianDateTime toUtc() =>
+      isUtc ? this : PersianDateTime.fromDateTime(toDateTime().toUtc());
+
+  @override
+  int compareTo(DateTime other) =>
+      toDateTime().compareTo(_nativeComparisonValue(other));
+
+  @override
+  bool isBefore(DateTime other) =>
+      toDateTime().isBefore(_nativeComparisonValue(other));
+
+  @override
+  bool isAfter(DateTime other) =>
+      toDateTime().isAfter(_nativeComparisonValue(other));
+
+  @override
+  bool isAtSameMomentAs(DateTime other) =>
+      toDateTime().isAtSameMomentAs(_nativeComparisonValue(other));
+
+  @override
+  Duration difference(DateTime other) =>
+      toDateTime().difference(_nativeComparisonValue(other));
+
+  /// Seconds since the Unix epoch.
+  @override
+  int get secondsSinceEpoch =>
+      millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+
+  /// Creates a copy with selected Solar Hijri wall-clock fields replaced.
+  ///
+  /// This shadows Dart's [DateTimeCopyWith.copyWith] extension so the result
+  /// remains a [PersianDateTime].
+  PersianDateTime copyWith({
+    int? year,
+    int? month,
+    int? day,
+    int? hour,
+    int? minute,
+    int? second,
+    int? millisecond,
+    int? microsecond,
+    bool? isUtc,
+  }) {
+    final bool resultIsUtc = isUtc ?? this.isUtc;
+    final List<int> fields = <int>[
+      year ?? this.year,
+      month ?? this.month,
+      day ?? this.day,
+      hour ?? this.hour,
+      minute ?? this.minute,
+      second ?? this.second,
+      millisecond ?? this.millisecond,
+      microsecond ?? this.microsecond,
+    ];
+    return resultIsUtc
+        ? PersianDateTime.utc(
+            fields[0],
+            fields[1],
+            fields[2],
+            fields[3],
+            fields[4],
+            fields[5],
+            fields[6],
+            fields[7],
+          )
+        : PersianDateTime(
+            fields[0],
+            fields[1],
+            fields[2],
+            fields[3],
+            fields[4],
+            fields[5],
+            fields[6],
+            fields[7],
+          );
+  }
+
+  @override
+  String toString() => _formatIso8601(separator: ' ');
+
+  @override
+  String toIso8601String() => _formatIso8601(separator: 'T');
+
+  String _formatIso8601({required String separator}) {
+    final String fraction = microsecond == 0
+        ? _threeDigits(millisecond)
+        : '${_threeDigits(millisecond)}${_threeDigits(microsecond)}';
+    return '${_fourDigits(year)}-${_twoDigits(month)}-${_twoDigits(day)}'
+        '$separator${_twoDigits(hour)}:${_twoDigits(minute)}:'
+        '${_twoDigits(second)}.$fraction${isUtc ? 'Z' : ''}';
+  }
+
+  static _ResolvedPersianDateTime _resolvePersianFields(
+    int year,
+    int month,
+    int day,
+    int hour,
+    int minute,
+    int second,
+    int millisecond,
+    int microsecond, {
+    required bool isUtc,
+  }) {
+    final int monthIndex = month - 1;
+    final int normalizedYear = year + _floorDiv(monthIndex, monthsPerYear);
+    final int normalizedMonth = _floorMod(monthIndex, monthsPerYear) + 1;
+
+    // Keep the end sentinel available during normalization. For example,
+    // 1498-13-00 is the same date as 1498-12-30 and needs no data for 1499.
+    final int monthStartOffset;
+    if (normalizedYear == maximumYear + 1 && normalizedMonth == 1) {
+      monthStartOffset = _supportedDayCount;
+    } else {
+      _requireSupportedYear(normalizedYear);
+      monthStartOffset = _yearStartDays[normalizedYear - minimumYear] +
+          _monthStartDay(normalizedYear, normalizedMonth);
     }
-    return dayCount + day;
+
+    int dayOffset = monthStartOffset + day - 1;
+
+    final int timeMicroseconds = hour * _microsecondsPerHour +
+        minute * _microsecondsPerMinute +
+        second * _microsecondsPerSecond +
+        millisecond * _microsecondsPerMillisecond +
+        microsecond;
+    dayOffset += _floorDiv(timeMicroseconds, _microsecondsPerDay);
+    _requireSupportedDayOffset(dayOffset);
+
+    int remaining = _floorMod(timeMicroseconds, _microsecondsPerDay);
+    final int normalizedHour = remaining ~/ _microsecondsPerHour;
+    remaining %= _microsecondsPerHour;
+    final int normalizedMinute = remaining ~/ _microsecondsPerMinute;
+    remaining %= _microsecondsPerMinute;
+    final int normalizedSecond = remaining ~/ _microsecondsPerSecond;
+    remaining %= _microsecondsPerSecond;
+    final int normalizedMillisecond = remaining ~/ _microsecondsPerMillisecond;
+    final int normalizedMicrosecond = remaining % _microsecondsPerMillisecond;
+
+    final DateTime gregorianDate = _gregorianEpoch.add(
+      Duration(days: dayOffset),
+    );
+    final DateTime dateTime = isUtc
+        ? DateTime.utc(
+            gregorianDate.year,
+            gregorianDate.month,
+            gregorianDate.day,
+            normalizedHour,
+            normalizedMinute,
+            normalizedSecond,
+            normalizedMillisecond,
+            normalizedMicrosecond,
+          )
+        : DateTime(
+            gregorianDate.year,
+            gregorianDate.month,
+            gregorianDate.day,
+            normalizedHour,
+            normalizedMinute,
+            normalizedSecond,
+            normalizedMillisecond,
+            normalizedMicrosecond,
+          );
+
+    // Resolve once more from native wall fields. This preserves DateTime's
+    // behavior for local times changed by daylight-saving transitions.
+    return _resolveDateTime(dateTime);
   }
 
-  /// Check if the year is a leap year
-  @override
-  bool get isLeapYear => _isLeapYear(year);
+  static _ResolvedPersianDateTime _resolveDateTime(DateTime dateTime) {
+    final int dayOffset = _gregorianDayOffset(dateTime);
+    _requireSupportedDayOffset(dayOffset);
 
-  /// Julian Day Number getter
-  @override
-  int get julianDay {
-    int totalDays = 0;
-    if (year > 1) {
-      for (int k = 1; k < year; k++) {
-        totalDays += 365;
-        if (_isLeapYear(k)) totalDays += 1;
+    int low = 0;
+    int high = IranianCalendarData.yearCount;
+    while (low < high) {
+      final int middle = (low + high) >> 1;
+      if (_yearStartDays[middle + 1] <= dayOffset) {
+        low = middle + 1;
+      } else {
+        high = middle;
       }
-    } else if (year < 1) {
-      for (int k = year; k < 1; k++) {
-        totalDays -= 365;
-        if (_isLeapYear(k)) totalDays -= 1;
-      }
     }
-    // Add all months of the current year
-    for (int m = 1; m < month; m++) {
-      totalDays += _monthLength(year, m);
+
+    final int year = minimumYear + low;
+    final int dayWithinYear = dayOffset - _yearStartDays[low];
+    final int month;
+    final int day;
+    if (dayWithinYear < 6 * 31) {
+      month = dayWithinYear ~/ 31 + 1;
+      day = dayWithinYear % 31 + 1;
+    } else {
+      final int dayWithinSecondHalf = dayWithinYear - 6 * 31;
+      month = dayWithinSecondHalf ~/ 30 + 7;
+      day = dayWithinSecondHalf % 30 + 1;
     }
-    // Add days in current month (zero-based)
-    totalDays += (day - 1);
-    // 1 Farvardin 1 → JDN 1948320
-    return 1948321 + totalDays;
-  }
 
-  /// Conversion from PersianDateTime to DateTime (Persian to Gregorian)
-  /// This method uses an approximate conversion via Julian day calculations.
-  /// For a given Persian date, we compute its Julian Day Number (JD) using
-  /// an approximation formula and then convert the JD to the Gregorian date.
-  @override
-  DateTime toDateTime() {
-    int floorDiv(int x, int y) => (x / y).floor();
-
-    int a = julianDay + 32044;
-    int b = floorDiv(4 * a + 3, 146097);
-    int c = a - floorDiv(146097 * b, 4);
-    int d = floorDiv(4 * c + 3, 1461);
-    int e = c - floorDiv(1461 * d, 4);
-    int m = floorDiv(5 * e + 2, 153);
-
-    int dayG = e - floorDiv(153 * m + 2, 5) + 1;
-    int monthG = m + 3 - 12 * floorDiv(m, 10);
-    int yearG = 100 * b + d - 4800 + floorDiv(m, 10);
-
-    if (isUtc) {
-      return DateTime.utc(
-          yearG, monthG, dayG, hour, minute, second, millisecond, microsecond);
-    }
-    return DateTime(
-      yearG,
-      monthG,
-      dayG,
-      hour,
-      minute,
-      second,
-      millisecond,
-      microsecond,
+    return _ResolvedPersianDateTime(
+      dateTime: dateTime,
+      year: year,
+      month: month,
+      day: day,
+      dayOffset: dayOffset,
     );
   }
 
-  /// Add a Duration to the Persian date
-  @override
-  PersianDateTime add(Duration duration) {
-    final DateTime result = toDateTime().add(duration);
-    return PersianDateTime.fromDateTime(result);
+  static DateTime _nativeCopy(DateTime dateTime) =>
+      DateTime.fromMicrosecondsSinceEpoch(
+        dateTime.microsecondsSinceEpoch,
+        isUtc: dateTime.isUtc,
+      );
+
+  static DateTime _nativeComparisonValue(DateTime dateTime) {
+    if (dateTime case final GeneralDateTimeInterface customDateTime) {
+      return customDateTime.toDateTime();
+    }
+    return dateTime;
   }
 
-  /// Subtract a Duration from the Persian date
-  @override
-  PersianDateTime subtract(Duration duration) {
-    final DateTime result = toDateTime().subtract(duration);
-    return PersianDateTime.fromDateTime(result);
+  static int _gregorianDayOffset(DateTime dateTime) => DateTime.utc(
+        dateTime.year,
+        dateTime.month,
+        dateTime.day,
+      ).difference(_gregorianEpoch).inDays;
+
+  static int _monthStartDay(int year, int month) {
+    if (month <= 6) return (month - 1) * 31;
+    return 6 * 31 + (month - 7) * 30;
   }
 
-  /// Convert to local time
-  @override
-  PersianDateTime toLocal() {
-    if (!isUtc) return this;
-    final localDt = toDateTime().toLocal();
-    return PersianDateTime.fromDateTime(localDt);
+  static int _yearLength(int year) {
+    _requireSupportedYear(year);
+    return IranianCalendarData.isLeapYear(year) ? 366 : 365;
   }
 
-  /// Convert to UTC time
-  @override
-  PersianDateTime toUtc() {
-    if (isUtc) return this;
-    final utcDt = toDateTime().toUtc();
-    return PersianDateTime.fromDateTime(utcDt);
+  static List<int> _buildYearStartDays() {
+    final List<int> starts = <int>[0];
+    int cumulativeDays = 0;
+    for (int year = minimumYear; year <= maximumYear; year++) {
+      cumulativeDays += IranianCalendarData.isLeapYear(year) ? 366 : 365;
+      starts.add(cumulativeDays);
+    }
+    return List<int>.unmodifiable(starts);
   }
 
-  /// Convert from Gregorian to Persian
-  PersianDateTime _toPersian() {
-    int jy = year - 621;
-    int jdn1f = _gregorianHelper.julianDay(year, 3, _startYearMarch(jy));
-    int jdn = _gregorianHelper.julianDay(year, month, day);
-    int lastLeap = _leapAndCycle(jy);
-    int k = jdn - jdn1f;
-    if (k >= 0) {
-      if (k <= 185) {
-        final int jm = 1 + (k ~/ 31);
-        final int jd = (k % 31) + 1;
-
-        return PersianDateTime._resolve(
-            jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
-      } else {
-        k -= 186;
-      }
-    } else {
-      jy -= 1;
-      k += 179;
-      if (lastLeap == 1) k += 1;
+  static void _requireSupportedYear(int year) {
+    if (year < minimumYear || year > maximumYear) {
+      throw RangeError.range(
+        year,
+        minimumYear,
+        maximumYear,
+        'year',
+        'Official Iranian calendar data is available only for Solar Hijri '
+            '$minimumYear through $maximumYear',
+      );
     }
-    final int jm = 7 + (k ~/ 30);
-    final int jd = (k % 30) + 1;
-    return PersianDateTime._resolve(
-        jy, jm, jd, hour, minute, second, millisecond, microsecond, isUtc);
   }
 
-  /// Normalize values (overflow handling)
-  PersianDateTime _normalize() {
-    int y = year, m = month, d = day;
-    int h = hour, min = minute, s = second, ms = millisecond, us = microsecond;
-    // Normalize microseconds to milliseconds
-    ms += us ~/ 1000;
-    us = us.remainder(1000);
-    if (us < 0) {
-      us += 1000;
-      ms -= 1;
+  static void _requireSupportedDayOffset(int dayOffset) {
+    if (dayOffset < 0 || dayOffset >= _supportedDayCount) {
+      throw RangeError(
+        'Date is outside the official Iranian calendar range '
+        '($minimumYear-01-01 through $maximumYear-12-'
+        '${daysInMonth(maximumYear, 12)})',
+      );
     }
-    // Normalize milliseconds to seconds
-    s += ms ~/ 1000;
-    ms = ms.remainder(1000);
-    if (ms < 0) {
-      ms += 1000;
-      s -= 1;
-    }
-    // Normalize seconds to minutes
-    min += s ~/ 60;
-    s = s.remainder(60);
-    if (s < 0) {
-      s += 60;
-      min -= 1;
-    }
-    // Normalize minutes to hours
-    h += min ~/ 60;
-    min = min.remainder(60);
-    if (min < 0) {
-      min += 60;
-      h -= 1;
-    }
-    // Normalize hours to days
-    d += h ~/ 24;
-    h = h.remainder(24);
-    if (h < 0) {
-      h += 24;
-      d -= 1;
-    }
-    // Normalize days to months
-    while (d < 1) {
-      m -= 1;
-      if (m < 1) {
-        m = 12;
-        y -= 1;
-      }
-      d += _monthLength(y, m);
-    }
-    while (d > _monthLength(y, m)) {
-      d -= _monthLength(y, m);
-      m += 1;
-      if (m > 12) {
-        m = 1;
-        y += 1;
-      }
-    }
-    // Normalize months to years
-    while (m < 1) {
-      m += 12;
-      y -= 1;
-    }
-    while (m > 12) {
-      m -= 12;
-      y += 1;
-    }
-    return PersianDateTime._resolve(y, m, d, h, min, s, ms, us, isUtc);
   }
 
-  /// Helper method to get month length
-  int _monthLength(int year, int month) {
-    if (month <= 6) return 31;
-    if (month <= 11) return 30;
-    return _isLeapYear(year) ? 30 : 29;
+  static int _floorDiv(int value, int divisor) {
+    final int quotient = value ~/ divisor;
+    final int remainder = value.remainder(divisor);
+    return remainder < 0 ? quotient - 1 : quotient;
   }
 
-  bool _isLeapYear(int jy) {
-    if (jy < -61 || jy >= 3178) {
-      int base = year > 0 ? 474 : 473;
-      int cycleYear = ((year - base) % 2820 + 2820) % 2820;
-      return (((cycleYear + 474 + 38) * 682) % 2816) < 682;
-    }
-    return _leapAndCycle(jy) == 0;
+  static int _floorMod(int value, int divisor) {
+    final int remainder = value.remainder(divisor);
+    return remainder < 0 ? remainder + divisor : remainder;
   }
 
-  /// Shared internal helper to calculate leap status from Persian logic.
-  int _leapAndCycle(int jy) {
-    if (jy < -61 || jy >= 3178) {
-      int base = jy > 0 ? 474 : 473;
-      int cycleYear = ((jy - base) % 2820 + 2820) % 2820;
-      int leap = (((cycleYear + 474 + 38) * 682) % 2816) ~/ 682;
-      return leap == 0 ? 0 : 1; // Return 0 for leap year, 1 otherwise
-    }
+  static String _twoDigits(int value) => value.toString().padLeft(2, '0');
 
-    final _CycleStats stats = _cycleStats(jy);
-    int n = jy - stats.lastBreak; // n = years since last break point (jp)
-    if (stats.jump - n < 6) {
-      n = n - stats.jump + ((stats.jump + 4) ~/ 33) * 33;
-    }
-    int leap = ((n + 1) % 33 - 1) % 4;
-    if (leap == -1) leap = 4;
-    return leap;
-  }
+  static String _threeDigits(int value) => value.toString().padLeft(3, '0');
 
-  int _gregorianYear(int jy) => jy + 621;
-
-  /// Gets the Gregorian March day when Farvardin 1st (Nowruz) starts
-  int _startYearMarch(int jy) {
-    if (jy < -61 || jy >= 3178) {
-      int gy = _gregorianYear(jy);
-      int march = ((gy ~/ 4) - ((gy ~/ 100 + 1) * 3 ~/ 4) - 150);
-      return 20 - march;
-    }
-    final int gy = _gregorianYear(jy);
-    final _CycleStats stats = _cycleStats(jy);
-    final int leapG = gy ~/ 4 - ((gy ~/ 100 + 1) * 3 ~/ 4) - 150;
-    return 20 + stats.leapCount - leapG;
-  }
-
-  _CycleStats _cycleStats(int jy) {
-    if (jy < -61 || jy >= 3178) {
-      throw Exception('Year must be between 61 and 3178 in this algorithm');
-    }
-    // leap year count
-    int leapCount = -14;
-    // last break year
-    int lastBreak = _breaks[0];
-    // jump period
-    int jump = 0;
-    for (int i = 1; i < _breaks.length; i++) {
-      // current break year
-      int currentBreak = _breaks[i];
-      jump = currentBreak - lastBreak;
-      if (jy < currentBreak) break;
-      leapCount += (jump ~/ 33) * 8 + ((jump % 33) ~/ 4);
-      lastBreak = currentBreak;
-    }
-    // years since the last break
-    int fromBreak = jy - lastBreak;
-    leapCount += (fromBreak ~/ 33) * 8 + ((fromBreak % 33 + 3) ~/ 4);
-    if ((jump % 33) == 4 && jump - fromBreak == 4) leapCount++;
-    return _CycleStats(leapCount: leapCount, lastBreak: lastBreak, jump: jump);
-  }
-
-  /// Seconds since epoch
-  @override
-  int get secondsSinceEpoch => toDateTime().millisecondsSinceEpoch ~/ 1000;
-
-  /// Milliseconds since epoch
-  @override
-  int get millisecondsSinceEpoch => toDateTime().millisecondsSinceEpoch;
-
-  /// Microseconds since epoch
-  @override
-  int get microsecondsSinceEpoch => toDateTime().microsecondsSinceEpoch;
-
-  /// Compares this dateTime instance to another.
-  /// This method allows comparison between different types that implement
-  /// [GeneralDateTimeInterface] as well as native [DateTime] objects.
-  /// Returns:
-  /// - A negative integer if `this` occurs before [other]
-  /// - Zero if `this` and [other] represent the same moment in time
-  /// - A positive integer if `this` occurs after [other]
-  /// Example:
-  /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 10);
-  /// final b = PersianDateTime(1403, 4, 15, 12);
-  /// final c = DateTime(2024, 7, 5, 12);
-  ///
-  /// a.compareTo(b); // < 0
-  /// b.compareTo(a); // > 0
-  /// b.compareTo(b); // == 0
-  /// b.compareTo(c); // Compare to native DateTime
-  /// ```
-
-  @override
-  int compareTo(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.compareTo(otherDate);
-    }
-    return selfDate.compareTo(other);
-  }
-
-  /// Checks whether this dateTime occurs before another.
-  /// This method compares this instance with [other], which can be either:
-  /// - Another object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// Returns `true` if this dateTime is before [other], otherwise `false`.
-  /// Example:
-  /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 10);
-  /// final b = PersianDateTime(1403, 4, 15, 12);
-  ///
-  /// a.isBefore(b); // true
-  /// b.isBefore(a); // false
-  ///
-  /// final native = DateTime(2025, 7, 6, 14);
-  /// b.isBefore(native); // true or false depending on internal conversion
-  /// ```
-
-  @override
-  bool isBefore(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.isBefore(otherDate);
-    }
-    return selfDate.isBefore(other);
-  }
-
-  /// Checks whether this dateTime occurs after another.
-  /// Compares this instance with [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// Returns `true` if this dateTime is after [other], otherwise `false`.
-  /// Example:
-  /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 12);
-  /// final b = PersianDateTime(1403, 4, 15, 10);
-  ///
-  /// a.isAfter(b); // true
-  /// b.isAfter(a); // false
-  ///
-  /// final native = DateTime(2025, 7, 6, 14);
-  /// b.isAfter(native); // true or false depending on internal conversion
-  /// ```
-
-  @override
-  bool isAfter(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.isAfter(otherDate);
-    }
-    return selfDate.isAfter(other);
-  }
-
-  /// Checks whether this dateTime represents the same moment as another.
-  /// Compares this instance with [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// Returns `true` if both datetimes represent the same point in time.
-  /// Example:
-  /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
-  /// final b = PersianDateTime(1403, 4, 15, 12, 30);
-  ///
-  /// a.isAtSameMomentAs(b); // true
-  ///
-  /// final native = DateTime(2025, 7, 6, 14, 0);
-  /// a.isAtSameMomentAs(native); // true or false depending on internal conversion
-  /// ```
-
-  @override
-  bool isAtSameMomentAs(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.isAtSameMomentAs(otherDate);
-    }
-    return selfDate.isAtSameMomentAs(other);
-  }
-
-  /// Returns the difference between this dateTime and another.
-  /// Computes the [Duration] between this instance and [other], which can be either:
-  /// - An object implementing [GeneralDateTimeInterface], or
-  /// - A native [DateTime] instance.
-  /// The result is positive if this dateTime is after [other], and negative if before.
-  /// Example:
-  /// ```dart
-  /// final a = PersianDateTime(1403, 4, 15, 12, 30);
-  /// final b = PersianDateTime(1403, 4, 15, 11, 0);
-  ///
-  /// final duration = a.difference(b); // 1 hour 30 minutes
-  /// duration.inMinutes; // 90
-  ///
-  /// final native = DateTime(2025, 7, 6, 14, 0);
-  /// a.difference(native);
-  /// ```
-
-  @override
-  Duration difference(DateTime other) {
-    final DateTime selfDate = toDateTime();
-    if (other is GeneralDateTimeInterface) {
-      DateTime otherDate = (other as GeneralDateTimeInterface).toDateTime();
-      return selfDate.difference(otherDate);
-    }
-    return selfDate.difference(other);
-  }
+  static String _fourDigits(int value) => value.toString().padLeft(4, '0');
 }
 
-/// Helper private class to return results from cycle calculation
-class _CycleStats {
-  _CycleStats(
-      {required this.leapCount, required this.lastBreak, required this.jump});
+final class _ResolvedPersianDateTime {
+  const _ResolvedPersianDateTime({
+    required this.dateTime,
+    required this.year,
+    required this.month,
+    required this.day,
+    required this.dayOffset,
+  });
 
-  /// number of leap years since cycle start
-  final int leapCount;
-
-  /// last break year from breaks list
-  final int lastBreak;
-
-  /// interval between two break points in the cycle
-  final int jump;
+  final DateTime dateTime;
+  final int year;
+  final int month;
+  final int day;
+  final int dayOffset;
 }

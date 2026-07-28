@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:general_datetime/general_datetime.dart';
-import 'package:general_datetime/default_localizations.dart';
 import 'package:general_datetime/delegates.dart';
 
 void main() {
@@ -49,21 +48,15 @@ class AppStartup extends StatelessWidget {
                   ),
                   const Divider(),
                   const Text('Persian Calendar'),
-                  Localizations.override(
-                    context: context,
-                    delegates: const <LocalizationsDelegate<dynamic>>[
-                      DefaultPersianCalendarMaterialLocalizations.delegate,
-                    ],
-                    child: CalendarDatePicker(
-                      initialDate: PersianDateTime.now(),
-                      firstDate: PersianDateTime(1400, 1, 1),
-                      lastDate: PersianDateTime(1450, 12, 31),
-                      currentDate: PersianDateTime.now(),
-                      onDateChanged: (value) {
-                        debugPrint('Persian selected: $value');
-                      },
-                      calendarDelegate: const PersianCalendarDelegate(),
-                    ),
+                  CalendarDatePicker(
+                    initialDate: PersianDateTime.now(),
+                    firstDate: PersianDateTime(1400, 1, 1),
+                    lastDate: PersianDateTime(1450, 12, 29),
+                    currentDate: PersianDateTime.now(),
+                    onDateChanged: (value) {
+                      debugPrint('Persian selected: $value');
+                    },
+                    calendarDelegate: const PersianCalendarDelegate.english(),
                   ),
                   const Divider(),
                   const Text('Hijri Calendar'),
