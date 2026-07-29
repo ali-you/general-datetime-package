@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
+import 'package:hijri/hijri_calendar.dart';
+import 'package:general_datetime/src/shared/gregorian_helper.dart';
 
 import '../fixtures/umm_al_qura_openjdk21_fixture.dart';
 
@@ -910,6 +912,61 @@ void main() {
         utc.toDateTime() == localSameMoment.toDateTime(),
         isFalse,
       );
+    });
+  });
+
+  group('Third-party comparison', () {
+    test('converts every supported Gregorian day to Hijri and matches hijri package', () {
+      final GregorianHelper gregorianHelper = GregorianHelper();
+      // final DateTime start = HijriDateTime.minimumGregorianDate;
+      final DateTime start = DateTime(1937, 3, 14);
+      // final DateTime end = HijriDateTime.maximumGregorianDate;
+      final DateTime end = DateTime(2077);
+
+      for (int year = start.year; year <= end.year; year++) {
+        for (int month = 1; month <= 12; month++) {
+          final int monthLength = gregorianHelper.monthLength(year, month);
+          for (int day = 1; day <= monthLength; day++) {
+            final DateTime current = DateTime.utc(year, month, day);
+            if (current.isBefore(start) || current.isAfter(end)) continue;
+
+            final HijriCalendar expected = HijriCalendar.fromDate(current);
+            final HijriDateTime actual = HijriDateTime.fromDateTime(current);
+
+            expect(actual.year, expected.hYear,
+                reason: 'Year mismatch at $year-$month-$day');
+            expect(actual.month, expected.hMonth,
+                reason: 'Month mismatch at $year-$month-$day');
+            expect(actual.day, expected.hDay,
+                reason: 'Day mismatch at $year-$month-$day');
+          }
+        }
+      }
+    });
+
+    test('converts every supported Hijri day to Gregorian and matches hijri package', () {
+      final HijriCalendar converter = HijriCalendar();
+      for (int year = HijriDateTime.minimumYear;
+          year <= HijriDateTime.maximumYear;
+          year++) {
+        for (int month = 1; month <= 12; month++) {
+          final int monthLength = HijriDateTime.daysInMonth(year, month);
+          for (int day = 1; day <= monthLength; day++) {
+            final HijriDateTime hijri = HijriDateTime.utc(year, month, day);
+            final DateTime expected =
+                converter.hijriToGregorian(year, month, day);
+
+            final DateTime actual = hijri.toDateTime();
+
+            expect(actual.year, expected.year,
+                reason: 'Gregorian year mismatch at Hijri $year-$month-$day');
+            expect(actual.month, expected.month,
+                reason: 'Gregorian month mismatch at Hijri $year-$month-$day');
+            expect(actual.day, expected.day,
+                reason: 'Gregorian day mismatch at Hijri $year-$month-$day');
+          }
+        }
+      }
     });
   });
 }

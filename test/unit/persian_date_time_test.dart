@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
+import 'package:general_datetime/src/shared/gregorian_helper.dart';
+import 'package:shamsi_date/shamsi_date.dart';
 
 import '../fixtures/university_tehran_persian_fixture.dart';
 
@@ -1135,6 +1137,58 @@ void main() {
         utc.toDateTime() == localSameMoment.toDateTime(),
         isFalse,
       );
+    });
+  });
+
+   group('Third-party comparison', () {
+    test('converts every supported Gregorian day to Persian and matches shamsi_date', () {
+      final GregorianHelper gregorianHelper = GregorianHelper();
+      final DateTime start = PersianDateTime.minimumGregorianDate;
+      final DateTime end = PersianDateTime.maximumGregorianDate;
+
+      for (int year = start.year; year <= end.year; year++) {
+        for (int month = 1; month <= 12; month++) {
+          final int monthLength = gregorianHelper.monthLength(year, month);
+          for (int day = 1; day <= monthLength; day++) {
+            final DateTime current = DateTime.utc(year, month, day);
+            if (current.isBefore(start) || current.isAfter(end)) continue;
+
+            final Jalali expected = Jalali.fromDateTime(current);
+            final PersianDateTime actual = PersianDateTime.fromDateTime(current);
+
+            expect(actual.year, expected.year,
+                reason: 'Year mismatch at $year-$month-$day');
+            expect(actual.month, expected.month,
+                reason: 'Month mismatch at $year-$month-$day');
+            expect(actual.day, expected.day,
+                reason: 'Day mismatch at $year-$month-$day');
+          }
+        }
+      }
+    });
+
+     test('converts every supported Persian day to Gregorian and matches shamsi_date', () {
+      for (int year = PersianDateTime.minimumYear;
+      year <= PersianDateTime.maximumYear;
+      year++) {
+        for (int month = 1; month <= 12; month++) {
+          final int monthLength = PersianDateTime.daysInMonth(year, month);
+          for (int day = 1; day <= monthLength; day++) {
+            final PersianDateTime persian = PersianDateTime.utc(year, month, day);
+            final Jalali shamsi = Jalali(year, month, day);
+            final Gregorian expected = shamsi.toGregorian();
+
+            final DateTime actual = persian.toDateTime();
+
+            expect(actual.year, expected.year,
+                reason: 'Gregorian year mismatch at Persian $year-$month-$day');
+            expect(actual.month, expected.month,
+                reason: 'Gregorian month mismatch at Persian $year-$month-$day');
+            expect(actual.day, expected.day,
+                reason: 'Gregorian day mismatch at Persian $year-$month-$day');
+          }
+        }
+      }
     });
   });
 }
