@@ -9,6 +9,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        timezone: [UTC, Asia/Tehran, America/New_York]
+    env:
+      TZ: ${{ matrix.timezone }}
 
     steps:
       - name: Checkout code
@@ -31,4 +37,4 @@ jobs:
         run: flutter analyze
 
       - name: Run tests
-        run: flutter test
+        run: flutter test --dart-define=CALENDAR_TEST_TZ=${{ matrix.timezone }}

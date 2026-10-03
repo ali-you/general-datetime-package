@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Added shared critical suites for both calendars: independent seeded
+  normalization, precision/epoch boundaries, adversarial parsing, DST, calendar
+  interoperability, and picker validation/navigation/localization isolation.
+- Added exhaustive compact parsing checks over all reference months and a
+  three-time-zone CI matrix with explicit DST assertions.
+- Fixed oversized epoch seconds/milliseconds wrapping into dates near 1970
+  in both calendars, with regressions for positive and negative 64-bit inputs.
 - Aligned Hijri calculations, data-coverage APIs, Material localizations,
   delegates, scoped picker examples, and tests with the Persian structure.
 - Added customized Hijri formatting/parsing and input-picker coverage, and

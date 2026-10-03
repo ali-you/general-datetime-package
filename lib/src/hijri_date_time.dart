@@ -187,6 +187,12 @@ class HijriDateTime extends DateTime
     int secondsSinceEpoch, {
     bool isUtc = false,
   }) {
+    RangeError.checkValueInInterval(
+      secondsSinceEpoch,
+      -Constants.maximumNativeEpochSeconds,
+      Constants.maximumNativeEpochSeconds,
+      'secondsSinceEpoch',
+    );
     return HijriDateTime.fromMicrosecondsSinceEpoch(
       secondsSinceEpoch * _microsecondsPerSecond,
       isUtc: isUtc,
@@ -197,9 +203,8 @@ class HijriDateTime extends DateTime
     int millisecondsSinceEpoch, {
     bool isUtc = false,
   }) {
-    return HijriDateTime.fromMicrosecondsSinceEpoch(
-      millisecondsSinceEpoch * _microsecondsPerMillisecond,
-      isUtc: isUtc,
+    return HijriDateTime.fromDateTime(
+      DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch, isUtc: isUtc),
     );
   }
 

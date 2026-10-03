@@ -191,6 +191,12 @@ class PersianDateTime extends DateTime
     int secondsSinceEpoch, {
     bool isUtc = false,
   }) {
+    RangeError.checkValueInInterval(
+      secondsSinceEpoch,
+      -Constants.maximumNativeEpochSeconds,
+      Constants.maximumNativeEpochSeconds,
+      'secondsSinceEpoch',
+    );
     return PersianDateTime.fromMicrosecondsSinceEpoch(
       secondsSinceEpoch * _microsecondsPerSecond,
       isUtc: isUtc,
@@ -201,9 +207,8 @@ class PersianDateTime extends DateTime
     int millisecondsSinceEpoch, {
     bool isUtc = false,
   }) {
-    return PersianDateTime.fromMicrosecondsSinceEpoch(
-      millisecondsSinceEpoch * _microsecondsPerMillisecond,
-      isUtc: isUtc,
+    return PersianDateTime.fromDateTime(
+      DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch, isUtc: isUtc),
     );
   }
 

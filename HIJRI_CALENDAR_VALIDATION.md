@@ -40,7 +40,7 @@ Additional tests cover normalization, local/UTC representation, epoch
 constructors, comparisons, native equality/hashing, arithmetic, `copyWith`,
 parsing, formatting, and rejection outside the finite interval.
 
-The complete native Flutter suite passed all 110 tests. Flutter analysis and
+The complete native Flutter suite passed all 165 tests. Flutter analysis and
 the repository formatting check passed. A Chrome run was attempted but did not
 reach the tests: the installed Flutter SDK failed to load CanvasKit assets and
 generated a malformed Windows test path. Browser execution is unverified.
@@ -79,6 +79,8 @@ Install its localization delegate in the picker scope using
 `Localizations.override`, or at app level when the app uses that calendar.
 Delegate and widget tests exercise customized names/formats/parsing, input
 submission, navigation, range rejection, week alignment, and scoped pickers.
+Shared critical regression suites and time-zone CI coverage are described in
+[CALENDAR_TESTING.md](CALENDAR_TESTING.md).
 
 Umm al-Qura data must not be extended using a repeating arithmetic Islamic
 leap cycle. Adding support beyond this interval requires a separately verified

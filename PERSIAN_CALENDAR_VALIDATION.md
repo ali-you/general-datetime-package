@@ -81,6 +81,9 @@ it as an independent oracle. They verify:
 - Persian Material localization formatting and parsing, customized month
   headers, signed years, date-picker navigation, input mode, and range failures.
 
+Shared critical regression suites and time-zone CI coverage are described in
+[CALENDAR_TESTING.md](CALENDAR_TESTING.md).
+
 Run the validation with:
 
 ```console

@@ -1,4 +1,9 @@
 class Constants {
+  /// Native DateTime supports at most 100,000,000 days from the Unix epoch.
+  /// Validate seconds before multiplication to avoid signed integer overflow.
+  static const int maximumNativeEpochSeconds =
+      100000000 * Duration.secondsPerDay;
+
   /*
    * date ::= yeardate time_opt timezone_opt
    * yeardate ::= year colon_opt month colon_opt day

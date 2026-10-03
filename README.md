@@ -274,6 +274,9 @@ documented in [`HIJRI_CALENDAR_VALIDATION.md`](HIJRI_CALENDAR_VALIDATION.md).
 
 ## Contributions
 
+See [CALENDAR_TESTING.md](CALENDAR_TESTING.md) for exhaustive calendar coverage,
+critical regression cases, and the UTC/Tehran/New York CI test matrix.
+
 Contributions are welcome! If you have suggestions, fixes, or new features, please submit a pull
 request or open an issue on GitHub.
 
