@@ -1,8 +1,21 @@
 # Persian calendar data and validation
 
-`PersianDateTime` implements Iran's civil Solar Hijri calendar over a finite,
-published interval. It does not extrapolate an arithmetic cycle beyond the
-available official results.
+`PersianDateTime` supports Solar Hijri -61-01-01 through 3177-12-29
+(Gregorian 0560-03-20 through 3799-03-19). Published Iranian calendar data
+remains authoritative for SH 1206–1498; outside that interval, dates use
+[Borkowski's break-year model](https://www.astro.uni.torun.pl/~kb/Papers/EMP/PersianC-EMP.htm).
+The extended interval is a calculated calendar, not a guarantee of official
+historical usage or future astronomical decisions. It includes year zero.
+
+`minimumYear` and `maximumYear` describe the supported calculation bounds.
+`minimumOfficialYear`, `maximumOfficialYear`, and `hasOfficialCalendarData`
+identify whether the published table covers a date. Negative years format as
+signed four-digit years, for example `-0061-01-01T00:00:00.000Z`.
+
+The model's uncertainty for distant years is discussed in its original paper.
+Other implementations using different astronomical predictions can disagree;
+[jalaali-js documents divergence from Intl after Gregorian 2256](https://github.com/jalaali/jalaali-js).
+No 2820-year fallback is applied beyond the finite calculation range.
 
 ## Primary sources
 
@@ -43,7 +56,7 @@ civil mapping is anchored to the annual calendars:
 ```
 
 With the fixed Solar Hijri month lengths, that produces a unique continuous
-civil calendar from SH 1206-01-01 (1827-03-22) through SH 1498-12-30
+published-data interval from SH 1206-01-01 (1827-03-22) through SH 1498-12-30
 (2120-03-20). The conflicting printed column is retained verbatim in the test
 fixture for auditability but is never used for conversion.
 
@@ -53,13 +66,20 @@ The tests keep the official CSV fixture separate from production data and use
 it as an independent oracle. They verify:
 
 - all 293 published leap/common-year markers and all 3,516 month lengths;
-- every one of the 107,016 supported days in both conversion directions;
+- every one of the 107,016 published-data days in both conversion directions;
+- all 3,239 supported year starts and leap statuses against `shamsi_date`;
+- all 1,183,020 calculated-range days against external year starts, including
+  conversion round trips and Julian day numbers;
+- reverse conversion for every day in the external oracle's shared range
+  (its final date is Gregorian 3798-12-31; this implementation covers the
+  remaining 78 days of the final Persian year as well);
+- continuity at both published-data edges and signed-year formatting;
 - the three annual-calendar civil anchors above and both range boundaries;
 - Julian day numbers, weekdays, normalization, parsing and offsets;
 - UTC/local conversion, epoch factories, microsecond precision, equality,
   hashing, comparisons, arithmetic, and `copyWith`;
-- English and Persian Material delegate formatting, Persian/Arabic-Indic digit
-  parsing, date-picker navigation, input mode, and range failures.
+- Persian Material localization formatting and parsing, customized month
+  headers, signed years, date-picker navigation, input mode, and range failures.
 
 Run the validation with:
 

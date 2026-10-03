@@ -101,9 +101,9 @@ void main() {
   // Arithmetic:
   var nextWeek = directDate.add(Duration(days: 7));
 
-  // The implementation is bounded by the official source data:
-  print(PersianDateTime.minimumYear); // 1206
-  print(PersianDateTime.maximumYear); // 1498
+  // Supported calculation range (official table: 1206 through 1498):
+  print(PersianDateTime.minimumYear); // -61
+  print(PersianDateTime.maximumYear); // 3177
 }
 ```
 
@@ -122,9 +122,11 @@ void main() {
 
 ## Flutter Integration (Localization & Delegates)
 
-Use the matching `CalendarDelegate` with Flutter Material date pickers. Both
-delegates own their calendar-specific formatting and parsing, so neither needs
-a replacement global `MaterialLocalizations`.
+Use the matching `CalendarDelegate` with Flutter Material date pickers.
+`PersianCalendarDelegate` handles calendar calculations and forwards names,
+formatting, parsing, and input help to the current `MaterialLocalizations`.
+Supply `DefaultPersianCalendarMaterialLocalizations.delegate` for a Persian
+picker. `HijriCalendarDelegate` supplies its own calendar-specific formatting.
 
 ### Use with CalendarDatePicker
 
@@ -132,22 +134,31 @@ Pass the corresponding delegate to change the calendar system:
 
 ```dart
 import 'package:general_datetime/delegates.dart';
+import 'package:general_datetime/default_localizations.dart';
 
-CalendarDatePicker(
-  initialDate: PersianDateTime.now(),
-  firstDate: PersianDateTime(1380, 1, 1),
-  lastDate: PersianDateTime(1450, 12, 29),
-  calendarDelegate: PersianCalendarDelegate.persian(),
-  onDateChanged: (DateTime date) {
-    print("Selected: $date");
-  },
+// Inside build(BuildContext context), scope the Persian localization to its picker:
+Localizations.override(
+  context: context,
+  delegates: const <LocalizationsDelegate<dynamic>>[
+    DefaultPersianCalendarMaterialLocalizations.delegate,
+  ],
+  child: CalendarDatePicker(
+    initialDate: PersianDateTime.now(),
+    firstDate: PersianDateTime(1380, 1, 1),
+    lastDate: PersianDateTime(1450, 12, 29),
+    calendarDelegate: const PersianCalendarDelegate(),
+    onDateChanged: (DateTime date) {
+      print("Selected: $date");
+    },
+  ),
 )
 ```
 
-The old replacement localization delegates remain available for compatibility,
-but are not needed with `PersianCalendarDelegate` or `HijriCalendarDelegate`.
-Do not register both legacy replacements in one `MaterialApp`: both provide the
-same `MaterialLocalizations` type, so Flutter can load only one per locale.
+For an app using only the Persian calendar, the localization delegate can
+instead be registered in `MaterialApp.localizationsDelegates`. Custom Material
+localizations can replace month names, date formats, and parsing without
+changing the calendar delegate. Scope calendar-specific localizations to their
+picker when showing several calendar systems in one app.
 
 ## API Overview
 
@@ -191,12 +202,20 @@ The Iranian Solar Hijri calendar is astronomical; it is not safely represented
 by an indefinitely repeating 33-year or 2820-year arithmetic cycle. This
 implementation uses the University of Tehran Calendar Center's published leap
 results for SH 1206 through 1498, anchored to its official annual calendars.
-The supported civil interval is SH 1206-01-01 through 1498-12-30 (Gregorian
-1827-03-22 through 2120-03-20). Dates outside it throw `RangeError` instead of
-silently switching algorithms.
+The supported interval is SH -61-01-01 through 3177-12-29 (Gregorian
+0560-03-20 through 3799-03-19). Within SH 1206–1498, the published table remains
+the authority. Outside it, Borkowski's finite break-year calculation supplies
+leap years; these calculated dates are not guaranteed official historical or
+future civil dates. Dates beyond the calculation range throw `RangeError`.
+
+`minimumOfficialYear`, `maximumOfficialYear`, and `hasOfficialCalendarData`
+identify the published-data interval separately from the supported range.
+The [calculation model](https://www.astro.uni.torun.pl/~kb/Papers/EMP/PersianC-EMP.htm)
+includes uncertainty for distant dates; implementations using other models,
+including `Intl`, may differ after Gregorian 2256.
 
 The first six months contain 31 days, the next five contain 30, and Esfand has
-29 or 30 according to the published leap data. Gregorian conversion, UTC/local
+29 or 30 according to the published data or calculation model. Gregorian conversion, UTC/local
 behavior, parsing, epoch constructors, arithmetic, equality, hashing, and
 overflow normalization preserve the true native `DateTime` instant at
 microsecond precision.

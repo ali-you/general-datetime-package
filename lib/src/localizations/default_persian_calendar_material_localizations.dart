@@ -23,11 +23,11 @@ class _PersianCalendarMaterialLocalizationsDelegate
       'DefaultPersianCalendarMaterialLocalizations.delegate(en_US)';
 }
 
-/// Legacy US-English Material localizations with Solar Hijri date formatting.
+/// US-English Material localizations with Solar Hijri names and date formats.
 ///
-/// Prefer [PersianCalendarDelegate], which owns its calendar-specific
-/// formatting and parsing without replacing every Material localization in a
-/// widget subtree. This class remains available for source compatibility.
+/// [PersianCalendarDelegate] uses the ambient [MaterialLocalizations] for date
+/// formatting and parsing. Load [delegate] for a Persian date picker, either in
+/// its [MaterialApp] or through a picker-specific [Localizations.override].
 class DefaultPersianCalendarMaterialLocalizations
     implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
@@ -99,7 +99,7 @@ class DefaultPersianCalendarMaterialLocalizations
     'Esfand',
   ];
 
-  /// Returns the official Solar Hijri length of [month] in [year].
+  /// Returns the Solar Hijri length of [month] in [year].
   int _getDaysInMonth(int year, int month) =>
       PersianDateTime.daysInMonth(year, month);
 
@@ -143,7 +143,8 @@ class DefaultPersianCalendarMaterialLocalizations
     // Preserves the legacy dd/mm/yyyy contract of this English localization.
     final String month = _formatTwoDigitZeroPad(date.month);
     final String day = _formatTwoDigitZeroPad(date.day);
-    final String year = date.year.toString().padLeft(4, '0');
+    final String year =
+        '${date.year < 0 ? '-' : ''}${date.year.abs().toString().padLeft(4, '0')}';
     return '$day/$month/$year';
   }
 
@@ -596,9 +597,8 @@ class DefaultPersianCalendarMaterialLocalizations
   /// A [LocalizationsDelegate] that uses [DefaultPersianCalendarMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// This delegate is not installed automatically. Prefer
-  /// [PersianCalendarDelegate] unless compatibility with the legacy replacement
-  /// localization is required.
+  /// Install this delegate for a [PersianCalendarDelegate] picker to supply
+  /// Solar Hijri month names, date formats, and parsing.
   static const LocalizationsDelegate<MaterialLocalizations> delegate =
       _PersianCalendarMaterialLocalizationsDelegate();
 

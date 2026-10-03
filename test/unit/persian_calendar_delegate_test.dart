@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/default_localizations.dart';
@@ -5,165 +6,42 @@ import 'package:general_datetime/delegates.dart';
 import 'package:general_datetime/general_datetime.dart';
 
 void main() {
-  const PersianCalendarDelegate defaultDelegate = PersianCalendarDelegate();
-  const PersianCalendarDelegate englishDelegate =
-      PersianCalendarDelegate.english();
-  const PersianCalendarDelegate persianDelegate =
-      PersianCalendarDelegate.persian();
-  const DefaultMaterialLocalizations gregorianLocalizations =
-      DefaultMaterialLocalizations();
-  const DefaultHijriCalendarMaterialLocalizations hijriLocalizations =
-      DefaultHijriCalendarMaterialLocalizations();
+  const PersianCalendarDelegate delegate = PersianCalendarDelegate();
+  const DefaultPersianCalendarMaterialLocalizations localizations =
+      DefaultPersianCalendarMaterialLocalizations();
 
-  group('PersianCalendarDelegate presentation', () {
+  group('PersianCalendarDelegate localizations', () {
     final PersianDateTime date = PersianDateTime(1403, 1, 1);
 
-    test('default constructor preserves the English presentation', () {
-      expect(
-        defaultDelegate.presentation,
-        PersianCalendarPresentation.english,
-      );
-      expect(
-        defaultDelegate.formatMonthYear(date, gregorianLocalizations),
-        englishDelegate.formatMonthYear(date, gregorianLocalizations),
-      );
+    test('uses Solar Hijri names and formats supplied by localizations', () {
+      expect(delegate.formatMonthYear(date, localizations), 'Farvardin 1403');
+      expect(delegate.formatMediumDate(date, localizations), 'Wed, Far 1');
+      expect(delegate.formatShortMonthDay(date, localizations), 'Far 1');
+      expect(delegate.formatShortDate(date, localizations), 'Far 1, 1403');
+      expect(delegate.formatFullDate(date, localizations),
+          'Wednesday, Farvardin 1, 1403');
+      expect(delegate.formatCompactDate(date, localizations), '01/01/1403');
+      expect(delegate.formatYear(1403, localizations), '1403');
+      expect(delegate.dateHelpText(localizations), localizations.dateHelpText);
+      expect(delegate.formatMonthYear(PersianDateTime(1403, 12), localizations),
+          'Esfand 1403');
     });
 
-    test('English formatting is independent of ambient localizations', () {
-      for (final MaterialLocalizations localizations in <MaterialLocalizations>[
-        gregorianLocalizations,
-        hijriLocalizations,
-      ]) {
-        expect(
-          englishDelegate.formatMonthYear(date, localizations),
-          'Farvardin 1403',
-        );
-        expect(englishDelegate.formatYear(date.year, localizations), '1403');
-        expect(
-          englishDelegate.formatMediumDate(date, localizations),
-          'Wed, Far 1',
-        );
-        expect(
-          englishDelegate.formatShortMonthDay(date, localizations),
-          'Far 1',
-        );
-        expect(
-          englishDelegate.formatShortDate(date, localizations),
-          'Far 1, 1403',
-        );
-        expect(
-          englishDelegate.formatFullDate(date, localizations),
-          'Wednesday, Farvardin 1, 1403',
-        );
-        expect(
-          englishDelegate.formatCompactDate(date, localizations),
-          '01/01/1403',
-        );
-        expect(englishDelegate.dateHelpText(localizations), 'dd/mm/yyyy');
-      }
+    test('honors customized month names and input help', () {
+      const _CustomPersianMaterialLocalizations custom =
+          _CustomPersianMaterialLocalizations();
+      expect(delegate.formatMonthYear(date, custom), 'Custom month 1 / 1403');
+      expect(delegate.dateHelpText(custom), 'Custom Persian date help');
     });
 
-    test('Persian formatting uses Persian names, digits, and date order', () {
-      expect(
-        persianDelegate.formatMonthYear(date, gregorianLocalizations),
-        'فروردین ۱۴۰۳',
-      );
-      expect(
-        persianDelegate.formatYear(date.year, gregorianLocalizations),
-        '۱۴۰۳',
-      );
-      expect(
-        persianDelegate.formatMediumDate(date, gregorianLocalizations),
-        'چهارشنبه ۱ فروردین',
-      );
-      expect(
-        persianDelegate.formatShortMonthDay(date, gregorianLocalizations),
-        '۱ فروردین',
-      );
-      expect(
-        persianDelegate.formatShortDate(date, gregorianLocalizations),
-        '۱ فروردین ۱۴۰۳',
-      );
-      expect(
-        persianDelegate.formatFullDate(date, gregorianLocalizations),
-        '۱۴۰۳ فروردین ۱، چهارشنبه',
-      );
-      expect(
-        persianDelegate.formatCompactDate(date, gregorianLocalizations),
-        '۱۴۰۳/۰۱/۰۱',
-      );
-      expect(
-        persianDelegate.dateHelpText(gregorianLocalizations),
-        'yyyy/mm/dd',
-      );
-    });
-  });
-
-  group('PersianCalendarDelegate parsing', () {
-    test('English parser returns strict PersianDateTime values', () {
-      for (final MaterialLocalizations localizations in <MaterialLocalizations>[
-        gregorianLocalizations,
-        hijriLocalizations,
-      ]) {
-        final DateTime? parsed =
-            englishDelegate.parseCompactDate(' 31 / 02 / 1403 ', localizations);
-
-        expect(parsed, isA<PersianDateTime>());
-        expect(parsed?.year, 1403);
-        expect(parsed?.month, 2);
-        expect(parsed?.day, 31);
-      }
+    test('uses the supplied parser for valid Persian dates', () {
+      final DateTime? parsed =
+          delegate.parseCompactDate(' 31 / 02 / 1403 ', localizations);
+      expect(parsed, isA<PersianDateTime>());
+      expect((parsed?.year, parsed?.month, parsed?.day), (1403, 2, 31));
     });
 
-    test('normalizes Latin, Persian, and Arabic-Indic digits', () {
-      final DateTime? latin = persianDelegate.parseCompactDate(
-        '1403/02/31',
-        gregorianLocalizations,
-      );
-      final DateTime? persian = persianDelegate.parseCompactDate(
-        '۱۴۰۳/۰۲/۳۱',
-        gregorianLocalizations,
-      );
-      final DateTime? arabicIndic = persianDelegate.parseCompactDate(
-        '١٤٠٣/٠٢/٣١',
-        gregorianLocalizations,
-      );
-      final DateTime? englishWithPersianDigits =
-          englishDelegate.parseCompactDate(
-        '۳۱/۰۲/۱۴۰۳',
-        gregorianLocalizations,
-      );
-
-      for (final DateTime? parsed in <DateTime?>[
-        latin,
-        persian,
-        arabicIndic,
-        englishWithPersianDigits,
-      ]) {
-        expect(parsed, isA<PersianDateTime>());
-        expect((parsed?.year, parsed?.month, parsed?.day), (1403, 2, 31));
-      }
-    });
-
-    test('round-trips valid compact dates in both presentations', () {
-      final PersianDateTime date = PersianDateTime(1403, 2, 31);
-
-      for (final PersianCalendarDelegate delegate in <PersianCalendarDelegate>[
-        englishDelegate,
-        persianDelegate
-      ]) {
-        final String formatted =
-            delegate.formatCompactDate(date, gregorianLocalizations);
-        final DateTime? parsed =
-            delegate.parseCompactDate(formatted, gregorianLocalizations);
-
-        expect(parsed, isA<PersianDateTime>());
-        expect((parsed?.year, parsed?.month, parsed?.day), (1403, 2, 31));
-      }
-    });
-
-    test('rejects malformed, invalid, and presentation-mismatched dates', () {
-      final int invalidEsfandDay = PersianDateTime.daysInMonth(1402, 12) + 1;
+    test('rejects malformed, invalid, and unsupported dates', () {
       for (final String? input in <String?>[
         null,
         '',
@@ -173,77 +51,43 @@ void main() {
         '00/02/1403',
         '32/02/1403',
         '01/13/1403',
-        '$invalidEsfandDay/12/1402',
+        '30/12/1402',
         '1403/02/31',
+        '01/01/-62',
+        '01/01/3178',
       ]) {
-        expect(
-          englishDelegate.parseCompactDate(input, gregorianLocalizations),
-          isNull,
-          reason: 'Expected "$input" to be rejected.',
-        );
+        expect(delegate.parseCompactDate(input, localizations), isNull,
+            reason: input);
       }
-
-      expect(
-        persianDelegate.parseCompactDate(
-          '31/02/1403',
-          gregorianLocalizations,
-        ),
-        isNull,
-      );
     });
 
-    test('accepts exact supported boundaries and rejects adjacent years', () {
-      final int minimumYear = PersianDateTime.minimumYear;
-      final int maximumYear = PersianDateTime.maximumYear;
-      final int lastDay = PersianDateTime.daysInMonth(maximumYear, 12);
-
-      expect(
-        englishDelegate.parseCompactDate(
-          '01/01/$minimumYear',
-          gregorianLocalizations,
-        ),
-        isA<PersianDateTime>(),
-      );
-      expect(
-        englishDelegate.parseCompactDate(
-          '$lastDay/12/$maximumYear',
-          gregorianLocalizations,
-        ),
-        isA<PersianDateTime>(),
-      );
-      expect(
-        englishDelegate.parseCompactDate(
-          '01/01/${minimumYear - 1}',
-          gregorianLocalizations,
-        ),
-        isNull,
-      );
-      expect(
-        englishDelegate.parseCompactDate(
-          '01/01/${maximumYear + 1}',
-          gregorianLocalizations,
-        ),
-        isNull,
-      );
+    test('round-trips extended dates through the localization formats', () {
+      for (final int year in <int>[-61, -1, 0, 1000, 1403, 2000, 3177]) {
+        final PersianDateTime date = PersianDateTime(year, 2, 31);
+        final String formatted =
+            delegate.formatCompactDate(date, localizations);
+        expect(delegate.parseCompactDate(formatted, localizations), date,
+            reason: formatted);
+      }
     });
   });
 
   group('PersianCalendarDelegate calendar operations', () {
     test('uses official month lengths', () {
-      expect(englishDelegate.getDaysInMonth(1403, 1), 31);
-      expect(englishDelegate.getDaysInMonth(1403, 7), 30);
+      expect(delegate.getDaysInMonth(1403, 1), 31);
+      expect(delegate.getDaysInMonth(1403, 7), 30);
       expect(
-        englishDelegate.getDaysInMonth(1403, 12),
+        delegate.getDaysInMonth(1403, 12),
         PersianDateTime.daysInMonth(1403, 12),
       );
     });
 
     test('navigates across ordinary year boundaries', () {
-      final DateTime nextMonth = englishDelegate.addMonthsToMonthDate(
+      final DateTime nextMonth = delegate.addMonthsToMonthDate(
         PersianDateTime(1403, 12, 1),
         1,
       );
-      final DateTime nextDay = englishDelegate.addDaysToDate(
+      final DateTime nextDay = delegate.addDaysToDate(
         PersianDateTime(
           1403,
           12,
@@ -256,20 +100,20 @@ void main() {
       expect((nextDay.year, nextDay.month, nextDay.day), (1404, 1, 1));
     });
 
-    test('throws when navigation leaves the official range', () {
+    test('throws when navigation leaves the supported range', () {
       final int minimumYear = PersianDateTime.minimumYear;
       final int maximumYear = PersianDateTime.maximumYear;
       final int lastDay = PersianDateTime.daysInMonth(maximumYear, 12);
 
       expect(
-        () => englishDelegate.addMonthsToMonthDate(
+        () => delegate.addMonthsToMonthDate(
           PersianDateTime(minimumYear, 1, 1),
           -1,
         ),
         throwsRangeError,
       );
       expect(
-        () => englishDelegate.addDaysToDate(
+        () => delegate.addDaysToDate(
           PersianDateTime(maximumYear, 12, lastDay),
           1,
         ),
@@ -279,7 +123,7 @@ void main() {
 
     test('aligns offsets with ambient week headers', () {
       expect(
-        englishDelegate.firstDayOffset(
+        delegate.firstDayOffset(
           1403,
           1,
           const _FirstDayMaterialLocalizations(0),
@@ -287,7 +131,7 @@ void main() {
         3,
       );
       expect(
-        englishDelegate.firstDayOffset(
+        delegate.firstDayOffset(
           1403,
           1,
           const _FirstDayMaterialLocalizations(1),
@@ -295,7 +139,7 @@ void main() {
         2,
       );
       expect(
-        englishDelegate.firstDayOffset(
+        delegate.firstDayOffset(
           1403,
           1,
           const _FirstDayMaterialLocalizations(6),
@@ -305,11 +149,19 @@ void main() {
     });
   });
 
-  group('legacy Persian Material localizations', () {
+  group('Persian Material localizations', () {
     const DefaultPersianCalendarMaterialLocalizations localizations =
         DefaultPersianCalendarMaterialLocalizations();
 
-    test('validates dates against the official supported range', () {
+    test('round-trips compact dates with negative years', () {
+      final PersianDateTime date = PersianDateTime(-61);
+      expect(localizations.formatCompactDate(date), '01/01/-0061');
+      expect(
+          localizations.parseCompactDate(localizations.formatCompactDate(date)),
+          date);
+    });
+
+    test('validates dates against the supported range', () {
       final int minimumYear = PersianDateTime.minimumYear;
       final int maximumYear = PersianDateTime.maximumYear;
 
@@ -333,31 +185,41 @@ void main() {
     });
   });
 
-  testWidgets('CalendarDatePicker needs no replacement localization',
+  testWidgets('CalendarDatePicker renders names from Persian localizations',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: CalendarDatePicker(
-            initialDate: PersianDateTime(1403, 1, 1),
-            firstDate: PersianDateTime(1402, 1, 1),
-            lastDate: PersianDateTime(1404, 12, 29),
-            currentDate: PersianDateTime(1403, 1, 1),
-            onDateChanged: (_) {},
-            calendarDelegate: englishDelegate,
+        home: Builder(
+          builder: (BuildContext context) => Scaffold(
+            body: Localizations.override(
+              context: context,
+              delegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultPersianCalendarMaterialLocalizations.delegate,
+              ],
+              child: CalendarDatePicker(
+                initialDate: PersianDateTime(1403, 1, 1),
+                firstDate: PersianDateTime(1402, 1, 1),
+                lastDate: PersianDateTime(1404, 12, 29),
+                currentDate: PersianDateTime(1403, 1, 1),
+                onDateChanged: (_) {},
+                calendarDelegate: delegate,
+              ),
+            ),
           ),
         ),
       ),
     );
-
     expect(find.text('Farvardin 1403'), findsOneWidget);
     expect(find.text('January 1403'), findsNothing);
   });
 
-  testWidgets('Persian presentation renders its own month header',
+  testWidgets('picker month header honors a custom localization',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          _CustomPersianLocalizationsDelegate(),
+        ],
         home: Scaffold(
           body: CalendarDatePicker(
             initialDate: PersianDateTime(1403, 1, 1),
@@ -365,52 +227,71 @@ void main() {
             lastDate: PersianDateTime(1404, 12, 29),
             currentDate: PersianDateTime(1403, 1, 1),
             onDateChanged: (_) {},
-            calendarDelegate: persianDelegate,
+            calendarDelegate: delegate,
           ),
         ),
       ),
     );
-
-    expect(find.text('فروردین ۱۴۰۳'), findsOneWidget);
+    expect(find.text('Custom month 1 / 1403'), findsOneWidget);
+    expect(find.text('Farvardin 1403'), findsNothing);
   });
 
-  testWidgets('input picker round-trips a date Gregorian parsing rejects',
+  testWidgets('input picker uses Persian localization parsing',
       (WidgetTester tester) async {
     DateTime? submittedDate;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultPersianCalendarMaterialLocalizations.delegate,
+        ],
         home: Scaffold(
           body: InputDatePickerFormField(
             initialDate: PersianDateTime(1403, 2, 31),
             firstDate: PersianDateTime(1403, 1, 1),
             lastDate: PersianDateTime(1403, 12, 30),
             onDateSubmitted: (DateTime date) => submittedDate = date,
-            calendarDelegate: englishDelegate,
+            calendarDelegate: delegate,
           ),
         ),
       ),
     );
-
     final TextField field = tester.widget<TextField>(find.byType(TextField));
     expect(field.controller?.text, '31/02/1403');
-
     await tester.enterText(find.byType(TextField), '31/02/1403');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
-
     expect(submittedDate, isA<PersianDateTime>());
-    expect(
-      (submittedDate?.year, submittedDate?.month, submittedDate?.day),
-      (1403, 2, 31),
-    );
+    expect((submittedDate?.year, submittedDate?.month, submittedDate?.day),
+        (1403, 2, 31));
   });
 }
 
 class _FirstDayMaterialLocalizations extends DefaultMaterialLocalizations {
   const _FirstDayMaterialLocalizations(this.firstDay);
-
   final int firstDay;
-
   @override
   int get firstDayOfWeekIndex => firstDay;
+}
+
+class _CustomPersianMaterialLocalizations
+    extends DefaultPersianCalendarMaterialLocalizations {
+  const _CustomPersianMaterialLocalizations();
+  @override
+  String formatMonthYear(DateTime date) =>
+      'Custom month ${date.month} / ${date.year}';
+  @override
+  String get dateHelpText => 'Custom Persian date help';
+}
+
+class _CustomPersianLocalizationsDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _CustomPersianLocalizationsDelegate();
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'en';
+  @override
+  Future<MaterialLocalizations> load(Locale locale) =>
+      SynchronousFuture<MaterialLocalizations>(
+          const _CustomPersianMaterialLocalizations());
+  @override
+  bool shouldReload(_CustomPersianLocalizationsDelegate old) => false;
 }

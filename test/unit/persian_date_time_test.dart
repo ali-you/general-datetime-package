@@ -8,18 +8,21 @@ import '../fixtures/university_tehran_persian_fixture.dart';
 void main() {
   group('University of Tehran reference data', () {
     test('publishes the exact official bounds and source rows', () {
-      expect(PersianDateTime.minimumYear, 1206);
-      expect(PersianDateTime.maximumYear, 1498);
+      expect(PersianDateTime.minimumOfficialYear, 1206);
+      expect(PersianDateTime.maximumOfficialYear, 1498);
       expect(
         UniversityTehranPersianFixture.rowCount,
-        PersianDateTime.maximumYear - PersianDateTime.minimumYear + 1,
+        PersianDateTime.maximumOfficialYear -
+            PersianDateTime.minimumOfficialYear +
+            1,
       );
       expect(
-        PersianDateTime.minimumGregorianDate,
+        PersianDateTime.utc(PersianDateTime.minimumOfficialYear).toDateTime(),
         UniversityTehranPersianFixture.firstGregorianUtc,
       );
       expect(
-        PersianDateTime.maximumGregorianDate,
+        PersianDateTime.utc(PersianDateTime.maximumOfficialYear, 12, 30)
+            .toDateTime(),
         UniversityTehranPersianFixture.lastGregorianUtc,
       );
       expect(
@@ -50,11 +53,11 @@ void main() {
       );
       expect(
         UniversityTehranPersianFixture.rows.first.year,
-        PersianDateTime.minimumYear,
+        PersianDateTime.minimumOfficialYear,
       );
       expect(
         UniversityTehranPersianFixture.rows.last.year,
-        PersianDateTime.maximumYear,
+        PersianDateTime.maximumOfficialYear,
       );
       expect(
         UniversityTehranPersianFixture.row(1408).leapMarker,
@@ -104,8 +107,8 @@ void main() {
     });
 
     test('matches every official month length and year length', () {
-      for (int year = PersianDateTime.minimumYear;
-          year <= PersianDateTime.maximumYear;
+      for (int year = PersianDateTime.minimumOfficialYear;
+          year <= PersianDateTime.maximumOfficialYear;
           year++) {
         final int expectedYearLength =
             UniversityTehranPersianFixture.yearLength(year);
@@ -156,12 +159,12 @@ void main() {
       }
     });
 
-    test('converts and round-trips every supported calendar day', () {
+    test('converts and round-trips every official calendar day', () {
       DateTime gregorianDay = UniversityTehranPersianFixture.firstGregorianUtc;
       int visitedDays = 0;
 
-      for (int year = PersianDateTime.minimumYear;
-          year <= PersianDateTime.maximumYear;
+      for (int year = PersianDateTime.minimumOfficialYear;
+          year <= PersianDateTime.maximumOfficialYear;
           year++) {
         final bool expectedLeapYear =
             UniversityTehranPersianFixture.yearLength(year) == 366;
@@ -265,141 +268,167 @@ void main() {
   });
 
   group('Validity and supported boundaries', () {
-    test('reports strict Persian and Gregorian validity', () {
-      final int finalDay = UniversityTehranPersianFixture.monthLength(1498, 12);
+    const int minimumYear = PersianDateTime.minimumYear;
+    const int maximumYear = PersianDateTime.maximumYear;
+    final int finalDay = PersianDateTime.daysInMonth(maximumYear, 12);
 
-      expect(PersianDateTime.isValidDate(1206, 1, 1), isTrue);
-      expect(PersianDateTime.isValidDate(1498, 12, finalDay), isTrue);
-      expect(PersianDateTime.isValidDate(1205, 12, 29), isFalse);
-      expect(PersianDateTime.isValidDate(1499, 1, 1), isFalse);
+    test('reports strict Persian and Gregorian validity', () {
+      expect(PersianDateTime.isValidDate(minimumYear, 1, 1), isTrue);
+      expect(PersianDateTime.isValidDate(maximumYear, 12, finalDay), isTrue);
+      expect(PersianDateTime.isValidDate(minimumYear - 1, 12, 29), isFalse);
+      expect(PersianDateTime.isValidDate(maximumYear + 1, 1, 1), isFalse);
       expect(PersianDateTime.isValidDate(1403, 0, 1), isFalse);
       expect(PersianDateTime.isValidDate(1403, 13, 1), isFalse);
       expect(PersianDateTime.isValidDate(1403, 1, 0), isFalse);
+      expect(PersianDateTime.isValidDate(1403, 1, 32), isFalse);
+      final DateTime first = PersianDateTime.minimumGregorianDate;
+      final DateTime last = PersianDateTime.maximumGregorianDate;
+      expect(PersianDateTime.isSupportedDateTime(first), isTrue);
+      expect(PersianDateTime.isSupportedDateTime(last), isTrue);
       expect(
-        PersianDateTime.isValidDate(
-          1403,
-          1,
-          UniversityTehranPersianFixture.monthLength(1403, 1) + 1,
-        ),
-        isFalse,
-      );
-
+          PersianDateTime.isSupportedDateTime(
+              first.subtract(const Duration(days: 1))),
+          isFalse);
       expect(
-        PersianDateTime.isSupportedDateTime(DateTime.utc(1827, 3, 22)),
-        isTrue,
-      );
-      expect(
-        PersianDateTime.isSupportedDateTime(
-          DateTime.utc(2120, 3, 20, 23, 59, 59, 999, 999),
-        ),
-        isTrue,
-      );
-      expect(
-        PersianDateTime.isSupportedDateTime(DateTime.utc(1827, 3, 21)),
-        isFalse,
-      );
-      expect(
-        PersianDateTime.isSupportedDateTime(DateTime.utc(2120, 3, 21)),
-        isFalse,
-      );
-      expect(() => PersianDateTime.daysInMonth(1205, 1), throwsRangeError);
-      expect(() => PersianDateTime.daysInMonth(1499, 1), throwsRangeError);
+          PersianDateTime.isSupportedDateTime(
+              last.add(const Duration(days: 1))),
+          isFalse);
+      expect(() => PersianDateTime.daysInMonth(minimumYear - 1, 1),
+          throwsRangeError);
+      expect(() => PersianDateTime.daysInMonth(maximumYear + 1, 1),
+          throwsRangeError);
       expect(() => PersianDateTime.daysInMonth(1403, 0), throwsRangeError);
       expect(() => PersianDateTime.daysInMonth(1403, 13), throwsRangeError);
     });
 
     test('accepts both exact endpoints', () {
-      _expectPersianFields(PersianDateTime.utc(1206), 1206, 1, 1, isUtc: true);
+      expect(PersianDateTime.minimumGregorianDate, DateTime.utc(560, 3, 20));
+      expect(PersianDateTime.maximumGregorianDate, DateTime.utc(3799, 3, 19));
+      expect(PersianDateTime.utc(minimumYear).toDateTime(),
+          PersianDateTime.minimumGregorianDate);
       expect(
-        PersianDateTime.utc(1206).toDateTime(),
-        DateTime.utc(1827, 3, 22),
-      );
-
-      final int finalDay = UniversityTehranPersianFixture.monthLength(1498, 12);
-      final PersianDateTime maximum = PersianDateTime.utc(
-        1498,
-        12,
-        finalDay,
-        23,
-        59,
-        59,
-        999,
-        999,
-      );
-      expect(
-        maximum.toDateTime(),
-        DateTime.utc(2120, 3, 20, 23, 59, 59, 999, 999),
-      );
+          PersianDateTime.utc(maximumYear, 12, finalDay, 23, 59, 59, 999, 999)
+              .toDateTime(),
+          PersianDateTime.maximumGregorianDate.add(const Duration(
+              hours: 23,
+              minutes: 59,
+              seconds: 59,
+              milliseconds: 999,
+              microseconds: 999)));
     });
 
     test('normalizes into the range before checking final validity', () {
-      _expectPersianFields(PersianDateTime.utc(1205, 13, 1), 1206, 1, 1,
-          isUtc: true);
-      _expectPersianFields(PersianDateTime.utc(1499, 0, 1), 1498, 12, 1,
-          isUtc: true);
-      _expectPersianFields(
-        PersianDateTime.utc(1498, 13, 0),
-        1498,
-        12,
-        UniversityTehranPersianFixture.monthLength(1498, 12),
-        isUtc: true,
-      );
+      expect(PersianDateTime.utc(minimumYear - 1, 13),
+          PersianDateTime.utc(minimumYear));
+      expect(PersianDateTime.utc(maximumYear + 1, 0),
+          PersianDateTime.utc(maximumYear, 12));
+      expect(PersianDateTime.utc(maximumYear, 13, 0),
+          PersianDateTime.utc(maximumYear, 12, finalDay));
     });
 
-    test('constructors reject final dates outside the table', () {
-      final int finalDay = UniversityTehranPersianFixture.monthLength(1498, 12);
-
-      expect(() => PersianDateTime(1205, 12, 29), throwsRangeError);
-      expect(() => PersianDateTime.utc(1205, 12, 29), throwsRangeError);
-      expect(() => PersianDateTime(1499, 1, 1), throwsRangeError);
-      expect(() => PersianDateTime.utc(1499, 1, 1), throwsRangeError);
-      expect(() => PersianDateTime(1206, 1, 0), throwsRangeError);
+    test('constructors reject final dates outside the supported range', () {
+      expect(() => PersianDateTime(minimumYear - 1, 12, 29), throwsRangeError);
       expect(
-        () => PersianDateTime.utc(1498, 12, finalDay + 1),
-        throwsRangeError,
-      );
+          () => PersianDateTime.utc(minimumYear - 1, 12, 29), throwsRangeError);
+      expect(() => PersianDateTime(maximumYear + 1), throwsRangeError);
+      expect(() => PersianDateTime.utc(maximumYear + 1), throwsRangeError);
+      expect(() => PersianDateTime(minimumYear, 1, 0), throwsRangeError);
+      expect(() => PersianDateTime.utc(maximumYear, 12, finalDay + 1),
+          throwsRangeError);
     });
 
     test('Gregorian and epoch factories reject unsupported days', () {
-      final DateTime before = DateTime.utc(1827, 3, 21);
-      final DateTime after = DateTime.utc(2120, 3, 21);
-
+      final DateTime before = PersianDateTime.minimumGregorianDate
+          .subtract(const Duration(days: 1));
+      final DateTime after =
+          PersianDateTime.maximumGregorianDate.add(const Duration(days: 1));
       expect(() => PersianDateTime.fromDateTime(before), throwsRangeError);
       expect(() => PersianDateTime.fromDateTime(after), throwsRangeError);
       expect(
-        () => PersianDateTime.fromSecondsSinceEpoch(
-          before.millisecondsSinceEpoch ~/ 1000,
-          isUtc: true,
-        ),
-        throwsRangeError,
-      );
+          () => PersianDateTime.fromSecondsSinceEpoch(
+              before.millisecondsSinceEpoch ~/ 1000,
+              isUtc: true),
+          throwsRangeError);
       expect(
-        () => PersianDateTime.fromMillisecondsSinceEpoch(
-          after.millisecondsSinceEpoch,
-          isUtc: true,
-        ),
-        throwsRangeError,
-      );
+          () => PersianDateTime.fromMillisecondsSinceEpoch(
+              after.millisecondsSinceEpoch,
+              isUtc: true),
+          throwsRangeError);
       expect(
-        () => PersianDateTime.fromMicrosecondsSinceEpoch(
-          after.microsecondsSinceEpoch,
-          isUtc: true,
-        ),
-        throwsRangeError,
-      );
+          () => PersianDateTime.fromMicrosecondsSinceEpoch(
+              after.microsecondsSinceEpoch,
+              isUtc: true),
+          throwsRangeError);
+    });
+  });
+
+  group('Extended calculated range', () {
+    test('exposes calculation bounds separately from published data', () {
+      expect(PersianDateTime.minimumYear, -61);
+      expect(PersianDateTime.maximumYear, 3177);
+      for (final int year in <int>[-61, 0, 1, 1205, 1499, 3177]) {
+        expect(PersianDateTime.utc(year).hasOfficialCalendarData, isFalse);
+      }
+      for (final int year in <int>[1206, 1403, 1498]) {
+        expect(PersianDateTime.utc(year).hasOfficialCalendarData, isTrue);
+      }
+    });
+
+    test('matches external year starts and leap status throughout the range',
+        () {
+      for (int year = PersianDateTime.minimumYear;
+          year <= PersianDateTime.maximumYear;
+          year++) {
+        final Jalali reference = Jalali(year);
+        final Gregorian gregorian = reference.toGregorian();
+        final PersianDateTime actual = PersianDateTime.utc(year);
+        expect(actual.toDateTime(),
+            DateTime.utc(gregorian.year, gregorian.month, gregorian.day),
+            reason: 'year $year');
+        expect(actual.isLeapYear, reference.isLeapYear(), reason: 'year $year');
+      }
+    });
+
+    test('arithmetic crosses both official-data edges continuously', () {
+      for (final int year in <int>[1206, 1499]) {
+        final PersianDateTime first = PersianDateTime.utc(year);
+        final PersianDateTime previous =
+            first.subtract(const Duration(days: 1));
+        expect(previous.year, year - 1);
+        expect(previous.month, 12);
+        expect(previous.day, PersianDateTime.daysInMonth(year - 1, 12));
+        expect(previous.add(const Duration(days: 1)), first);
+        expect(first.toDateTime().difference(previous.toDateTime()),
+            const Duration(days: 1));
+      }
+    });
+
+    test('formats and parses negative years and year zero', () {
+      for (final int year in <int>[-61, -1, 0, 1, 3177]) {
+        final PersianDateTime value =
+            PersianDateTime.utc(year, 1, 1, 12, 34, 56, 789, 123);
+        expect(PersianDateTime.parse(value.toIso8601String()), value);
+        expect(PersianDateTime.parse(value.toString()), value);
+      }
+      expect(PersianDateTime.utc(-61).toIso8601String(),
+          '-0061-01-01T00:00:00.000Z');
+      expect(PersianDateTime.parse('-0061-01-00T23:00:00-01:00'),
+          PersianDateTime.utc(-61));
+      expect(PersianDateTime.parse('3178-01-01T00:00:00+01:00'),
+          PersianDateTime.utc(3177, 12, 29, 23));
     });
   });
 
   group('DateTime-style normalization', () {
     test('normalizes every official month underflow and overflow', () {
-      for (int year = PersianDateTime.minimumYear;
-          year <= PersianDateTime.maximumYear;
+      for (int year = PersianDateTime.minimumOfficialYear;
+          year <= PersianDateTime.maximumOfficialYear;
           year++) {
         for (int month = 1; month <= PersianDateTime.monthsPerYear; month++) {
           final int monthLength =
               UniversityTehranPersianFixture.monthLength(year, month);
 
-          if (year != PersianDateTime.maximumYear || month != 12) {
+          if (year != PersianDateTime.maximumOfficialYear || month != 12) {
             final ReferencePersianDate expectedNext =
                 UniversityTehranPersianFixture.dateAfter(
               year,
@@ -422,7 +451,7 @@ void main() {
             _require(overflow.isUtc, '$year-$month overflow lost UTC mode');
           }
 
-          if (year != PersianDateTime.minimumYear || month != 1) {
+          if (year != PersianDateTime.minimumOfficialYear || month != 1) {
             final ReferencePersianDate expectedPrevious =
                 UniversityTehranPersianFixture.dateAfter(year, month, 1, -1);
             final PersianDateTime underflow =
@@ -835,6 +864,31 @@ void main() {
       );
     });
 
+    test('checks the supported range after applying numeric offsets', () {
+      expect(
+        PersianDateTime.parse('1206-01-00T23:00:00-01:00'),
+        PersianDateTime.utc(1206),
+      );
+      for (final String input in <String>[
+        '1498-12-31T00:00:00+01:00',
+        '1499-01-01T00:00:00+01:00',
+      ]) {
+        expect(
+          PersianDateTime.parse(input),
+          PersianDateTime.utc(1498, 12, 30, 23),
+          reason: input,
+        );
+      }
+      for (final String input in <String>[
+        '-0061-01-01T00:00:00+00:01',
+        '3177-12-29T23:59:59.999999-00:01',
+      ]) {
+        expect(() => PersianDateTime.parse(input), throwsFormatException,
+            reason: input);
+        expect(PersianDateTime.tryParse(input), isNull, reason: input);
+      }
+    });
+
     test('normalizes parsed calendar and time overflow', () {
       final int monthLength =
           UniversityTehranPersianFixture.monthLength(1403, 8);
@@ -872,8 +926,8 @@ void main() {
         '1403-09',
         '1403-09-01T00:00:00+24:00',
         '1403-09-01T00:00:00+03:60',
-        '1205-12-29',
-        '1499-01-01',
+        '-0062-12-29',
+        '3178-01-01',
       ]) {
         expect(
           () => PersianDateTime.parse(input),
@@ -976,11 +1030,12 @@ void main() {
 
     test('rejects copies whose normalized result leaves the table', () {
       expect(
-        () => PersianDateTime.utc(1206).copyWith(day: 0),
+        () => PersianDateTime.utc(PersianDateTime.minimumYear).copyWith(day: 0),
         throwsRangeError,
       );
       expect(
-        () => PersianDateTime.utc(1498, 12, 1).copyWith(month: 13),
+        () => PersianDateTime.utc(PersianDateTime.maximumYear, 12, 1)
+            .copyWith(month: 13),
         throwsRangeError,
       );
     });
@@ -1037,14 +1092,16 @@ void main() {
     });
 
     test('arithmetic rejects results beyond either endpoint', () {
-      final int finalDay = UniversityTehranPersianFixture.monthLength(1498, 12);
+      final int finalDay =
+          PersianDateTime.daysInMonth(PersianDateTime.maximumYear, 12);
       expect(
-        () =>
-            PersianDateTime.utc(1206).subtract(const Duration(microseconds: 1)),
+        () => PersianDateTime.utc(PersianDateTime.minimumYear)
+            .subtract(const Duration(microseconds: 1)),
         throwsRangeError,
       );
       expect(
-        () => PersianDateTime.utc(1498, 12, finalDay, 23, 59, 59, 999, 999)
+        () => PersianDateTime.utc(
+                PersianDateTime.maximumYear, 12, finalDay, 23, 59, 59, 999, 999)
             .add(const Duration(microseconds: 1)),
         throwsRangeError,
       );
@@ -1140,11 +1197,14 @@ void main() {
     });
   });
 
-   group('Third-party comparison', () {
-    test('converts every supported Gregorian day to Persian and matches shamsi_date', () {
+  group('Third-party comparison', () {
+    test(
+        'converts every shared Gregorian day to Persian and matches shamsi_date',
+        () {
       final GregorianHelper gregorianHelper = GregorianHelper();
       final DateTime start = PersianDateTime.minimumGregorianDate;
-      final DateTime end = PersianDateTime.maximumGregorianDate;
+      final DateTime end = DateTime.utc(
+          Gregorian.max.year, Gregorian.max.month, Gregorian.max.day);
 
       for (int year = start.year; year <= end.year; year++) {
         for (int month = 1; month <= 12; month++) {
@@ -1154,7 +1214,8 @@ void main() {
             if (current.isBefore(start) || current.isAfter(end)) continue;
 
             final Jalali expected = Jalali.fromDateTime(current);
-            final PersianDateTime actual = PersianDateTime.fromDateTime(current);
+            final PersianDateTime actual =
+                PersianDateTime.fromDateTime(current);
 
             expect(actual.year, expected.year,
                 reason: 'Year mismatch at $year-$month-$day');
@@ -1167,23 +1228,39 @@ void main() {
       }
     });
 
-     test('converts every supported Persian day to Gregorian and matches shamsi_date', () {
+    test(
+        'converts and round-trips every supported Persian day against external year starts',
+        () {
       for (int year = PersianDateTime.minimumYear;
-      year <= PersianDateTime.maximumYear;
-      year++) {
+          year <= PersianDateTime.maximumYear;
+          year++) {
         for (int month = 1; month <= 12; month++) {
           final int monthLength = PersianDateTime.daysInMonth(year, month);
           for (int day = 1; day <= monthLength; day++) {
-            final PersianDateTime persian = PersianDateTime.utc(year, month, day);
-            final Jalali shamsi = Jalali(year, month, day);
-            final Gregorian expected = shamsi.toGregorian();
+            final PersianDateTime persian =
+                PersianDateTime.utc(year, month, day);
+            final Gregorian yearStart = Jalali(year).toGregorian();
+            final int dayOffset = month <= 6
+                ? (month - 1) * 31 + day - 1
+                : 186 + (month - 7) * 30 + day - 1;
+            final DateTime expected =
+                DateTime.utc(yearStart.year, yearStart.month, yearStart.day)
+                    .add(Duration(days: dayOffset));
 
             final DateTime actual = persian.toDateTime();
+
+            final PersianDateTime roundTrip =
+                PersianDateTime.fromDateTime(actual);
+            _require(_hasDateFields(roundTrip, year, month, day),
+                'Round-trip mismatch at Persian $year-$month-$day');
+            _require(persian.julianDay == _gregorianJulianDayNumber(actual),
+                'Julian day mismatch at Persian $year-$month-$day');
 
             expect(actual.year, expected.year,
                 reason: 'Gregorian year mismatch at Persian $year-$month-$day');
             expect(actual.month, expected.month,
-                reason: 'Gregorian month mismatch at Persian $year-$month-$day');
+                reason:
+                    'Gregorian month mismatch at Persian $year-$month-$day');
             expect(actual.day, expected.day,
                 reason: 'Gregorian day mismatch at Persian $year-$month-$day');
           }

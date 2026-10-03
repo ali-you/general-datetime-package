@@ -1,14 +1,17 @@
 import 'general_date_time_interface.dart';
 import 'shared/constants.dart';
 import 'shared/iranian_calendar_data.dart';
+import 'shared/persian_calendar_calculation.dart';
 
-/// A date and time in Iran's official Solar Hijri (Persian) calendar.
+/// A date and time in the Solar Hijri (Persian) calendar.
 ///
 /// The Iranian calendar is determined astronomically, not by an indefinitely
 /// repeating arithmetic leap-year cycle. This implementation is therefore
-/// data-backed by the official University of Tehran Calendar Center table and
-/// supports only Solar Hijri [minimumYear] through [maximumYear]. Unsupported
-/// dates throw [RangeError] instead of silently changing calendar models.
+/// data-backed by the official University of Tehran Calendar Center table for
+/// [minimumOfficialYear] through [maximumOfficialYear]. Outside those years,
+/// Borkowski's break-year model extends support to [minimumYear] through
+/// [maximumYear]. Calculated dates are not guaranteed official civil dates.
+/// Dates beyond the calculation's finite range throw [RangeError].
 ///
 /// Instances retain the exact native [DateTime] instant internally. Calendar
 /// fields such as [year], [month], and [day] are exposed in Solar Hijri, while
@@ -41,11 +44,17 @@ class PersianDateTime extends DateTime
   static const int esfand = 12;
   static const int monthsPerYear = 12;
 
+  /// First Solar Hijri year supported by the calculation model.
+  static const int minimumYear = PersianCalendarCalculation.minimumYear;
+
+  /// Last Solar Hijri year supported by the calculation model.
+  static const int maximumYear = PersianCalendarCalculation.maximumYear;
+
   /// First Solar Hijri year covered by the official source table.
-  static const int minimumYear = IranianCalendarData.minimumYear;
+  static const int minimumOfficialYear = IranianCalendarData.minimumYear;
 
   /// Last Solar Hijri year covered by the official source table.
-  static const int maximumYear = IranianCalendarData.maximumYear;
+  static const int maximumOfficialYear = IranianCalendarData.maximumYear;
 
   static const int _microsecondsPerMillisecond = 1000;
   static const int _microsecondsPerSecond = 1000000;
@@ -57,7 +66,10 @@ class PersianDateTime extends DateTime
     IranianCalendarData.epochGregorianYear,
     IranianCalendarData.epochGregorianMonth,
     IranianCalendarData.epochGregorianDay,
-  );
+  ).subtract(Duration(days: _yearStartDays[minimumOfficialYear - minimumYear]));
+
+  static final int _epochJulianDay = IranianCalendarData.epochJulianDay -
+      _yearStartDays[minimumOfficialYear - minimumYear];
 
   /// Cumulative days at the start of each supported year, plus an end
   /// sentinel after [maximumYear].
@@ -210,7 +222,7 @@ class PersianDateTime extends DateTime
   /// Parses a Solar Hijri ISO-8601-like string.
   ///
   /// A trailing `Z` or numeric offset produces a UTC result. Calendar and time
-  /// overflows are normalized, but the final date must remain in the official
+  /// overflows are normalized, but the final date must remain in the
   /// supported range.
   factory PersianDateTime.parse(String formattedString) {
     final Match? match = Constants.parseFormat.firstMatch(formattedString);
@@ -256,36 +268,33 @@ class PersianDateTime extends DateTime
         );
       }
 
-      final PersianDateTime wallTime = PersianDateTime.utc(
+      final String? signText = match[9];
+      int offsetMinutes = 0;
+      if (signText != null) {
+        final int offsetHour = int.parse(match[10]!);
+        final int offsetMinute = parseIntOrZero(match[11]);
+        if (offsetHour > 23 || offsetMinute > 59) {
+          throw const FormatException('Invalid time-zone offset');
+        }
+        final int sign = signText == '-' ? -1 : 1;
+        offsetMinutes = sign * (offsetHour * 60 + offsetMinute);
+      }
+
+      // Apply the offset before checking the supported range: the wall date
+      // can lie outside the table while its resulting UTC date is supported.
+      return PersianDateTime.utc(
         year,
         month,
         day,
         hour,
-        minute,
+        minute - offsetMinutes,
         second,
         millisecond,
         microsecond,
       );
-
-      final String? signText = match[9];
-      if (signText == null) return wallTime;
-
-      final int offsetHour = int.parse(match[10]!);
-      final int offsetMinute = parseIntOrZero(match[11]);
-      if (offsetHour > 23 || offsetMinute > 59) {
-        throw const FormatException('Invalid time-zone offset');
-      }
-
-      final int sign = signText == '-' ? -1 : 1;
-      final Duration offset = Duration(
-        minutes: sign * (offsetHour * 60 + offsetMinute),
-      );
-      return PersianDateTime.fromDateTime(
-        wallTime.toDateTime().subtract(offset),
-      );
     } on RangeError {
       throw FormatException(
-        'Persian date is outside the official supported range',
+        'Persian date is outside the supported range',
         formattedString,
       );
     }
@@ -302,18 +311,14 @@ class PersianDateTime extends DateTime
   }
 
   /// The first supported Gregorian calendar date, in UTC.
-  static DateTime get minimumGregorianDate => DateTime.utc(
-        IranianCalendarData.epochGregorianYear,
-        IranianCalendarData.epochGregorianMonth,
-        IranianCalendarData.epochGregorianDay,
-      );
+  static DateTime get minimumGregorianDate => _gregorianEpoch;
 
   /// The last supported Gregorian calendar date, in UTC.
   static DateTime get maximumGregorianDate =>
       minimumGregorianDate.add(Duration(days: _supportedDayCount - 1));
 
-  /// Whether the Gregorian wall date of [dateTime] is covered by the official
-  /// source table.
+  /// Whether the Gregorian wall date of [dateTime] is within the
+  /// supported range.
   static bool isSupportedDateTime(DateTime dateTime) {
     final DateTime nativeDateTime = _nativeCopy(dateTime);
     final int offset = _gregorianDayOffset(nativeDateTime);
@@ -328,13 +333,13 @@ class PersianDateTime extends DateTime
     return day >= 1 && day <= daysInMonth(year, month);
   }
 
-  /// Returns the official length of [month] in [year].
+  /// Returns the calendar length of [month] in [year].
   static int daysInMonth(int year, int month) {
     _requireSupportedYear(year);
     RangeError.checkValueInInterval(month, 1, monthsPerYear, 'month');
     if (month <= 6) return 31;
     if (month <= 11) return 30;
-    return IranianCalendarData.isLeapYear(year) ? 30 : 29;
+    return PersianCalendarCalculation.isLeapYear(year) ? 30 : 29;
   }
 
   /// The calendar name.
@@ -345,7 +350,7 @@ class PersianDateTime extends DateTime
   @override
   int get weekday => toDateTime().weekday;
 
-  /// Official length of this Solar Hijri month.
+  /// Calendar length of this Solar Hijri month.
   @override
   int get monthLength => daysInMonth(year, month);
 
@@ -356,13 +361,17 @@ class PersianDateTime extends DateTime
   /// Number of days in this Solar Hijri year.
   int get yearLength => _yearLength(year);
 
-  /// Whether this official Solar Hijri year contains 366 days.
+  /// Whether this Solar Hijri year contains 366 days.
   @override
-  bool get isLeapYear => IranianCalendarData.isLeapYear(year);
+  bool get isLeapYear => PersianCalendarCalculation.isLeapYear(year);
+
+  /// Whether this year uses the published official calendar table.
+  bool get hasOfficialCalendarData =>
+      year >= minimumOfficialYear && year <= maximumOfficialYear;
 
   /// Gregorian Julian day number for this calendar date.
   @override
-  int get julianDay => IranianCalendarData.epochJulianDay + _dayOffset;
+  int get julianDay => _epochJulianDay + _dayOffset;
 
   /// Converts this value to a native Gregorian [DateTime].
   @override
@@ -497,7 +506,7 @@ class PersianDateTime extends DateTime
     final int normalizedMonth = _floorMod(monthIndex, monthsPerYear) + 1;
 
     // Keep the end sentinel available during normalization. For example,
-    // 1498-13-00 is the same date as 1498-12-30 and needs no data for 1499.
+    // (maximumYear + 1)-01-00 denotes the final supported calendar day.
     final int monthStartOffset;
     if (normalizedYear == maximumYear + 1 && normalizedMonth == 1) {
       monthStartOffset = _supportedDayCount;
@@ -562,7 +571,7 @@ class PersianDateTime extends DateTime
     _requireSupportedDayOffset(dayOffset);
 
     int low = 0;
-    int high = IranianCalendarData.yearCount;
+    int high = maximumYear - minimumYear + 1;
     while (low < high) {
       final int middle = (low + high) >> 1;
       if (_yearStartDays[middle + 1] <= dayOffset) {
@@ -620,14 +629,14 @@ class PersianDateTime extends DateTime
 
   static int _yearLength(int year) {
     _requireSupportedYear(year);
-    return IranianCalendarData.isLeapYear(year) ? 366 : 365;
+    return PersianCalendarCalculation.isLeapYear(year) ? 366 : 365;
   }
 
   static List<int> _buildYearStartDays() {
     final List<int> starts = <int>[0];
     int cumulativeDays = 0;
     for (int year = minimumYear; year <= maximumYear; year++) {
-      cumulativeDays += IranianCalendarData.isLeapYear(year) ? 366 : 365;
+      cumulativeDays += PersianCalendarCalculation.isLeapYear(year) ? 366 : 365;
       starts.add(cumulativeDays);
     }
     return List<int>.unmodifiable(starts);
@@ -640,7 +649,7 @@ class PersianDateTime extends DateTime
         minimumYear,
         maximumYear,
         'year',
-        'Official Iranian calendar data is available only for Solar Hijri '
+        'Persian calendar calculation is available only for Solar Hijri '
             '$minimumYear through $maximumYear',
       );
     }
@@ -649,7 +658,7 @@ class PersianDateTime extends DateTime
   static void _requireSupportedDayOffset(int dayOffset) {
     if (dayOffset < 0 || dayOffset >= _supportedDayCount) {
       throw RangeError(
-        'Date is outside the official Iranian calendar range '
+        'Date is outside the supported Persian calendar range '
         '($minimumYear-01-01 through $maximumYear-12-'
         '${daysInMonth(maximumYear, 12)})',
       );
@@ -671,7 +680,8 @@ class PersianDateTime extends DateTime
 
   static String _threeDigits(int value) => value.toString().padLeft(3, '0');
 
-  static String _fourDigits(int value) => value.toString().padLeft(4, '0');
+  static String _fourDigits(int value) =>
+      '${value < 0 ? '-' : ''}${value.abs().toString().padLeft(4, '0')}';
 }
 
 final class _ResolvedPersianDateTime {

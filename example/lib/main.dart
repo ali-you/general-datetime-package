@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:general_datetime/general_datetime.dart';
 import 'package:general_datetime/delegates.dart';
+import 'package:general_datetime/default_localizations.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Persian dates:
@@ -48,15 +49,21 @@ class AppStartup extends StatelessWidget {
                   ),
                   const Divider(),
                   const Text('Persian Calendar'),
-                  CalendarDatePicker(
-                    initialDate: PersianDateTime.now(),
-                    firstDate: PersianDateTime(1400, 1, 1),
-                    lastDate: PersianDateTime(1450, 12, 29),
-                    currentDate: PersianDateTime.now(),
-                    onDateChanged: (value) {
-                      debugPrint('Persian selected: $value');
-                    },
-                    calendarDelegate: const PersianCalendarDelegate.english(),
+                  Localizations.override(
+                    context: context,
+                    delegates: const <LocalizationsDelegate<dynamic>>[
+                      DefaultPersianCalendarMaterialLocalizations.delegate,
+                    ],
+                    child: CalendarDatePicker(
+                      initialDate: PersianDateTime.now(),
+                      firstDate: PersianDateTime(1400, 1, 1),
+                      lastDate: PersianDateTime(1450, 12, 29),
+                      currentDate: PersianDateTime.now(),
+                      onDateChanged: (value) {
+                        debugPrint('Persian selected: $value');
+                      },
+                      calendarDelegate: const PersianCalendarDelegate(),
+                    ),
                   ),
                   const Divider(),
                   const Text('Hijri Calendar'),

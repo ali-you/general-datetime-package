@@ -2,15 +2,22 @@
 
 ## Unreleased
 
+- Extended Persian support to SH -61 through 3177 (Gregorian 0560-03-20
+  through 3799-03-19), retaining published data for SH 1206–1498 and using
+  Borkowski's finite break-year model elsewhere.
+- Exposed official-data bounds and coverage separately from calculation bounds.
+- Added signed-year formatting, expanded boundary tests, and exhaustive
+  conversion checks over the extended interval.
+
 - Replaced the mixed Persian leap algorithms with a finite official data model
   sourced from the University of Tehran Calendar Center for SH 1206–1498.
 - Rebuilt Persian conversion, normalization, parsing, UTC/local handling, epoch
   factories, arithmetic, equality, hashing, and `copyWith` around the true
   native `DateTime` instant.
-- Made unsupported Persian dates fail explicitly instead of extrapolating a
-  33-year, break-table, or 2820-year cycle.
-- Made `PersianCalendarDelegate` own English/Persian names, digit shaping,
-  formatting, and parsing under any ambient Material localization.
+- Made dates outside the finite Persian calculation range fail explicitly
+  instead of extrapolating a 33-year or 2820-year cycle.
+- Restored `PersianCalendarDelegate` to use the current Material localizations
+  for month names, date formatting, parsing, and input help.
 - Added official-source fixtures and exhaustive Persian calendar, boundary,
   precision, parsing, delegate, and widget tests.
 - Replaced the approximate tabular Hijri implementation with the official
