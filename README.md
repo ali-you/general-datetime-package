@@ -201,8 +201,42 @@ Invalid text still returns null; a non-null result in another calendar throws
 `ArgumentError` for incompatible localization configuration. Valid formatting
 and parsing continue using the supplied localization without implicit conversion.
 Picker normalization retains calendar wall-date fields and produces local dates.
-When using `YearPicker` directly, provide a matching `currentDate`; its native
-default is rejected and a safe default is still tracked under issue 4.
+When using Flutter's `YearPicker` directly, provide a matching `currentDate`
+such as `PersianDateTime.now()` or `HijriDateTime.now()`. Flutter defaults to
+native `DateTime.now()` even with a custom delegate, so omitting it throws
+`ArgumentError` with these delegates. `CalendarDatePicker` already defaults to
+the delegate's `now()`.
+
+### Use with CalendarYearPicker
+
+Use the package's `CalendarYearPicker` for standalone year selection. Its
+omitted `currentDate` uses `calendarDelegate.now()`, and all supplied dates
+are normalized and validated by the delegate:
+
+```dart
+Localizations.override(
+  context: context,
+  delegates: const <LocalizationsDelegate<dynamic>>[
+    DefaultPersianCalendarMaterialLocalizations.delegate,
+  ],
+  child: CalendarYearPicker(
+    firstDate: PersianDateTime(1380, 1, 1),
+    lastDate: PersianDateTime(1450, 12, 29),
+    selectedDate: PersianDateTime(1403, 1, 1),
+    calendarDelegate: const PersianCalendarDelegate(),
+    onChanged: (DateTime date) {
+      print("Selected year: ${date.year}");
+    },
+  ),
+)
+```
+
+For Hijri, use `HijriDateTime` inputs, `HijriCalendarDelegate`, and
+`DefaultHijriCalendarMaterialLocalizations.delegate`. The wrapper is exported
+from `general_datetime.dart` and also supports the default Gregorian delegate.
+An explicit `currentDate` overrides the calendar clock; it must match the
+delegate's calendar, but need not fall within the selectable range. The
+wrapper forwards year selection, keys, and drag behavior to Flutter's picker.
 
 ### Use with CalendarDatePicker
 

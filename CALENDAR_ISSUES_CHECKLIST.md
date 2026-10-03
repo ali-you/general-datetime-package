@@ -5,7 +5,7 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 - [x] **1. P1 — Stop resolving the defective published datetime core.** Give the corrected implementations distinct release versions, require the corrected core, resolve local development/example dependencies to the neighboring source, and add integration regressions for chronology, UTC, and equality. Implemented and verified locally; release publication remains pending below.
 - [x] **2. P1 — Prevent Gregorian reconstruction through generic DateTime helpers.** Added and verified safe application/calendar boundaries for copyWith and date-only operations. External Gregorian helpers require explicit native conversion; see the limitation below.
 - [x] **3. P1 — Guard calendar delegate date types.** Both delegates now consistently reject incompatible runtime date arguments and non-null parser results with `ArgumentError`; explicit conversion and regression coverage are documented below.
-- [ ] **4. P2 — Handle direct YearPicker currentDate.** Provide a safe matching default and regression coverage.
+- [x] **4. P2 — Handle direct YearPicker currentDate.** Added `CalendarYearPicker` with a matching delegate-clock default, documentation, and regression coverage.
 - [ ] **5. P1 — Define safe serialization.** Separate Gregorian UTC timestamps from tagged calendar date records.
 - [ ] **6. P2 — Validate conflicting strict-parser date fields.** Check weekday, quarter, ordinal day, and month/day consistency.
 - [ ] **7. P2 — Validate repeated parser fields.** Reject invalid or inconsistent earlier occurrences.
@@ -61,7 +61,7 @@ Verification: **183/183 core tests and 493/493 formatter tests passed** against 
 
 ## Issue 3 implementation and verification
 
-Status: **done locally**. Issues 4–22 remain open.
+Status: **done locally**. See subsequent issue statuses below.
 
 - Retained `CalendarDelegate<DateTime>` for Flutter compatibility and added explicit runtime validation: Persian accepts `PersianDateTime`; Hijri accepts `HijriDateTime`. Incompatible date arguments throw `ArgumentError` with the argument name, expected type, and explicit conversion guidance.
 - Guarded date-only normalization, both range endpoints, day/month navigation, both month-delta operands, every date formatter, and both nullable day/month comparison operands. Mismatches are rejected even when the other comparison operand is null or the numeric fields happen to match.
@@ -70,3 +70,15 @@ Status: **done locally**. Issues 4–22 remain open.
 - Added 38 shared regression tests across both delegates, including Material picker constructor rejection. The direct `YearPicker` default remains tracked in issue 4; callers currently need a matching explicit `currentDate`.
 
 Verification: **221/221 core tests and 493/493 formatter tests passed** against the corrected local core, including existing calendar navigation, input-picker, and formatter localization integration coverage. Both analyzers reported no issues, the core's full format check reported zero changes, and both repositories passed `git diff --check`.
+
+## Issue 4 implementation and verification
+
+Status: **done locally**. Issues 5–22 remain open.
+
+- Added public `CalendarYearPicker`, exported from `general_datetime.dart`, as a standalone Flutter year-picker wrapper. An omitted `currentDate` uses the supplied `calendarDelegate.now()` once; an explicit date bypasses that clock.
+- Normalized and validated current, first, last, and non-null selected dates through the delegate. Persian/Hijri inputs retain matching runtime types and the picker's local-date policy; incompatible dates continue to throw `ArgumentError`.
+- Retained Flutter's year-selection behavior, including first-of-month callback dates, disabled years, nullable selection, keys, drag behavior, and Gregorian defaults. The current date may lie outside the selectable range.
+- Documented wrapper usage with matching localizations and the explicit `PersianDateTime.now()`/`HijriDateTime.now()` requirement when using Flutter's `YearPicker` directly. The upstream widget still defaults to a native Gregorian clock; delegate guards remain strict.
+- Added 11 regressions covering Persian/Hijri rendering and callback instants, the supplied delegate clock, explicit current dates, every incompatible date argument, direct Flutter constructor behavior, and Gregorian selection.
+
+Verification: **232/232 core tests and 493/493 formatter tests passed** against the corrected local core. The core analyzer reported no issues, its source format check reported zero changes, and both repositories passed `git diff --check`.

@@ -2,6 +2,11 @@
 
 ## [3.0.0] — release preparation
 
+- Added `CalendarYearPicker` with a safe `calendarDelegate.now()` default for
+  standalone Persian/Hijri year selection. All date inputs use the delegate's
+  normalization and validation. Documented Flutter's explicit `currentDate`
+  requirement for direct `YearPicker` use and added regression coverage.
+
 - Persian/Hijri calendar delegates now reject incompatible runtime date types
   with `ArgumentError` across field operations, ranges, nullable comparisons,
   formatting, and non-null localization parser results. Callers must explicitly
