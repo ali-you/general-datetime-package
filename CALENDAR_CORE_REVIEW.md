@@ -2,6 +2,10 @@
 
 Reviewed 2026-10-03 for use as the logic and UI foundation of a calendar application.
 
+Follow-up work is tracked in [CALENDAR_ISSUES_CHECKLIST.md](CALENDAR_ISSUES_CHECKLIST.md).
+The observations below describe the reviewed snapshot; fixes are recorded in
+the checklist rather than rewriting the original evidence.
+
 **Decision: adopt the corrected local implementations behind an application-owned calendar API, after addressing the blockers below. Do not adopt the currently resolved published general_datetime 2.1.0 as the core.** The local conversion engine is substantially stronger than the published dependency. These packages provide calendar dates, formatting, parsing, and Flutter Material date-picker integration; a complete calendar application still needs its own date-only model, navigation policies, event model, timezone handling, and UI state.
 
 ## Scope and verified results

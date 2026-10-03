@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## [3.0.0] — release preparation
+
+- Breaking: replaces the published 2.1.0 chronology and native-instant contracts
+  with the corrected implementations described below. Unsupported calendar
+  dates now fail explicitly. Publish this core before general_date_format 2.0.0.
 
 - Added shared critical suites for both calendars: independent seeded
   normalization, precision/epoch boundaries, adversarial parsing, DST, calendar

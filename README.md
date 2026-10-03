@@ -69,8 +69,18 @@ To use this plugin, add it to your project:
 
 ```yaml
 dependencies:
-  general_datetime: <latest_version>
+  general_datetime: ^3.0.0
 
+```
+
+Version 3.0.0 is the corrected source release being prepared in this repository.
+Until it is published, use a path dependency to this checkout; the hosted 2.1.0
+implementation does not contain these fixes:
+
+```yaml
+dependencies:
+  general_datetime:
+    path: ../general_date
 ```
 
 ### 2. Install from terminal
