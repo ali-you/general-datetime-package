@@ -428,8 +428,10 @@ class HijriDateTime extends DateTime
 
   /// Creates a copy with selected Umm al-Qura wall-clock fields replaced.
   ///
-  /// This shadows Dart's [DateTimeCopyWith.copyWith] extension so the result
-  /// remains a [HijriDateTime].
+  /// This shadows Dart's [DateTimeCopyWith.copyWith] extension only when the
+  /// receiver is statically typed as [HijriDateTime]. For a [DateTime]-typed
+  /// receiver use `CalendarDateUtils.copyWith` from the package's public library;
+  /// Dart's extension otherwise reconstructs a Gregorian date from Hijri fields.
   HijriDateTime copyWith({
     int? year,
     int? month,

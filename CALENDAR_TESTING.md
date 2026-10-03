@@ -58,6 +58,14 @@ validated constructor directly.
 
 The interface suite also checks unsupported factory types.
 
+`test/unit/calendar_date_utils_test.dart` verifies the safe application boundary
+using values statically typed as `DateTime`: calendar field replacement, exact
+Gregorian instants, all clock fields, overflow across year boundaries, UTC/local
+date-only behavior, supported bounds, and rejection of unregistered calendar
+fields. Native conversion preserves microseconds and mode before external
+`copyWith` and Material `DateUtils` calls. Expectations use the independent
+calendar fixtures and native Gregorian constructors.
+
 ## Run the tests
 
 ```console

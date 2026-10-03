@@ -2,6 +2,12 @@
 
 ## [3.0.0] — release preparation
 
+- Added `CalendarDateUtils.copyWith`, `dateOnly`, and `toGregorian` as explicit
+  calendar-field and native-instant boundaries for `DateTime`-typed values.
+  Field operations preserve Persian/Hijri types, precision, and UTC/local mode;
+  unsupported calendar interfaces fail explicitly. Documented the upstream
+  `DateTime.copyWith`/`DateUtils` limitation and added shared regressions.
+
 - Breaking: replaces the published 2.1.0 chronology and native-instant contracts
   with the corrected implementations described below. Unsupported calendar
   dates now fail explicitly. Publish this core before general_date_format 2.0.0.

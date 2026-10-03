@@ -433,8 +433,10 @@ class PersianDateTime extends DateTime
 
   /// Creates a copy with selected Solar Hijri wall-clock fields replaced.
   ///
-  /// This shadows Dart's [DateTimeCopyWith.copyWith] extension so the result
-  /// remains a [PersianDateTime].
+  /// This shadows Dart's [DateTimeCopyWith.copyWith] extension only when the
+  /// receiver is statically typed as [PersianDateTime]. For a [DateTime]-typed
+  /// receiver use `CalendarDateUtils.copyWith` from the package's public library;
+  /// Dart's extension otherwise reconstructs a Gregorian date from Persian fields.
   PersianDateTime copyWith({
     int? year,
     int? month,

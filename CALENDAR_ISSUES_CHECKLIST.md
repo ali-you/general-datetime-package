@@ -1,9 +1,9 @@
 # Calendar packages issue checklist
 
-Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.md). Finish and verify each item before moving to the next. This turn addresses issue 1 only.
+Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.md). Finish and verify each item before moving to the next. Implementation and verification notes are recorded below each completed issue.
 
 - [x] **1. P1 — Stop resolving the defective published datetime core.** Give the corrected implementations distinct release versions, require the corrected core, resolve local development/example dependencies to the neighboring source, and add integration regressions for chronology, UTC, and equality. Implemented and verified locally; release publication remains pending below.
-- [ ] **2. P1 — Prevent Gregorian reconstruction through generic DateTime helpers.** Define safe application/calendar boundaries for copyWith and date-only operations.
+- [x] **2. P1 — Prevent Gregorian reconstruction through generic DateTime helpers.** Added and verified safe application/calendar boundaries for copyWith and date-only operations. External Gregorian helpers require explicit native conversion; see the limitation below.
 - [ ] **3. P1 — Guard calendar delegate date types.** Reject or explicitly convert incompatible inputs consistently.
 - [ ] **4. P2 — Handle direct YearPicker currentDate.** Provide a safe matching default and regression coverage.
 - [ ] **5. P1 — Define safe serialization.** Separate Gregorian UTC timestamps from tagged calendar date records.
@@ -27,7 +27,7 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 
 ## Issue 1 implementation and verification
 
-Status: **done locally**. Issues 2–22 remain open.
+Status: **done locally**. Release publication remains pending.
 
 - Prepared `general_datetime` **3.0.0** and `general_date_format` **2.0.0** because the corrected chronology, instant/equality behavior, and finite Hijri range change the old contract.
 - The formatter and its example now require `general_datetime: ^3.0.0`. The defective hosted 2.1.0 release cannot satisfy this constraint.
@@ -46,3 +46,15 @@ These are separate from the checked local implementation. Neither release has be
 - Publish the corrected `general_datetime` 3.0.0 release first.
 - Remove the local overrides and repeat integration tests against hosted 3.0.0, verifying the same dependency contract.
 - Publish `general_date_format` 2.0.0 after that verification. Until the core is published, consumers must use the documented local override; hosted resolution is expected to fail rather than silently select 2.1.0.
+
+## Issue 2 implementation and verification
+
+Status: **done locally**. Issues 3–22 remain open.
+
+- Added public `CalendarDateUtils.copyWith` and `dateOnly` for values statically typed as `DateTime`. They dispatch to the correct Persian/Hijri constructor behavior, retaining calendar fields, precision, and UTC/local mode. Native inputs keep Gregorian behavior. Unregistered calendar interfaces fail explicitly.
+- Added `CalendarDateUtils.toGregorian` as the external-helper boundary. It copies epoch microseconds and timezone mode, never custom year/month/day fields.
+- Documented safe application usage, local DST normalization, timezone reinterpretation versus conversion, and the Material picker's separate local-date policy. Clarified the concrete classes' `copyWith` documentation.
+- Dart extensions and Flutter static helpers cannot be overridden by a subclass. Raw `DateTime`-typed `.copyWith` and `DateUtils` calls on calendar subclasses remain unsafe; applications must use the new helpers or convert to native Gregorian first. A composition-based civil-date model remains tracked in issue 18.
+- Added 18 regression tests spanning both calendars, native Gregorian behavior, and unsupported calendar rejection, with independent calendar reference fixtures.
+
+Verification: **183/183 core tests and 493/493 formatter tests passed** against the corrected local core. Both package analyzers reported no issues, the core's full format check reported zero changes, and both repositories passed `git diff --check`. This completes the explicit adapter boundary; callers must adopt that boundary for the upstream-helper hazard to be avoided.

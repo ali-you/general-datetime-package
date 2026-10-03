@@ -135,6 +135,45 @@ void main() {
 }
 ```
 
+### Safe calendar field operations
+
+Use `CalendarDateUtils` when a calendar value is held in a `DateTime` variable,
+such as a picker callback or a shared event model:
+
+```dart
+DateTime selected = PersianDateTime.utc(1403, 1, 1, 12, 30);
+final nextDate = CalendarDateUtils.copyWith(selected, day: 2);
+// PersianDateTime.utc(1403, 1, 2, 12, 30), Gregorian 2024-03-21.
+final midnight = CalendarDateUtils.dateOnly(selected);
+// PersianDateTime.utc(1403, 1, 1); UTC/local mode is preserved.
+
+final native = CalendarDateUtils.toGregorian(selected);
+// Native DateTime.utc(2024, 3, 20, 12, 30), preserving the exact instant.
+final gregorianChange = native.copyWith(day: 21);
+```
+
+The same helpers support Hijri and native Gregorian dates. Field copies use the
+input's calendar normalization and range checks. Other implementations of
+`GeneralDateTimeInterface` fail with `UnsupportedError` for field operations
+until an adapter is implemented; their instants can still use `toGregorian`.
+
+Avoid `selected.copyWith(...)` when `selected` is statically typed `DateTime`,
+and avoid `DateUtils.dateOnly(selected)` or other Gregorian helpers on calendar
+subclasses. Dart resolves its `copyWith` extension from the static type and
+Flutter's helpers reconstruct Gregorian dates from exposed calendar fields.
+These upstream calls cannot be overridden by this package. Route calendar field
+operations through `CalendarDateUtils`, or convert with `toGregorian` before
+using an external Gregorian helper. Convert the result back explicitly with
+`PersianDateTime.fromDateTime` or `HijriDateTime.fromDateTime` when needed.
+
+`dateOnly` returns a date-time with cleared clock fields, retaining UTC/local
+mode. Local DST rules can normalize a nonexistent midnight. Changing `isUtc`
+through `copyWith` reinterprets wall-clock fields; use `toUtc()`/`toLocal()` to
+preserve the instant. Material pickers should continue using the matching
+calendar delegate's local-date policy. A timezone-free civil-date model and
+calendar-period policies are separate work tracked in issue 18 of
+[the checklist](CALENDAR_ISSUES_CHECKLIST.md).
+
 ## Flutter Integration (Localization & Delegates)
 
 Use the matching `CalendarDelegate` with Flutter Material date pickers.

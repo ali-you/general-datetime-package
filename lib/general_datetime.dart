@@ -2,6 +2,7 @@
 /// you can use the package consider the example
 library;
 
+export 'src/calendar_date_utils.dart';
 export 'src/general_date_time_interface.dart';
 export 'src/hijri_date_time.dart';
 export 'src/persian_date_time.dart';
