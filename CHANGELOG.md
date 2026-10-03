@@ -2,6 +2,12 @@
 
 ## [3.0.0] — release preparation
 
+- Persian/Hijri calendar delegates now reject incompatible runtime date types
+  with `ArgumentError` across field operations, ranges, nullable comparisons,
+  formatting, and non-null localization parser results. Callers must explicitly
+  convert Gregorian/other-calendar instants. Added 38 shared regression tests
+  including Material picker constructor validation and localization forwarding.
+
 - Added `CalendarDateUtils.copyWith`, `dateOnly`, and `toGregorian` as explicit
   calendar-field and native-instant boundaries for `DateTime`-typed values.
   Field operations preserve Persian/Hijri types, precision, and UTC/local mode;

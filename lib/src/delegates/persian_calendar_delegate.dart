@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../persian_date_time.dart';
 
+/// A Material calendar delegate that accepts only [PersianDateTime] values.
+///
+/// All date inputs and non-null localization parser results are checked at
+/// runtime. Incompatible values throw [ArgumentError]; convert Gregorian or
+/// other-calendar instants with [PersianDateTime.fromDateTime] explicitly.
+/// Date-only and navigation results use the picker's local-midnight policy.
 class PersianCalendarDelegate extends CalendarDelegate<DateTime> {
   /// Creates a calendar delegate that uses the Persian calendar and the
   /// conventions of the current [MaterialLocalizations].
@@ -11,20 +17,50 @@ class PersianCalendarDelegate extends CalendarDelegate<DateTime> {
   DateTime now() => PersianDateTime.now();
 
   @override
-  DateTime dateOnly(DateTime date) =>
-      PersianDateTime(date.year, date.month, date.day);
+  DateTime dateOnly(DateTime date) {
+    final value = _requireCalendarDate(date, 'date');
+    return PersianDateTime(value.year, value.month, value.day);
+  }
 
   @override
-  int monthDelta(DateTime startDate, DateTime endDate) =>
-      (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range) {
+    _requireCalendarDate(range.start, 'range.start');
+    _requireCalendarDate(range.end, 'range.end');
+    return super.datesOnly(range);
+  }
+
+  @override
+  bool isSameDay(DateTime? dateA, DateTime? dateB) {
+    if (dateA != null) _requireCalendarDate(dateA, 'dateA');
+    if (dateB != null) _requireCalendarDate(dateB, 'dateB');
+    return super.isSameDay(dateA, dateB);
+  }
+
+  @override
+  bool isSameMonth(DateTime? dateA, DateTime? dateB) {
+    if (dateA != null) _requireCalendarDate(dateA, 'dateA');
+    if (dateB != null) _requireCalendarDate(dateB, 'dateB');
+    return super.isSameMonth(dateA, dateB);
+  }
+
+  @override
+  int monthDelta(DateTime startDate, DateTime endDate) {
+    _requireCalendarDate(startDate, 'startDate');
+    _requireCalendarDate(endDate, 'endDate');
+    return (endDate.year - startDate.year) * 12 +
+        endDate.month -
+        startDate.month;
+  }
 
   @override
   DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+    _requireCalendarDate(monthDate, 'monthDate');
     return PersianDateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 
   @override
   DateTime addDaysToDate(DateTime date, int days) {
+    _requireCalendarDate(date, 'date');
     return PersianDateTime(date.year, date.month, date.day + days);
   }
 
@@ -58,43 +94,59 @@ class PersianCalendarDelegate extends CalendarDelegate<DateTime> {
 
   @override
   String formatMonthYear(DateTime date, MaterialLocalizations localizations) {
-    return localizations.formatMonthYear(date);
+    return localizations.formatMonthYear(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatMediumDate(DateTime date, MaterialLocalizations localizations) {
-    return localizations.formatMediumDate(date);
+    return localizations.formatMediumDate(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatShortMonthDay(
       DateTime date, MaterialLocalizations localizations) {
-    return localizations.formatShortMonthDay(date);
+    return localizations
+        .formatShortMonthDay(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatShortDate(DateTime date, MaterialLocalizations localizations) {
-    return localizations.formatShortDate(date);
+    return localizations.formatShortDate(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatFullDate(DateTime date, MaterialLocalizations localizations) {
-    return localizations.formatFullDate(date);
+    return localizations.formatFullDate(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatCompactDate(DateTime date, MaterialLocalizations localizations) {
-    return localizations.formatCompactDate(date);
+    return localizations.formatCompactDate(_requireCalendarDate(date, 'date'));
   }
 
+  /// Returns null for invalid input. A non-null result in another calendar
+  /// throws [ArgumentError], indicating incompatible localization configuration.
   @override
   DateTime? parseCompactDate(
       String? inputString, MaterialLocalizations localizations) {
-    return localizations.parseCompactDate(inputString);
+    final parsed = localizations.parseCompactDate(inputString);
+    return parsed == null
+        ? null
+        : _requireCalendarDate(parsed, 'localizations.parseCompactDate result');
   }
 
   @override
   String dateHelpText(MaterialLocalizations localizations) {
     return localizations.dateHelpText;
+  }
+
+  PersianDateTime _requireCalendarDate(DateTime date, String argumentName) {
+    if (date is PersianDateTime) return date;
+    throw ArgumentError.value(
+      date,
+      argumentName,
+      'PersianCalendarDelegate requires PersianDateTime, received '
+      '${date.runtimeType}. Convert explicitly with PersianDateTime.fromDateTime.',
+    );
   }
 }

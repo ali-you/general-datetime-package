@@ -4,7 +4,7 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 
 - [x] **1. P1 — Stop resolving the defective published datetime core.** Give the corrected implementations distinct release versions, require the corrected core, resolve local development/example dependencies to the neighboring source, and add integration regressions for chronology, UTC, and equality. Implemented and verified locally; release publication remains pending below.
 - [x] **2. P1 — Prevent Gregorian reconstruction through generic DateTime helpers.** Added and verified safe application/calendar boundaries for copyWith and date-only operations. External Gregorian helpers require explicit native conversion; see the limitation below.
-- [ ] **3. P1 — Guard calendar delegate date types.** Reject or explicitly convert incompatible inputs consistently.
+- [x] **3. P1 — Guard calendar delegate date types.** Both delegates now consistently reject incompatible runtime date arguments and non-null parser results with `ArgumentError`; explicit conversion and regression coverage are documented below.
 - [ ] **4. P2 — Handle direct YearPicker currentDate.** Provide a safe matching default and regression coverage.
 - [ ] **5. P1 — Define safe serialization.** Separate Gregorian UTC timestamps from tagged calendar date records.
 - [ ] **6. P2 — Validate conflicting strict-parser date fields.** Check weekday, quarter, ordinal day, and month/day consistency.
@@ -49,7 +49,7 @@ These are separate from the checked local implementation. Neither release has be
 
 ## Issue 2 implementation and verification
 
-Status: **done locally**. Issues 3–22 remain open.
+Status: **done locally**. See subsequent issue statuses below.
 
 - Added public `CalendarDateUtils.copyWith` and `dateOnly` for values statically typed as `DateTime`. They dispatch to the correct Persian/Hijri constructor behavior, retaining calendar fields, precision, and UTC/local mode. Native inputs keep Gregorian behavior. Unregistered calendar interfaces fail explicitly.
 - Added `CalendarDateUtils.toGregorian` as the external-helper boundary. It copies epoch microseconds and timezone mode, never custom year/month/day fields.
@@ -58,3 +58,15 @@ Status: **done locally**. Issues 3–22 remain open.
 - Added 18 regression tests spanning both calendars, native Gregorian behavior, and unsupported calendar rejection, with independent calendar reference fixtures.
 
 Verification: **183/183 core tests and 493/493 formatter tests passed** against the corrected local core. Both package analyzers reported no issues, the core's full format check reported zero changes, and both repositories passed `git diff --check`. This completes the explicit adapter boundary; callers must adopt that boundary for the upstream-helper hazard to be avoided.
+
+## Issue 3 implementation and verification
+
+Status: **done locally**. Issues 4–22 remain open.
+
+- Retained `CalendarDelegate<DateTime>` for Flutter compatibility and added explicit runtime validation: Persian accepts `PersianDateTime`; Hijri accepts `HijriDateTime`. Incompatible date arguments throw `ArgumentError` with the argument name, expected type, and explicit conversion guidance.
+- Guarded date-only normalization, both range endpoints, day/month navigation, both month-delta operands, every date formatter, and both nullable day/month comparison operands. Mismatches are rejected even when the other comparison operand is null or the numeric fields happen to match.
+- Guarded non-null localization parser results. Invalid text still returns null; wrong-calendar parser results raise `ArgumentError` for incompatible configuration. Matching parser results and custom formatting values are forwarded unchanged.
+- Preserved matching-date calendar arithmetic and the delegates' existing local-midnight policy. Callers can convert native or other-calendar instants with the matching `fromDateTime` factory.
+- Added 38 shared regression tests across both delegates, including Material picker constructor rejection. The direct `YearPicker` default remains tracked in issue 4; callers currently need a matching explicit `currentDate`.
+
+Verification: **221/221 core tests and 493/493 formatter tests passed** against the corrected local core, including existing calendar navigation, input-picker, and formatter localization integration coverage. Both analyzers reported no issues, the core's full format check reported zero changes, and both repositories passed `git diff --check`.

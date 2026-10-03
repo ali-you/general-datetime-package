@@ -58,6 +58,14 @@ validated constructor directly.
 
 The interface suite also checks unsupported factory types.
 
+`test/unit/calendar_delegate_type_guard_test.dart` checks both delegates against
+native Gregorian and other-calendar inputs, including equal instants and equal
+numeric fields. It covers every date-taking operation, both comparison operands
+(including null combinations), both range endpoints, parser-result validation,
+unchanged forwarding to custom localizations, explicit instant conversion, and
+Material picker constructor rejection. Matching nullable comparison behavior
+and the delegates' local-date normalization policy are preserved.
+
 `test/unit/calendar_date_utils_test.dart` verifies the safe application boundary
 using values statically typed as `DateTime`: calendar field replacement, exact
 Gregorian instants, all clock fields, overflow across year boundaries, UTC/local

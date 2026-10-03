@@ -183,6 +183,27 @@ current `MaterialLocalizations`. Supply
 `DefaultPersianCalendarMaterialLocalizations.delegate` for a Persian picker and
 `DefaultHijriCalendarMaterialLocalizations.delegate` for a Hijri picker.
 
+Both delegates require matching runtime calendar types for every date argument:
+`PersianDateTime` for Persian and `HijriDateTime` for Hijri. This applies to
+date-only/range normalization, month/day navigation, nullable comparisons, and
+formatting. Both comparison operands and both range endpoints are checked.
+Native Gregorian and other-calendar dates throw `ArgumentError`; convert their
+instants explicitly before passing them to the delegate:
+
+```dart
+final gregorian = DateTime.utc(2024, 3, 20);
+final selected = PersianDateTime.fromDateTime(gregorian);
+final pickerDate = const PersianCalendarDelegate().dateOnly(selected);
+```
+
+The matching `MaterialLocalizations` parser must return the same calendar type.
+Invalid text still returns null; a non-null result in another calendar throws
+`ArgumentError` for incompatible localization configuration. Valid formatting
+and parsing continue using the supplied localization without implicit conversion.
+Picker normalization retains calendar wall-date fields and produces local dates.
+When using `YearPicker` directly, provide a matching `currentDate`; its native
+default is rejected and a safe default is still tracked under issue 4.
+
 ### Use with CalendarDatePicker
 
 Pass the corresponding delegate to change the calendar system:
