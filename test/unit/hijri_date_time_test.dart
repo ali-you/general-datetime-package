@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
-import 'package:hijri/hijri_calendar.dart';
-import 'package:general_datetime/src/shared/gregorian_helper.dart';
 
 import '../fixtures/umm_al_qura_openjdk21_fixture.dart';
 
@@ -10,6 +8,8 @@ void main() {
     test('publishes the exact OpenJDK Hijrah-umalqura bounds', () {
       expect(HijriDateTime.minimumYear, 1300);
       expect(HijriDateTime.maximumYear, 1600);
+      expect(HijriDateTime.minimumOfficialYear, HijriDateTime.minimumYear);
+      expect(HijriDateTime.maximumOfficialYear, HijriDateTime.maximumYear);
       expect(
         UmmAlQuraOpenJdk21Fixture.encodedYearCount,
         HijriDateTime.maximumYear - HijriDateTime.minimumYear + 1,
@@ -78,6 +78,7 @@ void main() {
         final int expectedYearLength =
             UmmAlQuraOpenJdk21Fixture.yearLength(year);
         final HijriDateTime firstDay = HijriDateTime.utc(year);
+        expect(firstDay.hasOfficialCalendarData, isTrue, reason: 'year $year');
 
         expect(
           firstDay.yearLength,
@@ -686,6 +687,40 @@ void main() {
       );
     });
 
+    test('applies offsets before validating the supported endpoints', () {
+      final HijriDateTime minimum = HijriDateTime.utc(1300);
+      expect(
+        HijriDateTime.parse('1300-01-00T23:00:00-01:00'),
+        minimum,
+      );
+      expect(
+        HijriDateTime.parse('1300-01-00T23:00:00.123456-01:00'),
+        minimum.add(const Duration(microseconds: 123456)),
+      );
+
+      final HijriDateTime maximumWallTime =
+          HijriDateTime.utc(1600, 12, 30, 23, 0, 0, 123, 456);
+      for (final String input in <String>[
+        '1601-01-01T00:00:00.123456+01:00',
+        '1600-12-31T00:00:00.123456+0100',
+        '1600-13-01T00:00:00.123456+01',
+      ]) {
+        expect(HijriDateTime.parse(input), maximumWallTime, reason: input);
+        expect(HijriDateTime.tryParse(input), maximumWallTime, reason: input);
+      }
+
+      for (final String input in <String>[
+        '1300-01-01T00:00:00+00:01',
+        '1300-01-00T23:00:00-00:59',
+        '1600-12-30T23:59:59.999999-00:01',
+        '1601-01-01T01:00:00+01:00',
+      ]) {
+        expect(() => HijriDateTime.parse(input), throwsFormatException,
+            reason: input);
+        expect(HijriDateTime.tryParse(input), isNull, reason: input);
+      }
+    });
+
     test('formats Hijri fields and round-trips its own output', () {
       final HijriDateTime utc =
           HijriDateTime.utc(1445, 9, 1, 12, 34, 56, 789, 123);
@@ -915,58 +950,34 @@ void main() {
     });
   });
 
-  group('Third-party comparison', () {
-    test('converts every supported Gregorian day to Hijri and matches hijri package', () {
-      final GregorianHelper gregorianHelper = GregorianHelper();
-      // final DateTime start = HijriDateTime.minimumGregorianDate;
-      final DateTime start = DateTime(1937, 3, 14);
-      // final DateTime end = HijriDateTime.maximumGregorianDate;
-      final DateTime end = DateTime(2077);
-
-      for (int year = start.year; year <= end.year; year++) {
-        for (int month = 1; month <= 12; month++) {
-          final int monthLength = gregorianHelper.monthLength(year, month);
-          for (int day = 1; day <= monthLength; day++) {
-            final DateTime current = DateTime.utc(year, month, day);
-            if (current.isBefore(start) || current.isAfter(end)) continue;
-
-            final HijriCalendar expected = HijriCalendar.fromDate(current);
-            final HijriDateTime actual = HijriDateTime.fromDateTime(current);
-
-            expect(actual.year, expected.hYear,
-                reason: 'Year mismatch at $year-$month-$day');
-            expect(actual.month, expected.hMonth,
-                reason: 'Month mismatch at $year-$month-$day');
-            expect(actual.day, expected.hDay,
-                reason: 'Day mismatch at $year-$month-$day');
-          }
-        }
-      }
+  // hijri 3.0.1 differs from ICU/OpenJDK in both historical and recent
+  // months. These regressions use the primary chronology, while the exhaustive
+  // fixture test above validates both directions across the entire range.
+  group('ICU/OpenJDK dataset regressions', () {
+    test('preserves the historical Safar boundary in AH 1356', () {
+      expect(HijriDateTime.daysInMonth(1356, 2), 30);
+      _expectHijriFields(
+        HijriDateTime.fromDateTime(DateTime.utc(1937, 5, 11)),
+        1356,
+        2,
+        30,
+        isUtc: true,
+      );
+      expect(HijriDateTime.utc(1356, 3, 1).toDateTime(),
+          DateTime.utc(1937, 5, 12));
     });
 
-    test('converts every supported Hijri day to Gregorian and matches hijri package', () {
-      final HijriCalendar converter = HijriCalendar();
-      for (int year = HijriDateTime.minimumYear;
-          year <= HijriDateTime.maximumYear;
-          year++) {
-        for (int month = 1; month <= 12; month++) {
-          final int monthLength = HijriDateTime.daysInMonth(year, month);
-          for (int day = 1; day <= monthLength; day++) {
-            final HijriDateTime hijri = HijriDateTime.utc(year, month, day);
-            final DateTime expected =
-                converter.hijriToGregorian(year, month, day);
-
-            final DateTime actual = hijri.toDateTime();
-
-            expect(actual.year, expected.year,
-                reason: 'Gregorian year mismatch at Hijri $year-$month-$day');
-            expect(actual.month, expected.month,
-                reason: 'Gregorian month mismatch at Hijri $year-$month-$day');
-            expect(actual.day, expected.day,
-                reason: 'Gregorian day mismatch at Hijri $year-$month-$day');
-          }
-        }
-      }
+    test('preserves the Jumada boundary in AH 1446', () {
+      expect(HijriDateTime.daysInMonth(1446, 5), 29);
+      _expectHijriFields(
+        HijriDateTime.fromDateTime(DateTime.utc(2024, 12, 2)),
+        1446,
+        6,
+        1,
+        isUtc: true,
+      );
+      expect(HijriDateTime.utc(1446, 6, 1).toDateTime(),
+          DateTime.utc(2024, 12, 2));
     });
   });
 }
@@ -975,6 +986,8 @@ const List<_ReferenceAnchor> _referenceAnchors = <_ReferenceAnchor>[
   _ReferenceAnchor(1300, 1, 1, 1882, 11, 12),
   _ReferenceAnchor(1318, 8, 1, 1900, 11, 24),
   _ReferenceAnchor(1343, 1, 1, 1924, 8, 2),
+  _ReferenceAnchor(1356, 2, 30, 1937, 5, 11),
+  _ReferenceAnchor(1356, 3, 1, 1937, 5, 12),
   _ReferenceAnchor(1400, 1, 1, 1979, 11, 21),
   _ReferenceAnchor(1420, 9, 1, 1999, 12, 9),
   _ReferenceAnchor(1430, 1, 1, 2008, 12, 29),
@@ -985,6 +998,7 @@ const List<_ReferenceAnchor> _referenceAnchors = <_ReferenceAnchor>[
   _ReferenceAnchor(1445, 9, 1, 2024, 3, 11),
   _ReferenceAnchor(1445, 10, 1, 2024, 4, 10),
   _ReferenceAnchor(1446, 1, 1, 2024, 7, 7),
+  _ReferenceAnchor(1446, 6, 1, 2024, 12, 2),
   _ReferenceAnchor(1446, 9, 1, 2025, 3, 1),
   _ReferenceAnchor(1446, 10, 1, 2025, 3, 30),
   _ReferenceAnchor(1500, 1, 1, 2076, 11, 28),

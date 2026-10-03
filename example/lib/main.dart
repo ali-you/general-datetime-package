@@ -67,15 +67,21 @@ class AppStartup extends StatelessWidget {
                   ),
                   const Divider(),
                   const Text('Hijri Calendar'),
-                  CalendarDatePicker(
-                    initialDate: HijriDateTime.now(),
-                    firstDate: HijriDateTime(1440, 1, 1),
-                    lastDate: HijriDateTime(1460, 12, 29),
-                    currentDate: HijriDateTime.now(),
-                    onDateChanged: (value) {
-                      debugPrint('Hijri selected: $value');
-                    },
-                    calendarDelegate: const HijriCalendarDelegate(),
+                  Localizations.override(
+                    context: context,
+                    delegates: const <LocalizationsDelegate<dynamic>>[
+                      DefaultHijriCalendarMaterialLocalizations.delegate,
+                    ],
+                    child: CalendarDatePicker(
+                      initialDate: HijriDateTime.now(),
+                      firstDate: HijriDateTime(1440, 1, 1),
+                      lastDate: HijriDateTime(1460, 12, 29),
+                      currentDate: HijriDateTime.now(),
+                      onDateChanged: (value) {
+                        debugPrint('Hijri selected: $value');
+                      },
+                      calendarDelegate: const HijriCalendarDelegate(),
+                    ),
                   ),
                 ],
               ),

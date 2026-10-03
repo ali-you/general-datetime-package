@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../delegates/hijri_calendar_delegate.dart';
 import '../hijri_date_time.dart';
 
 class _HijriCalendarMaterialLocalizationsDelegate
@@ -22,6 +23,11 @@ class _HijriCalendarMaterialLocalizationsDelegate
       'DefaultHijriCalendarMaterialLocalizations.delegate(en_US)';
 }
 
+/// US-English Material localizations with Umm al-Qura names and date formats.
+///
+/// [HijriCalendarDelegate] uses the ambient [MaterialLocalizations] for date
+/// formatting and parsing. Load [delegate] for a Hijri date picker, either in
+/// its [MaterialApp] or through a picker-specific [Localizations.override].
 class DefaultHijriCalendarMaterialLocalizations
     implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
@@ -31,7 +37,7 @@ class DefaultHijriCalendarMaterialLocalizations
   /// function, rather than constructing this class directly.
   const DefaultHijriCalendarMaterialLocalizations();
 
-  // Ordered to match DateTime.monday=1, DateTime.sunday=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=7.
   static const List<String> _shortWeekdays = <String>[
     'Mon',
     'Tue',
@@ -42,7 +48,7 @@ class DefaultHijriCalendarMaterialLocalizations
     'Sun',
   ];
 
-  // Ordered to match DateTime.monday=1, DateTime.sunday=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=7.
   static const List<String> _weekdays = <String>[
     'Monday',
     'Tuesday',
@@ -93,7 +99,7 @@ class DefaultHijriCalendarMaterialLocalizations
     'Dhu al-Hijjah',
   ];
 
-  /// Returns the number of days in a month.
+  /// Returns the Umm al-Qura length of [month] in [year].
   int _getDaysInMonth(int year, int month) =>
       HijriDateTime.daysInMonth(year, month);
 
@@ -134,10 +140,11 @@ class DefaultHijriCalendarMaterialLocalizations
 
   @override
   String formatCompactDate(DateTime date) {
-    // Assumes dd/mm/yyyy format
+    // Preserves the legacy dd/mm/yyyy contract of this English localization.
     final String month = _formatTwoDigitZeroPad(date.month);
     final String day = _formatTwoDigitZeroPad(date.day);
-    final String year = date.year.toString().padLeft(4, '0');
+    final String year =
+        '${date.year < 0 ? '-' : ''}${date.year.abs().toString().padLeft(4, '0')}';
     return '$day/$month/$year';
   }
 
@@ -177,22 +184,25 @@ class DefaultHijriCalendarMaterialLocalizations
   DateTime? parseCompactDate(String? inputString) {
     if (inputString == null) return null;
 
-    // Assumes dd/mm/yyyy format
+    // Preserves the legacy dd/mm/yyyy contract of this English localization.
     final List<String> inputParts = inputString.split('/');
     if (inputParts.length != 3) return null;
 
-    final int? year = int.tryParse(inputParts[2], radix: 10);
-    if (year == null || year < 1) return null;
+    final int? year = int.tryParse(inputParts[2].trim(), radix: 10);
+    if (year == null) return null;
 
-    final int? month = int.tryParse(inputParts[1], radix: 10);
+    final int? month = int.tryParse(inputParts[1].trim(), radix: 10);
     if (month == null || month < 1 || month > 12) return null;
 
+    final int? day = int.tryParse(inputParts[0].trim(), radix: 10);
+    if (day == null) return null;
+
     try {
-      final int? day = int.tryParse(inputParts[0], radix: 10);
-      if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
-        return null;
-      }
+      if (!HijriDateTime.isValidDate(year, month, day)) return null;
+      if (day > _getDaysInMonth(year, month)) return null;
       return HijriDateTime(year, month, day);
+    } on RangeError {
+      return null;
     } on ArgumentError {
       return null;
     }
@@ -565,16 +575,15 @@ class DefaultHijriCalendarMaterialLocalizations
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expandedHint => 'Collapsed';
+  String get expandedHint => 'Expanded';
 
   @override
-  String get collapsedHint => 'Expanded';
+  String get collapsedHint => 'Collapsed';
 
   @override
   String get refreshIndicatorSemanticLabel => 'Refresh';
 
-  /// Creates an object that provides US English resource values for the material
-  /// library widgets.
+  /// Creates legacy US-English Material values with Umm al-Qura date formats.
   ///
   /// The [locale] parameter is ignored.
   ///
@@ -587,9 +596,8 @@ class DefaultHijriCalendarMaterialLocalizations
   /// A [LocalizationsDelegate] that uses [DefaultHijriCalendarMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// Add this explicitly only when the entire localization scope uses Hijri
-  /// date formatting. `HijriCalendarDelegate` already owns its date formatting
-  /// and parsing, so most apps do not need this replacement localization.
+  /// Install this delegate for a [HijriCalendarDelegate] picker to supply
+  /// Umm al-Qura month names, date formats, and parsing.
   static const LocalizationsDelegate<MaterialLocalizations> delegate =
       _HijriCalendarMaterialLocalizationsDelegate();
 

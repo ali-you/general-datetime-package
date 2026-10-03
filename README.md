@@ -117,16 +117,22 @@ void main() {
 
   // Create a Hijri date directly:
   HijriDateTime directDate = HijriDateTime(1446, 9, 1);
+
+  // Supported range and published-data coverage:
+  print(HijriDateTime.minimumYear); // 1300
+  print(HijriDateTime.maximumYear); // 1600
+  print(directDate.hasOfficialCalendarData); // true
 }
 ```
 
 ## Flutter Integration (Localization & Delegates)
 
 Use the matching `CalendarDelegate` with Flutter Material date pickers.
-`PersianCalendarDelegate` handles calendar calculations and forwards names,
-formatting, parsing, and input help to the current `MaterialLocalizations`.
-Supply `DefaultPersianCalendarMaterialLocalizations.delegate` for a Persian
-picker. `HijriCalendarDelegate` supplies its own calendar-specific formatting.
+`PersianCalendarDelegate` and `HijriCalendarDelegate` handle calendar
+calculations and forward names, formatting, parsing, and input help to the
+current `MaterialLocalizations`. Supply
+`DefaultPersianCalendarMaterialLocalizations.delegate` for a Persian picker and
+`DefaultHijriCalendarMaterialLocalizations.delegate` for a Hijri picker.
 
 ### Use with CalendarDatePicker
 
@@ -154,7 +160,27 @@ Localizations.override(
 )
 ```
 
-For an app using only the Persian calendar, the localization delegate can
+The Hijri picker uses the same structure:
+
+```dart
+Localizations.override(
+  context: context,
+  delegates: const <LocalizationsDelegate<dynamic>>[
+    DefaultHijriCalendarMaterialLocalizations.delegate,
+  ],
+  child: CalendarDatePicker(
+    initialDate: HijriDateTime.now(),
+    firstDate: HijriDateTime(1440, 1, 1),
+    lastDate: HijriDateTime(1460, 12, 29),
+    calendarDelegate: const HijriCalendarDelegate(),
+    onDateChanged: (DateTime date) {
+      print("Selected: $date");
+    },
+  ),
+)
+```
+
+For an app using only one calendar, the matching localization delegate can
 instead be registered in `MaterialApp.localizationsDelegates`. Custom Material
 localizations can replace month names, date formats, and parsing without
 changing the calendar delegate. Scope calendar-specific localizations to their
@@ -234,12 +260,17 @@ AH 1300-01-01 through AH 1600-12-30 (Gregorian 1882-11-12 through
 implementation never silently falls back to a different Hijri calendar.
 
 Month lengths and 354/355-day years come directly from the Umm al-Qura data.
+As with `PersianDateTime`, `minimumOfficialYear`, `maximumOfficialYear`, and
+`hasOfficialCalendarData` describe published-data coverage. Every supported
+Hijri year uses the table, so its official-data bounds equal its supported bounds.
 Gregorian conversion, UTC/local behavior, parsing, epoch constructors,
 arithmetic, and overflow normalization all preserve the native `DateTime`
 instant at microsecond precision.
 
 Data provenance and the Unicode license notice are recorded in
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+Source checks, exhaustive coverage, and differences from `hijri` 3.0.1 are
+documented in [`HIJRI_CALENDAR_VALIDATION.md`](HIJRI_CALENDAR_VALIDATION.md).
 
 ## Contributions
 

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Aligned Hijri calculations, data-coverage APIs, Material localizations,
+  delegates, scoped picker examples, and tests with the Persian structure.
+- Added customized Hijri formatting/parsing and input-picker coverage, and
+  corrected the Hijri localization's expansion-state hints.
+- Fixed Hijri parsing to apply numeric time-zone offsets before validating
+  supported endpoints, retaining microsecond precision.
+- Cross-checked all 3,612 Umm al-Qura months with ICU 78.3 and Java/OpenJDK 21;
+  replaced incompatible `hijri` 3.0.1 comparisons with primary-source regressions.
+
 - Extended Persian support to SH -61 through 3177 (Gregorian 0560-03-20
   through 3799-03-19), retaining published data for SH 1206–1498 and using
   Borkowski's finite break-year model elsewhere.
@@ -27,8 +36,8 @@
   `DateTime` instant.
 - Made unsupported Umm al-Qura dates fail explicitly instead of silently
   extrapolating another Islamic calendar.
-- Made `HijriCalendarDelegate` own Hijri formatting and parsing so it remains
-  correct under Gregorian or Persian ambient Material localizations.
+- Made `HijriCalendarDelegate` use the current Material localizations for
+  month names, date formatting, parsing, and input help, like the Persian delegate.
 - Added exhaustive calendar, boundary, precision, parsing, delegate, and widget
   tests, independently cross-validated with ICU and OpenJDK.
 - Raised the declared Flutter minimum to 3.32.0, where `CalendarDelegate` is

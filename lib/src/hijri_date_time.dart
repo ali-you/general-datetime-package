@@ -1,5 +1,6 @@
 import 'general_date_time_interface.dart';
 import 'shared/constants.dart';
+import 'shared/hijri_calendar_calculation.dart';
 import 'shared/umm_al_qura_data.dart';
 
 /// A date and time in Saudi Arabia's Umm al-Qura calendar.
@@ -43,10 +44,16 @@ class HijriDateTime extends DateTime
   static const int monthsPerYear = 12;
 
   /// First supported Umm al-Qura year.
-  static const int minimumYear = UmmAlQuraData.minimumYear;
+  static const int minimumYear = HijriCalendarCalculation.minimumYear;
 
   /// Last supported Umm al-Qura year.
-  static const int maximumYear = UmmAlQuraData.maximumYear;
+  static const int maximumYear = HijriCalendarCalculation.maximumYear;
+
+  /// First Hijri year covered by the published Umm al-Qura table.
+  static const int minimumOfficialYear = UmmAlQuraData.minimumYear;
+
+  /// Last Hijri year covered by the published Umm al-Qura table.
+  static const int maximumOfficialYear = UmmAlQuraData.maximumYear;
 
   static const int _microsecondsPerMillisecond = 1000;
   static const int _microsecondsPerSecond = 1000000;
@@ -257,31 +264,30 @@ class HijriDateTime extends DateTime
         );
       }
 
-      final HijriDateTime wallTime = HijriDateTime.utc(
+      final String? signText = match[9];
+      int offsetMinutes = 0;
+      if (signText != null) {
+        final int offsetHour = int.parse(match[10]!);
+        final int offsetMinute = parseIntOrZero(match[11]);
+        if (offsetHour > 23 || offsetMinute > 59) {
+          throw const FormatException('Invalid time-zone offset');
+        }
+        final int sign = signText == '-' ? -1 : 1;
+        offsetMinutes = sign * (offsetHour * 60 + offsetMinute);
+      }
+
+      // Validate the resulting UTC date after applying the offset. The wall
+      // date may be outside the table even when the final date is supported.
+      return HijriDateTime.utc(
         year,
         month,
         day,
         hour,
-        minute,
+        minute - offsetMinutes,
         second,
         millisecond,
         microsecond,
       );
-
-      final String? signText = match[9];
-      if (signText == null) return wallTime;
-
-      final int offsetHour = int.parse(match[10]!);
-      final int offsetMinute = parseIntOrZero(match[11]);
-      if (offsetHour > 23 || offsetMinute > 59) {
-        throw const FormatException('Invalid time-zone offset');
-      }
-
-      final int sign = signText == '-' ? -1 : 1;
-      final Duration offset = Duration(
-        minutes: sign * (offsetHour * 60 + offsetMinute),
-      );
-      return HijriDateTime.fromDateTime(wallTime.toDateTime().subtract(offset));
     } on RangeError {
       throw FormatException(
         'Hijri date is outside the supported Umm al-Qura range',
@@ -301,11 +307,7 @@ class HijriDateTime extends DateTime
   }
 
   /// The first supported Gregorian calendar date, in UTC.
-  static DateTime get minimumGregorianDate => DateTime.utc(
-        UmmAlQuraData.epochGregorianYear,
-        UmmAlQuraData.epochGregorianMonth,
-        UmmAlQuraData.epochGregorianDay,
-      );
+  static DateTime get minimumGregorianDate => _gregorianEpoch;
 
   /// The last supported Gregorian calendar date, in UTC.
   static DateTime get maximumGregorianDate =>
@@ -330,9 +332,7 @@ class HijriDateTime extends DateTime
   /// Returns the official Umm al-Qura length of [month] in [year].
   static int daysInMonth(int year, int month) {
     _requireSupportedYear(year);
-    RangeError.checkValueInInterval(month, 1, monthsPerYear, 'month');
-    final int bits = UmmAlQuraData.yearMonthLengthBits[year - minimumYear];
-    return bits & (1 << (monthsPerYear - month)) == 0 ? 29 : 30;
+    return HijriCalendarCalculation.daysInMonth(year, month);
   }
 
   /// The calendar name.
@@ -356,7 +356,13 @@ class HijriDateTime extends DateTime
 
   /// Whether this Umm al-Qura year contains 355 days.
   @override
-  bool get isLeapYear => yearLength == 355;
+  bool get isLeapYear => HijriCalendarCalculation.isLeapYear(year);
+
+  /// Whether this year uses the published Umm al-Qura calendar table.
+  ///
+  /// All currently supported Hijri years have published calendar data.
+  bool get hasOfficialCalendarData =>
+      year >= minimumOfficialYear && year <= maximumOfficialYear;
 
   /// Gregorian Julian day number for this calendar date.
   @override
@@ -561,7 +567,7 @@ class HijriDateTime extends DateTime
     _requireSupportedDayOffset(dayOffset);
 
     int low = 0;
-    int high = UmmAlQuraData.yearMonthLengthBits.length;
+    int high = maximumYear - minimumYear + 1;
     while (low < high) {
       final int middle = (low + high) >> 1;
       if (_yearStartDays[middle + 1] <= dayOffset) {
@@ -619,21 +625,14 @@ class HijriDateTime extends DateTime
 
   static int _yearLength(int year) {
     _requireSupportedYear(year);
-    return _yearStartDays[year - minimumYear + 1] -
-        _yearStartDays[year - minimumYear];
+    return HijriCalendarCalculation.yearLength(year);
   }
 
   static List<int> _buildYearStartDays() {
     final List<int> starts = <int>[0];
     int cumulativeDays = 0;
-    for (final int bits in UmmAlQuraData.yearMonthLengthBits) {
-      int thirtyDayMonths = 0;
-      int remainingBits = bits;
-      while (remainingBits != 0) {
-        thirtyDayMonths += remainingBits & 1;
-        remainingBits >>= 1;
-      }
-      cumulativeDays += 12 * 29 + thirtyDayMonths;
+    for (int year = minimumYear; year <= maximumYear; year++) {
+      cumulativeDays += HijriCalendarCalculation.yearLength(year);
       starts.add(cumulativeDays);
     }
     return List<int>.unmodifiable(starts);
