@@ -1,0 +1,92 @@
+name: Calendar browser and devices
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [javascript, wasm]
+    steps:
+      - uses: actions/checkout@v4
+      - id: pin
+        run: python -c "import json,os; p=json.load(open('.github/calendar_pair.json')); open(os.environ['GITHUB_OUTPUT'],'a').write('ref='+p['peerRevision']+'\n')"
+      - uses: actions/checkout@v4
+        with:
+          repository: ali-you/general-date-format-package
+          ref: ${{ steps.pin.outputs.ref }}
+          path: .dart_tool/calendar_dependencies/general_date_format
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: python tool/resolve_calendar_pair.py --chronology "$GITHUB_WORKSPACE" --formatter "$GITHUB_WORKSPACE/.dart_tool/calendar_dependencies/general_date_format"
+      - run: flutter pub get
+      - run: flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }} test/platform_calendar_smoke_test.dart
+      - run: flutter pub get && dart run tool/generate_timezone_revision.dart && flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
+        working-directory: apps/calendar_demo
+      - run: flutter build web --release ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
+        working-directory: apps/calendar_demo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: calendar-web-${{ matrix.compiler }}
+          path: apps/calendar_demo/build/web
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: pin
+        run: python -c "import json,os; p=json.load(open('.github/calendar_pair.json')); open(os.environ['GITHUB_OUTPUT'],'a').write('ref='+p['peerRevision']+'\n')"
+      - uses: actions/checkout@v4
+        with:
+          repository: ali-you/general-date-format-package
+          ref: ${{ steps.pin.outputs.ref }}
+          path: .dart_tool/calendar_dependencies/general_date_format
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: python tool/resolve_calendar_pair.py --chronology "$GITHUB_WORKSPACE" --formatter "$GITHUB_WORKSPACE/.dart_tool/calendar_dependencies/general_date_format"
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          working-directory: apps/calendar_demo
+          script: flutter pub get && dart run tool/generate_timezone_revision.dart && flutter test integration_test/calendar_smoke_test.dart -d emulator-5554
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: pin
+        run: python -c "import json,os; p=json.load(open('.github/calendar_pair.json')); open(os.environ['GITHUB_OUTPUT'],'a').write('ref='+p['peerRevision']+'\n')"
+      - uses: actions/checkout@v4
+        with:
+          repository: ali-you/general-date-format-package
+          ref: ${{ steps.pin.outputs.ref }}
+          path: .dart_tool/calendar_dependencies/general_date_format
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: python tool/resolve_calendar_pair.py --chronology "$GITHUB_WORKSPACE" --formatter "$GITHUB_WORKSPACE/.dart_tool/calendar_dependencies/general_date_format"
+      - name: Boot an available iPhone simulator
+        run: |
+          DEVICE=$(xcrun simctl list devices available -j | python -c 'import json,sys; print(next(d["udid"] for ds in json.load(sys.stdin)["devices"].values() for d in ds if "iPhone" in d["name"]))')
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE" -b
+          echo "SIMULATOR_ID=$DEVICE" >> "$GITHUB_ENV"
+      - run: flutter pub get && dart run tool/generate_timezone_revision.dart && flutter test integration_test/calendar_smoke_test.dart -d "$SIMULATOR_ID"
+        working-directory: apps/calendar_demo

@@ -18,12 +18,12 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 - [x] **14. P3 — Define negative secondsSinceEpoch rounding.** Both calendars round down directly from microseconds; documented the containing-second contract and verified fractional boundaries.
 - [x] **15. P2 — Make example tests deterministic.** Injected a once-per-screen clock, derived all calendars from one instant, and froze fixtures with midnight/rebuild regressions.
 - [x] **16. P2 — Separate pure Dart logic from Flutter integration.** Extracted reusable chronology and formatting core packages; existing Flutter APIs share their implementations and types. Verified Dart-only resolution, tests, and native CLI execution; publication remains pending.
-- [ ] **17. P2 — Define a complete calendar contract.** Cover identity, construction, conversion, validity, bounds, fields, and registration.
-- [ ] **18. P2 — Add date-only and calendar-period policies.** Define civil-day/month/year arithmetic, clamping, and day counting.
-- [ ] **19. P2 — Define timezone and scheduling capabilities.** Specify named zones, DST ambiguity, recurrence, and chronology policies.
-- [ ] **20. P2 — Build the application calendar UI/controller layer.** Implement the required event views and verify keyboard, semantics, RTL, and layout behavior.
-- [ ] **21. P2 — Expand automated integration/platform coverage.** Test the corrected pair, minimum/current Flutter, browser, devices, and explicit timezone expectations.
-- [ ] **22. P3 — Improve locale/adapter maintenance.** Establish reproducible data generation, Flutter compatibility checks, and release performance measurements.
+- [x] **17. P2 — Define a complete calendar contract.** Added strict CalendarSystem adapters, explicit identity/data policies, bounds, conversion, and a closed built-in registry.
+- [x] **18. P2 — Add date-only and calendar-period policies.** Added immutable CalendarDate, civil arithmetic, clamp/reject/overflow policies, ranges, equality, and explicit week rules.
+- [x] **19. P2 — Define timezone and scheduling capabilities.** Added an optional named-zone/recurrence package, DST policies, exceptions, business days, reminder boundary, and microsecond formatter precision.
+- [x] **20. P2 — Build the application calendar UI/controller layer.** Added a separate demo application with four event views, controller, overlap layout, selection/rescheduling, and interaction/layout regressions.
+- [ ] **21. P2 — Expand automated integration/platform coverage.** Implemented pinned-pair, minimum/current SDK, browser/Wasm and device workflows plus explicit timezone assertions. External matrix execution remains pending; see below.
+- [x] **22. P3 — Improve locale/adapter maintenance.** Added verified CLDR generation, explicit compatibility policies, adapter compatibility tests, and a measured native release baseline.
 
 ## Issue 1 implementation and verification
 
@@ -225,3 +225,75 @@ Status: **done locally**. Package publication remains pending; issues 17–22 re
 Verification: **5/5 chronology-core Dart tests, 4/4 formatter-core Dart tests, 287/287 Flutter date-engine/picker tests, 585/585 Flutter formatter/localization tests, and 5/5 example tests passed**. Both cores analyzed successfully using the Dart executable directly, with no Flutter in either resolved package graph. Both Flutter analyzers reported no issues. Both native CLI executables produced the independently expected calendar dates; the chronology example also serialized the exact UTC microseconds. Source format checks reported zero changes, the Persian Afrikaans generator's `--check` passed, and both repositories passed `git diff --check`.
 
 Release order: publish `general_datetime_core` 1.0.0 first; then `general_datetime` 3.0.0 and `general_date_format_core` 1.0.0; then `general_date_format` 2.0.0 after hosted integration verification without overrides. No package was published. Minimum Dart/Flutter versions, browser/device execution, and named-zone/scheduling capabilities were not independently verified or expanded by this extraction.
+
+## Issue 17 implementation and verification
+
+Status: **done locally**.
+
+- Added pure Dart `CalendarSystem` and the immutable `CalendarSystems` lookup for Gregorian, Persian and Umm al-Qura. The contract exposes identifiers, calendar fields, strict construction, validity, month/year lengths, bounds, conversion, published-data coverage and data/calculation revisions.
+- Native Gregorian civil-day coordinates are distinct from event instants. Wrong-calendar coordinates are rejected; `fromInstant` converts epoch values explicitly. Strict construction rejects clock overflow and local DST normalization. Resolving repeated local times requires the named-zone layer, not the native constructor.
+- Kept version-1 storage identifiers and unsupported-calendar rejection. Implementing a contract alone does not register chronology with formatting or serialization; custom plugin registration is deliberately outside this closed three-calendar registry.
+- Corrected `GeneralDateTimeInterface.now<T>()` to return its requested concrete type while retaining unsupported-type rejection.
+
+Verification: **10 contract tests passed**, including independent 2024-03-20 calendar fixtures, microseconds, supported endpoints and coverage metadata. Core analyzer clean. Existing native chronology/picker suite subsequently passed **289/289** tests.
+
+## Issue 18 implementation and verification
+
+Status: **done locally**.
+
+- Added composition-based `CalendarDate`, with calendar-tagged value equality/hash keys, explicit same-civil-day comparison and conversion, and interoperability with the existing storage record. It never assigns a timezone to an all-day date.
+- Added exact civil-day movement/counting, month/year periods with clamp (default), reject and overflow policies, negative/signed-year handling, and exact large-offset rejection. Clamping is documented as non-reversible.
+- Added half-open date ranges and an explicit inclusive count. Week rules expose first weekday/minimum first-week days and return the chosen calendar's week-year. A week calculation requiring data before the supported range fails explicitly.
+- Corrected the README's claim that elapsed Duration arithmetic operates on calendar fields.
+
+Verification: **5 civil-date regressions passed**; the complete standalone chronology suite passed **20/20** tests. Coverage includes month policies, leap days, year zero, cross-calendar identity, DST-independent counting, ISO week-year boundaries and extreme offsets. Analyzer clean.
+
+## Issue 19 implementation and verification
+
+Status: **done locally**, within the explicitly documented scheduling contract.
+
+- Added independent pure Dart `general_calendar_schedule` under `packages/`, with an injectable zone provider and a timezone-package IANA implementation. The chronology core remains dependency-free. Both timezone 0.10 integer offsets and 0.11 Duration offsets are supported so SDK constraints can select a compatible release.
+- Enumerates and verifies matching UTC instants for wall times. Gaps explicitly reject, skip, or advance to the next valid minute; folds reject by default or select the earlier/later instant. Seconds and microseconds are retained. Zone data must be initialized explicitly, and its revision is application-supplied; the demo records the resolved bundled IANA revision.
+- Added bounded daily/weekly/monthly/yearly recurrence, anchored clamping/rejection/skip/overflow rules, exclusions, moved exceptions, elapsed event durations, half-open conflict checks, holiday/weekend policies and a reminder-delivery interface. Candidate limits fail rather than returning partial success. Monthly rules retain the original requested day.
+- This is not an RFC 5545 RRULE importer. Count means anchored candidate slots, including skipped/cancelled slots. Future expansion uses current zone rules; stored historical UTC events remain fixed. OS notification delivery and holiday datasets are application integrations, not provided background services.
+- Formatter output/parsing retains microseconds through six digits. Existing minimum-three-digit output remains compatible; larger widths append exact zeros. Strict parsing rejects nonzero precision beyond six digits and accepts exact trailing zeros; ordinary parsing truncates excess precision. Native digits and repeated-field checks retain their contracts.
+
+Verification: **6 scheduling tests** and **7 standalone formatter tests** passed, including independent New York gap/fold UTC expectations, 23-hour daily recurrence, microseconds, anchored short months, moved exceptions, Tehran projections, holiday rules and bounded expansion. Both analyzers clean. Full formatter/localization suite passed **590/590** tests after updating legacy millisecond/CLDR expectations.
+
+## Issue 20 implementation and verification
+
+Status: **done locally**, as a separate application/demo package.
+
+- Added `apps/calendar_demo`, with runnable web/Android/iOS scaffolding, local corrected-core resolution, month/week/day/agenda event views and secondary-calendar labels.
+- Controller owns selection, calendar/zone/navigation and asynchronous event queries. Generation tokens prevent stale success/failure results from overwriting a later query; errors expose retry and loading state. Event IDs must be unique.
+- Timelines split events at named-zone midnight, show actual 23/25-hour days, and handle skipped civil days. Deterministic overlap columns use half-open intervals. Minimum visual event targets reserve separate columns while retaining real event timestamps.
+- Month view supports drag-to-date rescheduling; every event has a keyboard-accessible dialog with previous/next-day move callbacks. Calendar cells support arrows (mirrored in RTL), Page Up/Down and Home. Locale changes preserve controller state; the demo offers English/Persian presentation.
+- Added semantics, selection labels, narrow/large-text layout checks, and responsive selectors. Backend persistence is supplied through the event-source/reschedule interfaces; sample storage is intentionally in memory.
+
+Verification: **8 controller/widget tests passed**, covering stale requests/recovery, overlap and short-event targets, midnight splitting, DST/skipped days, keyboard/semantics/RTL/large text, all four views and rescheduling callbacks. Release web build succeeded. Visual inspection identified missing icon/font assets; Material icons and a licensed Noto Sans Arabic fallback were bundled and verified in English/Persian RTL rendering. Browser automated test execution is separately recorded under issue 21.
+
+## Issue 21 implementation and remaining execution
+
+Status: **implemented; external matrix verification pending**. Do not interpret workflow syntax validation as completed device/minimum-SDK execution.
+
+- Both repositories pin the peer checkout by a full commit SHA in `.github/calendar_pair.json`, record actual revisions and resolve one explicit local package pair. Pins currently name the existing peer baseline commits; update them when a later peer revision is required, including after these changes land. No floating peer default branch is used.
+- Added minimum Dart 3.4/current standalone jobs and Flutter 3.32/current jobs across UTC, Tehran and New York. Formatting checks use the current formatter; older formatter styles are not treated as minimum-SDK semantic failures.
+- Formatter jobs now pass `CALENDAR_TEST_TZ`, with independent offset and 23/25-hour assertions that fail if the requested zone was ignored. Added portable chronology/picker and formatter/microsecond browser regressions, JavaScript/Wasm jobs, full demo browser tests and release artifacts.
+- Added Android-emulator/iOS-simulator application smoke jobs, plus a manually selectable hosted-pair job for execution after publication without development overrides. Generated source pair/zone metadata is reproducible.
+
+Local verification: **289/289 native chronology/picker tests, 590/590 formatter tests**, standalone suites and demo tests passed on the installed current SDK. Workflow YAML and every embedded Bash script were parsed/validated. A release JavaScript build succeeded and the application rendered in the in-app browser.
+
+Remaining: Chrome's automated suite stalled at loading before assertions on this Windows SDK and was stopped. Minimum SDK, automated browser/Wasm assertions, Android/iOS runs and GitHub execution are not certified locally. Hosted-pair execution also depends on pending publication. No code was pushed or package published.
+
+## Issue 22 implementation and verification
+
+Status: **done locally** for reproducibility, compatibility tests and measured baseline.
+
+- Replaced the large legacy Persian symbol implementation with pinned CLDR 48 calendar names and shared intl language metadata. All bundled Persian/Hijri names now have locale source mappings and verified input SHA-256 records in the formatter's `tool/cldr_sources.lock.json`.
+- Added one deterministic generator with a non-writing `--check`; changed Hijri's entry point to use it and preserve third-party notices. The Afrikaans check remains supported. Generation no longer replaces the license file.
+- Preserved date ordering, native digits and explicit en_ISO short-label/era behavior through a tracked compatibility policy. The shared skeleton API chooses a pattern before the calendar is known; its retained calendar-independent patterns are deliberate exceptions, not claims of full CLDR calendar-pattern matching. `locale_migration_report.json` records differences against Persian CLDR for review. Generated maps are immutable.
+- Removed Gregorian symbol initialization's dependence on initializing the entire Persian map merely to obtain digit defaults.
+- Added three Flutter adapter compatibility regressions exercising date/number/time formatting, compact parsing, translated Material labels and native digits. Minimum/current framework jobs will continually exercise those entry points; private adapters continue to reject operations outside their contract.
+- Added a compiled AOT benchmark and five-process measurement harness. The recorded Windows/Dart 3.13.4 baseline executable is **6,718,464 bytes**, with per-run first-format timing, format/strict-parse cost and process RSS. This is a current baseline, not proof of an old/new performance improvement. Release web output is measured separately; no speculative cache optimization was introduced.
+
+Verification: complete formatter/localization suite **590/590**, standalone suite **7/7**, formatter example **5/5**, both CLDR regeneration checks, and compiled benchmark execution passed. Updated independent expected Persian abbreviations/eras to the pinned CLDR spellings. The separate demo's release JavaScript entry is **3,452,264 bytes** (**837,855** with offline gzip); all packaged output totals **43,740,857 bytes**, including renderer alternatives, fonts and symbol files. These are artifact sizes, not actual page download or formatter-only costs. See the formatter's `tool/README.md`, migration report and baselines for policies and reproduction commands.

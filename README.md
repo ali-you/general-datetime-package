@@ -51,7 +51,8 @@ The same policy applies to `copyWith` and `CalendarDateUtils.copyWith`.
 
 - **Custom Arithmetic:**
   Perform date arithmetic using custom implementations of `add`, `subtract`, and `difference` that work
-  directly on calendar fields.
+  on elapsed instants. Use `CalendarDate` for timezone-free civil-day and
+  month/year arithmetic with an explicit overflow policy.
 
 - **Negative Normalization:**
   Automatically normalize negative or overflow values in day, month, hour, minute, second, millisecond, and
@@ -446,7 +447,9 @@ var nowHijri = GeneralDateTimeInterface.now<HijriDateTime>();
 
 ## Customization
 
-You can extend `GeneralDateTimeInterface` to support additional calendar systems.
+Application adapters can implement `CalendarSystem`. The built-in registry,
+formatter and version-1 serialization support Gregorian, Persian and Umm al-Qura;
+implementing an interface alone does not register another calendar.
 
 > [!IMPORTANT]
 > Ensure custom calendars define their supported range, normalization rules,
@@ -515,3 +518,36 @@ request or open an issue on GitHub.
 ## Licence
 
 This project is licensed under the BSD 3-Clause License. See the [LICENSE](https://github.com/ali-you/general-datetime-package/blob/main/LICENSE) file for details.
+
+## Application calendar API
+
+`CalendarSystems.forId(CalendarId.persian)` exposes strict construction,
+validity, supported/published bounds, calendar fields and civil-day conversion.
+The built-in registry supports Gregorian, Persian and Umm al-Qura only; an
+implementation of `CalendarSystem` does not automatically register formatter
+or version-1 storage support.
+
+Use `CalendarDate` for all-day/domain values:
+
+```dart
+final date = CalendarDate(
+  calendar: CalendarId.persian, year: 1403, month: 6, day: 31);
+final next = date.addMonths(1); // 1403-07-30: default clamping
+final civilTomorrow = date.addDays(1);
+final record = next.toRecord(); // Existing version-1 civil storage schema
+```
+
+`CalendarOverflow.reject` rejects absent destination days; `overflow` carries
+them into the following month. Clamping is not reversible. Recurrences must
+retain the original requested day. `CalendarDateRange` is half-open; use
+`inclusiveDayCount` explicitly when both endpoints are included. Tagged equality
+includes the calendar; `isSameCivilDay`/`compareTo` compare civil-day position.
+
+`CalendarWeekRules` supplies explicit weekday/minimum-first-week-day policies
+for the selected calendar, including its week-year. Calculations that require
+calendar data outside supported bounds fail explicitly.
+
+Named-zone resolution and recurrence live in the independent optional
+[`general_calendar_schedule`](packages/general_calendar_schedule/README.md)
+package. The runnable [`calendar_demo`](apps/calendar_demo/README.md) owns event
+views/controller state. Neither layer adds dependencies to the chronology core.

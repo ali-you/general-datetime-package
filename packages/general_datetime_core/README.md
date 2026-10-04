@@ -56,6 +56,22 @@ For Material pickers, use `general_datetime`, `delegates.dart`, and
 `default_localizations.dart` from the Flutter wrapper. For localized formatting
 in a server or CLI, use `general_date_format_core`.
 
+`CalendarSystems` exposes the three built-in `CalendarSystem` implementations.
+They validate civil fields, publish bounds and calculation/data metadata, and
+convert Gregorian civil days or native instants explicitly. The registry is
+closed: implementing the interface does not register a calendar for storage or
+formatting.
+
+Use immutable `CalendarDate` when a value has no time or timezone. It supports
+exact day arithmetic and explicit clamp/reject/overflow policies for months and
+years. Equality includes the calendar; `isSameCivilDay` compares day position
+across calendars. `CalendarDateRange` uses an exclusive end, and
+`CalendarWeekRules` defines first-weekday and minimum-days rules per calendar.
+Clamping is not reversible, and crossing unsupported bounds fails explicitly.
+
+Named zones and recurrence live in the optional `general_calendar_schedule`
+package beside this core. They do not change core dependency requirements.
+
 The parent repository's exhaustive reference tests exercise this same engine
 through the wrapper. This package's Dart tests additionally verify independent
 date fixtures, serialization, bounds, and the absence of Flutter in the resolved

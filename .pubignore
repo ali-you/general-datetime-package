@@ -36,4 +36,5 @@ build/
 
 # The Dart core is published independently.
 packages/
+apps/
 **/pubspec_overrides.yaml.example

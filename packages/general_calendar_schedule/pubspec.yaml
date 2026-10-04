@@ -1,0 +1,12 @@
+name: general_calendar_schedule
+description: Explicit named-zone and civil recurrence policies for the calendar cores.
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dependencies:
+  general_datetime_core: ^1.0.0
+  timezone: '>=0.10.0 <0.12.0'
+dev_dependencies:
+  test: ^1.25.2
+  lints: '>=4.0.0 <6.0.0'

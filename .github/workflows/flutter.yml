@@ -1,59 +1,88 @@
-name: Flutter CI
-
+name: Calendar CI
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
+  pair:
+    runs-on: ubuntu-latest
+    outputs:
+      repository: ${{ steps.pin.outputs.repository }}
+      revision: ${{ steps.pin.outputs.revision }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: pin
+        run: |
+          python - <<'PY'
+          import json, os, re
+          pin = json.load(open('.github/calendar_pair.json'))
+          assert re.fullmatch(r'[0-9a-f]{40}', pin['peerRevision'])
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('repository=' + pin['peerRepository'] + '\nrevision=' + pin['peerRevision'] + '\n')
+          PY
   dart-core:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk: ['3.4.0', stable]
     defaults:
       run:
         working-directory: packages/general_datetime_core
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
       - run: dart pub get
-      - run: dart format --output=none --set-exit-if-changed lib test example
+      - if: matrix.sdk == 'stable'
+        run: dart format --output=none --set-exit-if-changed lib test example
       - run: dart analyze
       - run: dart test
       - run: dart compile exe example/cli.dart -o .dart_tool/calendar_cli
       - run: .dart_tool/calendar_cli
-
   test:
+    needs: pair
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        flutter: ['3.32.0', '']
         timezone: [UTC, Asia/Tehran, America/New_York]
     env:
       TZ: ${{ matrix.timezone }}
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          # flutter-version: 2.29.0
+          repository: ${{ needs.pair.outputs.repository }}
+          ref: ${{ needs.pair.outputs.revision }}
+          path: .dart_tool/calendar_dependencies/general_date_format
+      - uses: subosito/flutter-action@v2
+        with:
           channel: stable
-          architecture: x64
-
-      - name: Install dependencies
+          flutter-version: ${{ matrix.flutter }}
+      - name: Resolve and record exact source pair
         run: |
-          cp pubspec_overrides.yaml.example pubspec_overrides.yaml
-          cp example/pubspec_overrides.yaml.example example/pubspec_overrides.yaml
-          (cd packages/general_datetime_core && dart pub get)
+          python tool/resolve_calendar_pair.py --chronology "$GITHUB_WORKSPACE" --formatter "$GITHUB_WORKSPACE/.dart_tool/calendar_dependencies/general_date_format"
+          git rev-parse HEAD
+          git -C .dart_tool/calendar_dependencies/general_date_format rev-parse HEAD
           flutter pub get
-
-      - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test example/lib packages/general_datetime_core
-
-      - name: Analyze package and example
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test --dart-define=CALENDAR_TEST_TZ=${{ matrix.timezone }}
+          (cd packages/general_datetime_core && dart pub get)
+          (cd packages/general_calendar_schedule && dart pub get)
+          (cd apps/calendar_demo && flutter pub get && dart run tool/generate_timezone_revision.dart)
+      - if: matrix.flutter == ''
+        run: dart format --output=none --set-exit-if-changed lib test example/lib packages apps/calendar_demo/lib apps/calendar_demo/test apps/calendar_demo/integration_test
+      - run: flutter analyze
+      - run: flutter test --dart-define=CALENDAR_TEST_TZ=${{ matrix.timezone }}
+      - run: dart analyze
+        working-directory: packages/general_calendar_schedule
+      - run: dart test
+        working-directory: packages/general_calendar_schedule
+      - run: flutter analyze
+        working-directory: apps/calendar_demo
+      - run: flutter test
+        working-directory: apps/calendar_demo

@@ -1,9 +1,9 @@
 import 'package:general_datetime_core/general_datetime_core.dart';
 
 abstract class GeneralDateTimeInterface<T> {
-  static GeneralDateTimeInterface now<T extends GeneralDateTimeInterface>() {
-    if (T == PersianDateTime) return PersianDateTime.now();
-    if (T == HijriDateTime) return HijriDateTime.now();
+  static T now<T extends GeneralDateTimeInterface>() {
+    if (T == PersianDateTime) return PersianDateTime.now() as T;
+    if (T == HijriDateTime) return HijriDateTime.now() as T;
     throw TypeError();
   }
 

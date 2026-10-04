@@ -2,6 +2,17 @@
 
 ## [3.0.0] — release preparation
 
+- Add the common `CalendarSystem` contract and immutable built-in registry,
+  strict field construction, supported bounds, and chronology metadata.
+- Add immutable `CalendarDate`, explicit day/month/year arithmetic policies,
+  half-open date ranges, and calendar-aware week rules in the Dart core.
+- Add an optional unpublished scheduling package with named-zone providers,
+  explicit DST policies, bounded recurrence, exceptions, business days, and
+  reminder interfaces. Add a separate four-view Flutter calendar demo.
+- Add pinned two-repository CI setup, minimum/current SDK and timezone jobs,
+  JavaScript/Wasm coverage, and Android/iOS smoke workflows. Platform execution
+  remains a release gate; local verification does not establish device support.
+
 - Extract chronology, conversion, field utilities, and serialization into
   `general_datetime_core` 1.0.0, usable with the Dart SDK alone. Retain the
   existing Flutter imports as re-exports of the same types and keep picker
