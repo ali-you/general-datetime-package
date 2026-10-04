@@ -7,6 +7,21 @@ on:
     branches: [ main ]
 
 jobs:
+  dart-core:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/general_datetime_core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get
+      - run: dart format --output=none --set-exit-if-changed lib test example
+      - run: dart analyze
+      - run: dart test
+      - run: dart compile exe example/cli.dart -o .dart_tool/calendar_cli
+      - run: .dart_tool/calendar_cli
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -28,10 +43,14 @@ jobs:
           architecture: x64
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          cp pubspec_overrides.yaml.example pubspec_overrides.yaml
+          cp example/pubspec_overrides.yaml.example example/pubspec_overrides.yaml
+          (cd packages/general_datetime_core && dart pub get)
+          flutter pub get
 
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test example/lib
+        run: dart format --output=none --set-exit-if-changed lib test example/lib packages/general_datetime_core
 
       - name: Analyze package and example
         run: flutter analyze

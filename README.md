@@ -69,6 +69,30 @@ The same policy applies to `copyWith` and `CalendarDateUtils.copyWith`.
 
 ## Installation
 
+### Pure Dart and Flutter package boundaries
+
+The calendar engine now lives in the independent
+[`general_datetime_core`](packages/general_datetime_core/README.md) package.
+Backend and CLI projects can depend on that package using only the Dart SDK.
+Localized Dart formatting lives in `general_date_format_core` in the neighboring
+formatter repository. Both pure packages are prepared as version 1.0.0 and are
+not yet published.
+
+This `general_datetime` package remains the Flutter integration wrapper. Its
+existing public date imports re-export the core's exact classes; picker
+delegates and default Material localizations retain their existing libraries.
+The calculations and data tables have one implementation shared by both layers.
+
+For local Flutter development, copy `pubspec_overrides.yaml.example` to
+`pubspec_overrides.yaml` before `flutter pub get`. Copy the example's template
+as well when running it. Overrides in dependencies are not inherited by apps;
+an external app must override `general_datetime_core` to this repository's
+`packages/general_datetime_core` directory until the core is published.
+
+Publish `general_datetime_core` 1.0.0 first, then `general_datetime` 3.0.0.
+The formatting core also requires the new Dart chronology core. Verify hosted
+resolution without local overrides before releasing either Flutter wrapper.
+
 To use this plugin, add it to your project:
 
 ### 1. Add to `pubspec.yaml`

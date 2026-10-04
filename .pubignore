@@ -33,3 +33,7 @@ build/
 # Nested library packages and local development resolution.
 **/pubspec.lock
 **/pubspec_overrides.yaml
+
+# The Dart core is published independently.
+packages/
+**/pubspec_overrides.yaml.example

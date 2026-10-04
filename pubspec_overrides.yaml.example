@@ -1,0 +1,3 @@
+dependency_overrides:
+  general_datetime_core:
+    path: packages/general_datetime_core

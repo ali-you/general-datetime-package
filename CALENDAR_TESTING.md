@@ -1,5 +1,21 @@
 # Calendar testing
 
+## Pure Dart boundary
+
+The shared engine lives in `packages/general_datetime_core`; the Flutter tests
+below exercise it through compatibility re-exports. Copy the root and example
+override templates before resolving the unpublished core locally.
+
+From `packages/general_datetime_core`, run `dart pub get`, `dart analyze`, and
+`dart test`. Its additional tests assert independent conversion/storage fixtures
+and reject Flutter packages in the resolved dependency graph. The CLI example
+can be executed with `dart run example/cli.dart` or compiled with
+`dart compile exe example/cli.dart -o .dart_tool/calendar_cli`.
+
+The neighboring `general_date_format_core` package supplies equivalent Dart-only
+format/parser tests and a compiled CLI example. Existing Flutter suites still
+cover the complete date engine, parser, delegates, and localized picker behavior.
+
 The suite combines independent reference-data checks, deterministic stress
 tests, date-time contracts, and Material picker integration tests for both
 Persian and Hijri calendars.

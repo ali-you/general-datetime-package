@@ -17,7 +17,7 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 - [x] **13. P2 — Protect shared dateSymbols from mutation.** Symbol fields and collections are immutable; serialization returns detached snapshots.
 - [x] **14. P3 — Define negative secondsSinceEpoch rounding.** Both calendars round down directly from microseconds; documented the containing-second contract and verified fractional boundaries.
 - [x] **15. P2 — Make example tests deterministic.** Injected a once-per-screen clock, derived all calendars from one instant, and froze fixtures with midnight/rebuild regressions.
-- [ ] **16. P2 — Separate pure Dart logic from Flutter integration.** Establish reusable package boundaries if backend/CLI use is required.
+- [x] **16. P2 — Separate pure Dart logic from Flutter integration.** Extracted reusable chronology and formatting core packages; existing Flutter APIs share their implementations and types. Verified Dart-only resolution, tests, and native CLI execution; publication remains pending.
 - [ ] **17. P2 — Define a complete calendar contract.** Cover identity, construction, conversion, validity, bounds, fields, and registration.
 - [ ] **18. P2 — Add date-only and calendar-period policies.** Define civil-day/month/year arithmetic, clamping, and day counting.
 - [ ] **19. P2 — Define timezone and scheduling capabilities.** Specify named zones, DST ambiguity, recurrence, and chronology policies.
@@ -43,7 +43,8 @@ The example suite has **three failures** from its time-dependent fixtures and fi
 
 These are separate from the checked local implementation. Neither release has been published.
 
-- Publish the corrected `general_datetime` 3.0.0 release first.
+- Publish `general_datetime_core` 1.0.0 first, as introduced by issue 16.
+- Publish the corrected `general_datetime` 3.0.0 and `general_date_format_core` 1.0.0 after verifying their hosted Dart-core dependency.
 - Remove the local overrides and repeat integration tests against hosted 3.0.0, verifying the same dependency contract.
 - Publish `general_date_format` 2.0.0 after that verification. Until the core is published, consumers must use the documented local override; hosted resolution is expected to fail rather than silently select 2.1.0.
 
@@ -199,7 +200,7 @@ Verification: **286/286 core tests passed**, including the existing exhaustive c
 
 ## Issue 15 analysis, implementation and verification
 
-Status: **done locally**. Issues 16–22 remain open.
+Status: **done locally**. Later issue statuses are recorded below.
 
 - Reproduced all three existing example test failures: fixed Farvardin/Ramadan/date expectations no longer matched the three independent now() calls. Reading separate clocks on every build also allowed calendar displays to describe different instants near midnight.
 - Added an optional native clock callback to MyApp/FormatExample. The screen samples it once during initialization, defaulting to DateTime.now, and derives Persian and Hijri values from that same native instant. Locale changes and picker rebuilds retain the snapshot; creating a fresh screen reads the clock again. No new dependency was needed.
@@ -207,3 +208,20 @@ Status: **done locally**. Issues 16–22 remain open.
 - Added two widget regressions for a clock crossing midnight during locale rebuilds and fresh-screen capture. The five example tests now use injected time, with no expectations tied to the execution date. Documented the snapshot and test-clock policy in the example README, package README and changelog.
 
 Final verification for issues 14–15: **286/286 core tests, 584/584 formatter tests, and 5/5 example tests passed** against the corrected neighboring packages. Both analyzers reported no issues, including the formatter example. Core and formatter/example format checks reported zero changes; both repositories passed `git diff --check`. Browser/device execution and release publication were not performed.
+
+## Issue 16 analysis, implementation and verification
+
+Status: **done locally**. Package publication remains pending; issues 17–22 remain open.
+
+- Confirmed the coupling was still present: both original package manifests required the Flutter SDK, and the formatter's main library exported Flutter Material localizations. A separate Dart import alone would not fix SDK dependency resolution. This was a package-reuse limitation, rather than a chronology defect; Flutter-only consumers were already supported.
+- Extracted `general_datetime_core` **1.0.0** into `general_date/packages/general_datetime_core`. It owns the calendar classes, calculation/data helpers, exact normalization, instant/field utilities, interface, and serialization. Its runtime has no package dependencies and no Flutter SDK requirement.
+- Extracted `general_date_format_core` **1.0.0** into `general_date_format/packages/general_date_format_core`. It owns formatting, parsing, locale resolution, immutable symbols, and locale tables; its runtime dependencies are only the Dart chronology core, `intl`, and `clock`.
+- Kept `general_datetime` 3.0.0 and `general_date_format` 2.0.0 as Flutter integration wrappers. Existing public imports and internal compatibility paths forward to the cores; picker delegates, default Material localizations, and multilingual Material adapters stay in the wrappers. Runtime date/formatter identities are shared, so calendar dispatch, equality, serialization, and picker validation do not cross competing copies of the classes.
+- Verified all **27 extracted implementation files** match the original source except for package-import paths. The extraction changes package ownership, not chronology/parser policies. Locale generators now write the sole canonical tables in the formatter core, and both cores retain their licenses and third-party notices. Wrapper publication excludes nested core packages.
+- Added tracked override templates for root packages, examples, and the formatting core. Consumer apps must provide their own overrides until publication; overrides inside dependencies are not inherited. Documented Dart imports, local dependency setup, CLI commands, retained contracts, and release ordering in both repositories and core READMEs/changelogs.
+- Added **9 standalone Dart regressions** covering dependency graphs without Flutter/wrapper packages, independent Gregorian/Persian/Hijri UTC fixtures, exact instants/equality/storage, bounds, field helpers, native digits, script fallback, and strict-parser guards. Added **2 Flutter regressions** proving shared exported type identities and formatter acceptance of pure-core values. Both Dart CLI examples compile to native executables and run successfully.
+- Added independent Dart-SDK CI jobs for core analysis, formatting, tests, compilation, and CLI execution. Flutter jobs resolve the extracted local cores; formatter jobs check out chronology source from the core repository's default branch. This requires the extraction to land there before formatter CI runs. Workflow YAML and generated override blocks were validated locally; GitHub execution was not performed. Exact release/revision pinning and the complete minimum/platform matrix remain issue 21.
+
+Verification: **5/5 chronology-core Dart tests, 4/4 formatter-core Dart tests, 287/287 Flutter date-engine/picker tests, 585/585 Flutter formatter/localization tests, and 5/5 example tests passed**. Both cores analyzed successfully using the Dart executable directly, with no Flutter in either resolved package graph. Both Flutter analyzers reported no issues. Both native CLI executables produced the independently expected calendar dates; the chronology example also serialized the exact UTC microseconds. Source format checks reported zero changes, the Persian Afrikaans generator's `--check` passed, and both repositories passed `git diff --check`.
+
+Release order: publish `general_datetime_core` 1.0.0 first; then `general_datetime` 3.0.0 and `general_date_format_core` 1.0.0; then `general_date_format` 2.0.0 after hosted integration verification without overrides. No package was published. Minimum Dart/Flutter versions, browser/device execution, and named-zone/scheduling capabilities were not independently verified or expanded by this extraction.

@@ -2,6 +2,12 @@
 
 ## [3.0.0] — release preparation
 
+- Extract chronology, conversion, field utilities, and serialization into
+  `general_datetime_core` 1.0.0, usable with the Dart SDK alone. Retain the
+  existing Flutter imports as re-exports of the same types and keep picker
+  delegates/default Material localizations in this wrapper. Publish the Dart
+  core first; use the tracked local override templates before publication.
+
 - Define `secondsSinceEpoch` as the containing Unix second, rounded down
   directly from microseconds in both calendars. Negative fractional instants
   now use consistent floor rounding; -1 microsecond becomes -1 second and

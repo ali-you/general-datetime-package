@@ -1,0 +1,9 @@
+name: general_datetime_core
+description: Pure Dart Persian and Umm al-Qura calendar chronology, date operations, and serialization.
+version: 1.0.0
+repository: https://github.com/ali-you/general-date-package
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+dev_dependencies:
+  test: ^1.25.2
+  lints: '>=4.0.0 <6.0.0'
