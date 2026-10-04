@@ -53,3 +53,8 @@ Widget tests cover controller ordering/recovery, DST/skipped days, midnight
 splitting, real/visual overlap, all four views, selection/rescheduling and
 keyboard/semantics/RTL/large-text narrow layouts. Mobile smoke workflows are
 configured; Windows-local execution does not certify Android/iOS results.
+
+Gregorian labels use the application's `intl.DateFormat`. The demo chooses
+Flutter's Material localization delegates for intl locale initialization.
+When embedding `CalendarScreen` independently, initialize the intl locale data
+you choose before building it (the widget tests use bundled local data).

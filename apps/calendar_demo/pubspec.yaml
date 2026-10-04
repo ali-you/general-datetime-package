@@ -15,6 +15,7 @@ dependencies:
   general_calendar_schedule:
     path: ../../packages/general_calendar_schedule
   timezone: '>=0.10.0 <0.12.0'
+  intl: ^0.20.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:general_date_format_core/general_date_format_core.dart';
 import 'package:general_datetime_core/general_datetime_core.dart';
+import 'package:intl/intl.dart' as intl;
 
 import 'calendar_controller.dart';
 
@@ -42,9 +43,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.dispose();
   }
 
-  String _dateText(CalendarDate date, [String pattern = 'y/M/d']) =>
-      GeneralDateFormat(pattern, widget.locale)
-          .format(date.system.construct(date.year, date.month, date.day));
+  String _dateText(CalendarDate date, [String pattern = 'y/M/d']) {
+    final value = date.system.construct(date.year, date.month, date.day);
+    if (date.calendar == CalendarId.gregory) {
+      return intl.DateFormat(pattern, widget.locale).format(value);
+    }
+    return GeneralDateFormat(pattern, widget.locale).format(value);
+  }
+
   String _secondary(CalendarDate date) {
     final id = date.calendar == CalendarId.gregory
         ? CalendarId.persian

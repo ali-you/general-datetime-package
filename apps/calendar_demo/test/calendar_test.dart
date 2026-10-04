@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_calendar_schedule/general_calendar_schedule.dart';
 import 'package:general_datetime_core/general_datetime_core.dart';
+import 'package:intl/date_symbol_data_local.dart' as intl_data;
 import 'package:timezone/data/latest.dart' as data;
 
 CalendarDate g(int y, int m, int d) =>
@@ -26,6 +27,9 @@ class PendingSource implements CalendarEventSource {
 
 void main() {
   setUpAll(data.initializeTimeZones);
+  // Standalone CalendarScreen tests choose bundled intl locale initialization.
+  // The full demo app initializes intl through Flutter's Material delegate.
+  setUpAll(intl_data.initializeDateFormatting);
   test('new query wins even when old results arrive later; errors recover',
       () async {
     final source = PendingSource();
