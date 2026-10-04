@@ -2,10 +2,11 @@
 
 ## [3.0.0] — release preparation
 
-- Added `CalendarYearPicker` with a safe `calendarDelegate.now()` default for
-  standalone Persian/Hijri year selection. All date inputs use the delegate's
-  normalization and validation. Documented Flutter's explicit `currentDate`
-  requirement for direct `YearPicker` use and added regression coverage.
+- Added version-1 JSON storage contracts: `CalendarInstant` serializes exact
+  native Gregorian UTC timestamps with calendar and optional zone metadata;
+  `CalendarDateRecord` stores validated calendar/year/month/day fields without
+  an implied instant. Added Unicode calendar identifiers, strict decoders,
+  microsecond-preserving round trips, and storage warnings on calendar ISO output.
 
 - Persian/Hijri calendar delegates now reject incompatible runtime date types
   with `ArgumentError` across field operations, ranges, nullable comparisons,

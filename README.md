@@ -174,6 +174,95 @@ calendar delegate's local-date policy. A timezone-free civil-date model and
 calendar-period policies are separate work tracked in issue 18 of
 [the checklist](CALENDAR_ISSUES_CHECKLIST.md).
 
+### Safe JSON storage
+
+Use `CalendarInstant` for timed values and `CalendarDateRecord` for all-day
+calendar dates. Both expose `toJson()` and a strict `fromJson()` factory and work
+with `dart:convert`. These versioned records are this package's storage contract.
+
+```dart
+import 'dart:convert';
+import 'package:general_datetime/general_datetime.dart';
+
+DateTime selected = PersianDateTime.utc(1403, 1, 1, 12, 34, 56, 789, 123);
+final event = CalendarInstant.fromDateTime(selected, timeZone: 'Asia/Tehran');
+final stored = jsonEncode(event);
+// {"version":1,"kind":"instant",
+//  "timestamp":"2024-03-20T12:34:56.789123Z",
+//  "calendar":"persian","timeZone":"Asia/Tehran"}
+final restored = CalendarInstant.fromJson(jsonDecode(stored));
+// restored.instant is native Gregorian UTC, retaining the exact microseconds.
+final display = PersianDateTime.fromDateTime(restored.instant);
+// Explicit UTC calendar conversion; it does not apply the named zone metadata.
+
+final allDay = CalendarDateRecord.fromDateTime(HijriDateTime.utc(1446, 9, 1));
+final dateJson = jsonEncode(allDay);
+// {"version":1,"kind":"calendar-date","calendar":"islamic-umalqura",
+//  "year":1446,"month":9,"day":1}
+final restoredDate = CalendarDateRecord.fromJson(jsonDecode(dateJson));
+// Calendar fields only: no clock, timezone, or implied instant.
+
+final explicitDate = CalendarDateRecord(
+  calendar: CalendarId.persian, year: 1403, month: 1, day: 1,
+);
+```
+
+Version-1 fields:
+
+| Record | Required fields | Optional fields |
+| --- | --- | --- |
+| Instant | `version: 1`, `kind: "instant"`, `timestamp`, `calendar` | `timeZone` |
+| Calendar date | `version: 1`, `kind: "calendar-date"`, `calendar`, integer `year`, `month`, `day` | None |
+
+The supported [Unicode calendar identifiers](https://github.com/unicode-org/cldr/blob/main/common/bcp47/calendar.xml)
+are `gregory`, `persian`, and `islamic-umalqura`, exposed by `CalendarId`.
+`islamic` and other Hijri algorithms are not aliases for Umm al-Qura. Identifiers
+name the calendar system; the calculation rules, data sources, and supported
+ranges remain those documented by this package. The schema version identifies
+the record layout, not a calendar-data revision.
+
+For instants, the timestamp is authoritative. Serialization converts epoch
+microseconds to native Gregorian UTC before formatting. Decoding returns native
+UTC; the preferred calendar is metadata and does not reinterpret the timestamp.
+An instant can be outside that calendar's supported display range; an explicit
+conversion to the calendar then follows its normal range checks. Input
+local/UTC mode is not retained. The optional `timeZone` must be a nonempty,
+trimmed string and is retained as opaque application metadata, normally an IANA
+name. The package does not validate zone existence, infer a zone name from a
+local value, or resolve zone offsets/DST. A future wall-clock schedule or a
+recurrence requires its own policy (issue 19).
+
+The timestamp schema uses a strict UTC subset of
+[RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6):
+`YYYY-MM-DDTHH:mm:ss[.fraction]Z`, Gregorian years 0000 through 9999, and at most
+six fractional digits. Encoder output has three or six fractional digits.
+Decoding rejects invalid dates, overflow normalization, leap seconds, offsets,
+missing seconds, excess precision, and RFC 9557 annotations. Native Gregorian
+inputs outside the timestamp year range cannot be encoded. RFC 9557 interchange
+is separate from this JSON schema; its calendar identifiers are reused here.
+
+Calendar-date records validate strict calendar fields and supported bounds.
+They support signed Persian years including zero, and native Gregorian UTC date
+bounds. `fromDateTime` explicitly extracts the input's wall date and discards
+clock fields and timezone mode without converting it. Use the field constructor
+when the source is already a civil date. All-day records must not be encoded as
+midnight timestamps. Calendar arithmetic remains separate work (issue 18).
+
+Both decoders throw `FormatException` for missing/unknown fields, wrong types,
+unknown identifiers, unsupported versions, wrong record kinds, or invalid field
+values. An optional `timeZone` must be omitted rather than set to null. Direct
+construction with invalid dates or zone metadata throws `ArgumentError`;
+unregistered calendar interfaces throw `UnsupportedError` when encoding.
+
+**Do not store Persian/Hijri `toIso8601String()` or `toString()` output as a
+generic timestamp.** Those methods retain their existing calendar-specific
+behavior for compatibility with the matching calendar parser. `toUtc()` still
+returns a calendar subclass. A Persian `1403-01-01T...Z` would be read as
+Gregorian year 1403 by a generic parser. A schema cannot detect this mistake
+after someone manually assigns such a string to `timestamp`; always use the
+instant encoder. For a timestamp-only external API, use
+`CalendarDateUtils.toGregorian(selected).toUtc().toIso8601String()`.
+
 ## Flutter Integration (Localization & Delegates)
 
 Use the matching `CalendarDelegate` with Flutter Material date pickers.

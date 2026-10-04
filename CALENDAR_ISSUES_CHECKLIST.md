@@ -5,8 +5,8 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 - [x] **1. P1 — Stop resolving the defective published datetime core.** Give the corrected implementations distinct release versions, require the corrected core, resolve local development/example dependencies to the neighboring source, and add integration regressions for chronology, UTC, and equality. Implemented and verified locally; release publication remains pending below.
 - [x] **2. P1 — Prevent Gregorian reconstruction through generic DateTime helpers.** Added and verified safe application/calendar boundaries for copyWith and date-only operations. External Gregorian helpers require explicit native conversion; see the limitation below.
 - [x] **3. P1 — Guard calendar delegate date types.** Both delegates now consistently reject incompatible runtime date arguments and non-null parser results with `ArgumentError`; explicit conversion and regression coverage are documented below.
-- [x] **4. P2 — Handle direct YearPicker currentDate.** Added `CalendarYearPicker` with a matching delegate-clock default, documentation, and regression coverage.
-- [ ] **5. P1 — Define safe serialization.** Separate Gregorian UTC timestamps from tagged calendar date records.
+- [ ] **4. P2 — Handle direct YearPicker currentDate.** Added `CalendarYearPicker` with a matching delegate-clock default, documentation, and regression coverage.
+- [x] **5. P1 — Define safe serialization.** Added versioned Gregorian UTC instant records and tagged calendar-date records, strict decoding, documentation, and regression coverage.
 - [ ] **6. P2 — Validate conflicting strict-parser date fields.** Check weekday, quarter, ordinal day, and month/day consistency.
 - [ ] **7. P2 — Validate repeated parser fields.** Reject invalid or inconsistent earlier occurrences.
 - [ ] **8. P2 — Respect hour cycles when parsing AM/PM.** Handle or reject combinations with H/k explicitly.
@@ -73,7 +73,7 @@ Verification: **221/221 core tests and 493/493 formatter tests passed** against 
 
 ## Issue 4 implementation and verification
 
-Status: **done locally**. Issues 5–22 remain open.
+Status: **done locally**. See subsequent issue statuses below.
 
 - Added public `CalendarYearPicker`, exported from `general_datetime.dart`, as a standalone Flutter year-picker wrapper. An omitted `currentDate` uses the supplied `calendarDelegate.now()` once; an explicit date bypasses that clock.
 - Normalized and validated current, first, last, and non-null selected dates through the delegate. Persian/Hijri inputs retain matching runtime types and the picker's local-date policy; incompatible dates continue to throw `ArgumentError`.
@@ -82,3 +82,16 @@ Status: **done locally**. Issues 5–22 remain open.
 - Added 11 regressions covering Persian/Hijri rendering and callback instants, the supplied delegate clock, explicit current dates, every incompatible date argument, direct Flutter constructor behavior, and Gregorian selection.
 
 Verification: **232/232 core tests and 493/493 formatter tests passed** against the corrected local core. The core analyzer reported no issues, its source format check reported zero changes, and both repositories passed `git diff --check`.
+
+## Issue 5 implementation and verification
+
+Status: **done locally**. Issues 6–22 remain open.
+
+- Added public immutable `CalendarInstant` and `CalendarDateRecord` with version-1 `toJson`/`fromJson` contracts and `dart:convert` round trips. `CalendarId` uses the Unicode identifiers `gregory`, `persian`, and `islamic-umalqura`; other Hijri algorithms are not silently aliased.
+- Instant records convert epoch microseconds to native Gregorian UTC before formatting, retaining the exact instant and precision. Decoding returns native UTC and retains calendar/optional timezone presentation metadata separately. Metadata does not reinterpret the timestamp; named-zone resolution and scheduling remain issue 19.
+- Calendar-date records contain only calendar/year/month/day, validate strict fields and supported bounds, and never assign a midnight instant or timezone. Extraction from `DateTime` explicitly discards the clock and mode without converting the wall date. Signed Persian years, including zero, are supported. Calendar arithmetic remains issue 18.
+- Strict decoders reject malformed records, missing/unknown fields, wrong types or kinds, unknown calendars, unsupported versions, invalid/normalized dates, and excess timestamp precision. The timestamp schema uses four-digit Gregorian years 0000–9999, required seconds, optional one-to-six fractional digits, and `Z`; offsets, leap seconds, and RFC 9557 annotations require separate interchange support.
+- Preserved existing calendar-specific `toIso8601String`/matching-parser behavior and added explicit storage warnings to both methods and the README. `toUtc()` alone retains the calendar subclass. Applications must use the new storage boundary (or explicit native Gregorian conversion); manually placing an untagged calendar string into a timestamp field remains inherently ambiguous.
+- Added 31 regressions covering independent Gregorian reference fixtures, UTC/local equivalence, microseconds, negative epochs, calendar-date endpoints and signed years, strict schema/timestamp validation, immutable record storage, and unsupported calendar rejection. Documented the schema, error policy, calendar-data policy, and application examples.
+
+Verification: **252/252 core tests and 493/493 formatter tests passed** against the corrected local core in the current working tree. The core analyzer reported no issues, its full source format check reported zero changes, and both repositories passed `git diff --check`.

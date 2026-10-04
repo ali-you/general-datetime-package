@@ -480,6 +480,13 @@ class HijriDateTime extends DateTime
   @override
   String toString() => _formatIso8601(separator: ' ');
 
+  /// Returns an ISO-like string with Umm al-Qura fields, not Gregorian.
+  ///
+  /// A native `DateTime.parse` or backend timestamp parser will misinterpret
+  /// the year. `toUtc()` retains this calendar-specific output. For storage use
+  /// `CalendarInstant.fromDateTime(this).toJson()` from the public library, or
+  /// `toDateTime().toUtc().toIso8601String()` for a native Gregorian timestamp.
+  /// Only [HijriDateTime.parse] should consume this untagged calendar string.
   @override
   String toIso8601String() => _formatIso8601(separator: 'T');
 

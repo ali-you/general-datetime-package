@@ -58,16 +58,6 @@ validated constructor directly.
 
 The interface suite also checks unsupported factory types.
 
-`test/unit/calendar_year_picker_test.dart` verifies standalone year selection:
-
-- omitted current dates use the matching delegate's clock for Persian/Hijri;
-- explicit current dates bypass the clock, including dates outside the range;
-- date normalization, nullable selection, disabled years, and callback calendar
-  types/instants agree with Flutter's first-of-month selection behavior;
-- native and other-calendar inputs are rejected for every date argument;
-- direct Flutter `YearPicker` requires a matching explicit current date;
-- the wrapper also supports the default Gregorian delegate.
-
 `test/unit/calendar_delegate_type_guard_test.dart` checks both delegates against
 native Gregorian and other-calendar inputs, including equal instants and equal
 numeric fields. It covers every date-taking operation, both comparison operands
@@ -83,6 +73,14 @@ date-only behavior, supported bounds, and rejection of unregistered calendar
 fields. Native conversion preserves microseconds and mode before external
 `copyWith` and Material `DateUtils` calls. Expectations use the independent
 calendar fixtures and native Gregorian constructors.
+
+`test/unit/calendar_serialization_test.dart` verifies the version-1 storage
+boundary: Gregorian timestamp expectations from independent calendar fixtures,
+microsecond preservation, UTC/local instant equivalence, timezone-free date
+fields, supported endpoints, signed Persian years, Gregorian leap dates,
+wrong record kinds/types/versions, unknown calendars/fields, unsupported calendar
+interfaces, strict timestamp precision, and rejection of invalid/overflowing
+fields. It also reproduces the calendar ISO string's generic-parser hazard.
 
 ## Run the tests
 
