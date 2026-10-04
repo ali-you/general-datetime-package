@@ -7,11 +7,11 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 - [x] **3. P1 — Guard calendar delegate date types.** Both delegates now consistently reject incompatible runtime date arguments and non-null parser results with `ArgumentError`; explicit conversion and regression coverage are documented below.
 - [ ] **4. P2 — Handle direct YearPicker currentDate.** Added `CalendarYearPicker` with a matching delegate-clock default, documentation, and regression coverage.
 - [x] **5. P1 — Define safe serialization.** Added versioned Gregorian UTC instant records and tagged calendar-date records, strict decoding, documentation, and regression coverage.
-- [ ] **6. P2 — Validate conflicting strict-parser date fields.** Check weekday, quarter, ordinal day, and month/day consistency.
-- [ ] **7. P2 — Validate repeated parser fields.** Reject invalid or inconsistent earlier occurrences.
-- [ ] **8. P2 — Respect hour cycles when parsing AM/PM.** Handle or reject combinations with H/k explicitly.
-- [ ] **9. P2 — Correct numeric c/cc weekday semantics.** Use locale-relative weekday numbers and validation.
-- [ ] **10. P2 — Preserve locale script during fallback.** Resolve language/script/region consistently in formatting and Material adapters.
+- [x] **6. P2 — Validate conflicting strict-parser date fields.** Strict/loose parsing retains and checks weekday, quarter, ordinal day, and month/day constraints in either field order.
+- [x] **7. P2 — Validate repeated parser fields.** Every occurrence is validated; consistent repetitions remain supported, including aliases and ambiguous names.
+- [x] **8. P2 — Respect hour cycles when parsing AM/PM.** h/K use the day period; H/k keep their 24-hour value and require matching AM/PM in strict/loose parsing.
+- [x] **9. P2 — Correct numeric c/cc weekday semantics.** Both emit unpadded locale-relative weekday numbers 1–7, with range and date-consistency validation.
+- [x] **10. P2 — Preserve locale script during fallback.** Added shared language/script/region resolution for formatting, parsing, and Material date/number adapters, with regression coverage.
 - [ ] **11. P2 — Correct Persian Afrikaans localization.** Reconcile locale-neutral weekday/time/week metadata and document authoritative data generation.
 - [ ] **12. P2 — Prevent constructor arithmetic overflow.** Check extreme wall-clock/month/day inputs before multiplication and addition wrap.
 - [ ] **13. P2 — Protect shared dateSymbols from mutation.** Expose immutable data or explicit instance-local customization.
@@ -85,7 +85,7 @@ Verification: **232/232 core tests and 493/493 formatter tests passed** against 
 
 ## Issue 5 implementation and verification
 
-Status: **done locally**. Issues 6–22 remain open.
+Status: **done locally**. See subsequent issue statuses below.
 
 - Added public immutable `CalendarInstant` and `CalendarDateRecord` with version-1 `toJson`/`fromJson` contracts and `dart:convert` round trips. `CalendarId` uses the Unicode identifiers `gregory`, `persian`, and `islamic-umalqura`; other Hijri algorithms are not silently aliased.
 - Instant records convert epoch microseconds to native Gregorian UTC before formatting, retaining the exact instant and precision. Decoding returns native UTC and retains calendar/optional timezone presentation metadata separately. Metadata does not reinterpret the timestamp; named-zone resolution and scheduling remain issue 19.
@@ -95,3 +95,59 @@ Status: **done locally**. Issues 6–22 remain open.
 - Added 31 regressions covering independent Gregorian reference fixtures, UTC/local equivalence, microseconds, negative epochs, calendar-date endpoints and signed years, strict schema/timestamp validation, immutable record storage, and unsupported calendar rejection. Documented the schema, error policy, calendar-data policy, and application examples.
 
 Verification: **252/252 core tests and 493/493 formatter tests passed** against the corrected local core in the current working tree. The core analyzer reported no issues, its full source format check reported zero changes, and both repositories passed `git diff --check`.
+
+## Issue 6 implementation and verification
+
+Status: **done locally**.
+
+- Strict and loose parsing retain every explicit month/day, ordinal day, quarter, and weekday constraint and compare it with the resulting calendar date. Conflicts fail with `FormatException`; nullable parser APIs return null. Field order no longer lets a quarter or ordinal day hide invalid month/day input.
+- A quarter supplies its first month and day 1 only when those fields are absent. Ordinal-only patterns retain their calendar-specific construction and year-length validation. Ordinary `parse` retains permissive date-field precedence and normalization.
+- Textual weekdays retain all matching indices for ambiguous names such as English `T`, preserving valid narrow-name round trips while rejecting incompatible names. Loose names retain their case/whitespace rules without bypassing semantic validation.
+- Added regressions for both field orders, matching redundant fields, partial quarter patterns, ordinal bounds, narrow-name ambiguity, local/UTC mode, and all three calendars.
+
+Verification: the issue-6 targeted suite passed before proceeding to issue 7. Final verification for the combined changes is recorded under issue 9.
+
+## Issue 7 implementation and verification
+
+Status: **done locally**.
+
+- Retain every year, month, day, ordinal, quarter, weekday, hour, minute, second, millisecond, era, and day-period occurrence. Invalid or conflicting earlier values cannot be overwritten into acceptance. Matching repetitions and semantic aliases remain supported.
+- Validate each hour token's original range before comparing normalized hours. Two-digit years retain their per-occurrence century semantics, and all occurrences use one clock reading for a stable century window.
+- Ambiguous month names retain all possible months and intersect with other month constraints; a quarter can also disambiguate a narrow name. Names that remain ambiguous preserve a compatible spelling without claiming a unique date.
+- Added regressions for earlier invalid/conflicting fields, both AM/PM orders, repeated eras, matching aliases, narrow month names, two-digit/full-year combinations, and a moving clock at the century boundary.
+
+Verification: the issue-7 targeted suite passed before proceeding to issue 8. Final verification for the combined changes is recorded under issue 9.
+
+## Issue 8 implementation and verification
+
+Status: **done locally**.
+
+- Apply AM/PM conversion to h/K only. H/k retain their complete 24-hour value; k=24 represents midnight on the parsed date. Strict and loose parsing require any day-period marker to match that value.
+- `HH:mm a` now round-trips `13:00 PM` as hour 13 and rejects contradictory `01:00 PM`, rather than shifting it to hour 13. Ordinary parsing uses the corrected hour-cycle conversion while retaining its permissive validation policy.
+- Retain each occurrence's hour cycle so mixed/repeated hour symbols must describe the same hour. Day-period position does not change the result.
+- Added midnight/noon/afternoon/end-of-day regressions for h/K/H/k, repeated and mixed cycles, invalid raw ranges, contradictory markers, both token orders, local/UTC mode, and all three calendars.
+
+Verification: the issue-8 targeted suite passed before proceeding to issue 9. Final verification for the combined changes is recorded below.
+
+## Issue 9 implementation and verification
+
+Status: **done locally**. See subsequent issue statuses below.
+
+- Numeric c/cc now use the selected calendar locale's FIRSTDAYOFWEEK to produce weekday numbers 1–7. Both widths emit one unpadded digit, as defined by the Unicode date field table; ccc/cccc/ccccc retain their weekday-name forms.
+- Strict and loose parsing validate every numeric weekday's range and agreement with the resulting date, including repeated tokens and combinations with weekday names. Weekdays constrain the default date when date fields are absent; they do not search for a different date.
+- Added locale-relative/native-digit regressions across all three calendars, including independent Monday expectations for en_US (2), en_GB (1), and fa (3) on the same instant. Updated four older Persian formatting expectations that asserted the defective day-of-month behavior.
+- Documented redundant-field validation, hour-cycle/day-period behavior, quarter defaults, ambiguous names, numeric weekday semantics, and compatibility changes in the formatter README, API documentation, and changelog.
+
+Final verification for issues 6–9: **252/252 core tests and 540/540 formatter tests passed** against the corrected neighboring core. The formatter includes **47 new regression tests**. Its analyzer reported no issues, the formatter source/test format check reported zero changes, and both repositories passed `git diff --check`. No release was published.
+
+## Issue 10 implementation and verification
+
+Status: **done locally**. Issues 11–22 remain open.
+
+- Added one shared locale resolver that normalizes hyphens/underscores and language/script/region casing, checks exact and base locale keys, retains supported language-plus-script data, then tries compatible region data and language fallback. Legacy language aliases retain script/region components; default `en_US`, `C`/`en_ISO`, and unsupported-language errors remain supported.
+- `sr_Latn_RS` and `sr-Latn-RS` now select `sr_Latn`, retaining Latin weekday/month names in formatting and strict/loose parsing across all three calendars. Regional patterns such as `en_Latn_GB` and numeric-region `es_Latn_419` remain regional.
+- Mapped Chinese script requests to the bundled regional tables: `zh_Hant_HK`/`zh_Hant_MO` prefer `zh_HK`, other `zh_Hant` requests prefer `zh_TW`, and `zh_Hans` uses `zh_CN`. Explicit scripts take precedence over conflicting region defaults; an exact supported key still wins.
+- Reused the resolver for Material support checks and date/number adapters against their respective data sets, while retaining Flutter's original locale for translated labels. Corrected advertised-locale tests to place script codes in `Locale.fromSubtags` rather than the country field.
+- Added **29 regressions** for normalization, candidate priority, aliases, date/number agreement, independent Serbian/Chinese weekday expectations, named-date parsing, regional patterns, and both Material adapters. Documented the policy in the README, constructor documentation, and changelog. Variants/extensions are tried as exact keys, then ignored for fallback; unsupported scripts can fall back to language data. Full CLDR matching, calendar selection through Unicode extensions, and numbering-system extension preferences are outside this resolver's contract.
+
+Verification: **252/252 core tests and 569/569 formatter tests passed** against the corrected neighboring core. The formatter analyzer reported no issues, its complete source/test format check reported zero changes, and both repositories passed `git diff --check`. No release was published.
