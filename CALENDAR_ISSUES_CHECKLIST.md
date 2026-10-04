@@ -12,11 +12,11 @@ Work through these items in the order used by [the review](CALENDAR_CORE_REVIEW.
 - [x] **8. P2 — Respect hour cycles when parsing AM/PM.** h/K use the day period; H/k keep their 24-hour value and require matching AM/PM in strict/loose parsing.
 - [x] **9. P2 — Correct numeric c/cc weekday semantics.** Both emit unpadded locale-relative weekday numbers 1–7, with range and date-consistency validation.
 - [x] **10. P2 — Preserve locale script during fallback.** Added shared language/script/region resolution for formatting, parsing, and Material date/number adapters, with regression coverage.
-- [ ] **11. P2 — Correct Persian Afrikaans localization.** Reconcile locale-neutral weekday/time/week metadata and document authoritative data generation.
-- [ ] **12. P2 — Prevent constructor arithmetic overflow.** Check extreme wall-clock/month/day inputs before multiplication and addition wrap.
-- [ ] **13. P2 — Protect shared dateSymbols from mutation.** Expose immutable data or explicit instance-local customization.
-- [ ] **14. P3 — Define negative secondsSinceEpoch rounding.** Compute directly from microseconds and test fractional boundaries.
-- [ ] **15. P2 — Make example tests deterministic.** Inject/freeze time and derive all displayed calendars from one instant.
+- [x] **11. P2 — Correct Persian Afrikaans localization.** Generated Afrikaans Persian names from pinned CLDR 48; reconciled shared language/week metadata with intl and documented provenance.
+- [x] **12. P2 — Prevent constructor arithmetic overflow.** Exact normalization validates extreme fields before narrowing, preserving ordinary normalization and valid cancellation.
+- [x] **13. P2 — Protect shared dateSymbols from mutation.** Symbol fields and collections are immutable; serialization returns detached snapshots.
+- [x] **14. P3 — Define negative secondsSinceEpoch rounding.** Both calendars round down directly from microseconds; documented the containing-second contract and verified fractional boundaries.
+- [x] **15. P2 — Make example tests deterministic.** Injected a once-per-screen clock, derived all calendars from one instant, and froze fixtures with midnight/rebuild regressions.
 - [ ] **16. P2 — Separate pure Dart logic from Flutter integration.** Establish reusable package boundaries if backend/CLI use is required.
 - [ ] **17. P2 — Define a complete calendar contract.** Cover identity, construction, conversion, validity, bounds, fields, and registration.
 - [ ] **18. P2 — Add date-only and calendar-period policies.** Define civil-day/month/year arithmetic, clamping, and day counting.
@@ -142,7 +142,7 @@ Final verification for issues 6–9: **252/252 core tests and 540/540 formatter 
 
 ## Issue 10 implementation and verification
 
-Status: **done locally**. Issues 11–22 remain open.
+Status: **done locally**. Subsequent issue statuses are recorded below.
 
 - Added one shared locale resolver that normalizes hyphens/underscores and language/script/region casing, checks exact and base locale keys, retains supported language-plus-script data, then tries compatible region data and language fallback. Legacy language aliases retain script/region components; default `en_US`, `C`/`en_ISO`, and unsupported-language errors remain supported.
 - `sr_Latn_RS` and `sr-Latn-RS` now select `sr_Latn`, retaining Latin weekday/month names in formatting and strict/loose parsing across all three calendars. Regional patterns such as `en_Latn_GB` and numeric-region `es_Latn_419` remain regional.
@@ -151,3 +151,59 @@ Status: **done locally**. Issues 11–22 remain open.
 - Added **29 regressions** for normalization, candidate priority, aliases, date/number agreement, independent Serbian/Chinese weekday expectations, named-date parsing, regional patterns, and both Material adapters. Documented the policy in the README, constructor documentation, and changelog. Variants/extensions are tried as exact keys, then ignored for fallback; unsupported scripts can fall back to language data. Full CLDR matching, calendar selection through Unicode extensions, and numbering-system extension preferences are outside this resolver's contract.
 
 Verification: **252/252 core tests and 569/569 formatter tests passed** against the corrected neighboring core. The formatter analyzer reported no issues, its complete source/test format check reported zero changes, and both repositories passed `git diff --check`. No release was published.
+
+## Issue 11 implementation and verification
+
+Status: **done locally**.
+
+- Generated Afrikaans Persian month and era names from Unicode CLDR 48, tag `48.0.0`. Added a reproducible generator with a non-writing `--check`, source URL, input SHA-256, and Unicode license attribution. Afrikaans now formats `Farvardin`, `Woensdag`, and `nm.`; Material weekday headers use `[S, M, D, W, D, V, S]`.
+- Reconciled Persian weekday names, quarters, AM/PM markers, time/date-time formats, and week metadata against the same intl locale source used by Gregorian and Hijri. Calendar month/era names, native-digit defaults, and existing calendar date patterns retain their separate policies. Updated older Persian weekday/quarter golden expectations after independently checking CLDR spellings.
+- Retained Monday for `en_MY` and the deliberate `en_ISO` convention. intl/CLDR's Malaysia data differs from Flutter's English fallback; the formatter adapters intentionally retain their selected source rather than copying that fallback's Sunday convention.
+- Added four regressions for independently specified Afrikaans text and strict parsing, picker headers/dates, every supported locale's neutral metadata, and Malaysia/ISO conventions. Documented generation and provenance in the formatter's `tool/README.md`, README, changelog, and third-party notice.
+- Other Persian month/era translations and the separate skeleton-pattern table still use legacy sources. A complete CLDR migration/translation audit remains issue 22; this fix does not claim authoritative generation of those remaining tables.
+
+Verification: the four new regressions and the complete formatter suite passed. Final combined verification for issues 11–13 is recorded below.
+
+## Issue 12 implementation and verification
+
+Status: **done locally**.
+
+- Both date classes use shared exact month and clock normalization. Ordinary bounded components use safe integer arithmetic; extreme inputs use BigInt before multiplication, addition, subtraction, and supported-range validation. BigInt results are narrowed only after they fit the calendar's range.
+- Oversized positive/negative hours, minutes, seconds, milliseconds, microseconds, and month/day/year combinations can no longer wrap into valid dates. Addition overflow is covered even when each individual multiplication fits.
+- Preserved normal negative/overflow normalization, valid cancellation of extreme fields, microsecond precision, UTC/local behavior, and the maximum-date end sentinel. The same protection applies to calendar copyWith paths. Exact out-of-range results throw RangeError.
+- Added 28 regressions across both calendars and UTC/local mode, covering the reproduced wraps, int64 endpoints, month/year cancellation, large clock/day cancellation, normal fields, supported endpoints, and copyWith. Documented the constructor policy in the core README and changelog.
+
+Verification: **280/280 core tests passed**, including the existing exhaustive independent calendar fixtures. The core analyzer reported no issues. Final combined verification is recorded below.
+
+## Issue 13 implementation and verification
+
+Status: **done locally**. Subsequent issue statuses are recorded below.
+
+- DateSymbols scalar fields are final; lists and maps are defensively copied and unmodifiable for Gregorian, Persian, and Hijri. Symbol access can no longer replace month names, digit metadata, or week conventions globally.
+- serializeToMap returns a detached mutable snapshot, including all nested lists/maps. Snapshot edits are available for application-owned labels and do not customize the formatter. Direct construction and deserialization also isolate caller-owned collections.
+- Updated Gregorian initialization to set digit metadata before constructing immutable symbols. Documented the breaking removal of symbol setters and the getter's most-recent-calendar policy in API docs, the README, and changelog.
+- Added 11 regressions covering field and collection mutation attempts, unaffected existing/new formatters and strict parsing, detached snapshots, and caller-owned constructor/deserializer inputs across all three calendars.
+
+Final verification for issues 11–13: **280/280 core tests and 584/584 formatter tests passed** against the corrected neighboring core. Both analyzers reported no issues. Both source/test format checks reported zero changes; the CLDR generator's `--check` passed, and both repositories passed `git diff --check`. Browser/device execution and release publication were not performed.
+
+## Issue 14 analysis, implementation and verification
+
+Status: **done locally**.
+
+- Confirmed the getter still reduced microseconds through native milliseconds and then truncated seconds. This mixed rounding did not consistently identify the second containing a negative fractional instant. The new boundary/reconstruction regressions failed against both old implementations; exact-second tests already passed.
+- Defined a single policy: floor the exact microsecond epoch value to the containing Unix second. Both getters now use direct integer division plus a negative-remainder adjustment, without passing through milliseconds or floating point. For example, -1 and -999999 microseconds map to -1 second; -1000001 maps to -2 seconds. Positive fractions and exact integer seconds retain their expected values.
+- Documented the policy, timezone independence, fractional precision loss, and compatibility change in both concrete getters, the shared interface, README and changelog. Microseconds/CalendarInstant remain the precision-preserving storage boundary.
+- Added six shared regressions with 25 independent signed boundary fixtures, UTC/local construction, timezone conversion, containing-second reconstruction bounds, and exact second round trips beyond 32-bit limits.
+
+Verification: **286/286 core tests passed**, including the existing exhaustive calendar/reference suites and all six new epoch tests. The corrected formatter dependency integration also passed. Both analyzers reported no issues. Final combined verification is recorded below.
+
+## Issue 15 analysis, implementation and verification
+
+Status: **done locally**. Issues 16–22 remain open.
+
+- Reproduced all three existing example test failures: fixed Farvardin/Ramadan/date expectations no longer matched the three independent now() calls. Reading separate clocks on every build also allowed calendar displays to describe different instants near midnight.
+- Added an optional native clock callback to MyApp/FormatExample. The screen samples it once during initialization, defaulting to DateTime.now, and derives Persian and Hijri values from that same native instant. Locale changes and picker rebuilds retain the snapshot; creating a fresh screen reads the clock again. No new dependency was needed.
+- Froze every example test with an explicit UTC fixture: Gregorian 2024-03-20, Persian 1403-01-01, and Umm al-Qura 1445-09-10. Asserted independent ASCII/native-digit dates and exact selected picker labels, while retaining localized headers, RTL behavior and widget exception checks.
+- Added two widget regressions for a clock crossing midnight during locale rebuilds and fresh-screen capture. The five example tests now use injected time, with no expectations tied to the execution date. Documented the snapshot and test-clock policy in the example README, package README and changelog.
+
+Final verification for issues 14–15: **286/286 core tests, 584/584 formatter tests, and 5/5 example tests passed** against the corrected neighboring packages. Both analyzers reported no issues, including the formatter example. Core and formatter/example format checks reported zero changes; both repositories passed `git diff --check`. Browser/device execution and release publication were not performed.

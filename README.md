@@ -27,6 +27,12 @@ Hijri (Umm al-Qura), and other
 calendar systems—all while preserving time components and handling timezone, leap year, and negative
 value normalization within each calendar's documented range.
 
+Persian and Hijri constructors normalize fields using exact arithmetic before
+checking the supported calendar bounds. Extreme inputs that would previously
+wrap into an ordinary date now throw `RangeError`. Components may still cancel
+to a valid result, and ordinary normalization such as hour `25` is unchanged.
+The same policy applies to `copyWith` and `CalendarDateUtils.copyWith`.
+
 ## Related Packages
 
 | Version                                                                                                                      | Package                                                             | Description                                                             |
@@ -395,6 +401,15 @@ picker when showing several calendar systems in one app.
 - `isLeapYear`: Whether the year is a leap year in that specific calendar.
 - `dayOfYear`: 1-based day of the year.
 - `julianDay`: The calculated Julian day number.
+
+`secondsSinceEpoch` is the Unix second containing the instant, rounded down
+directly from `microsecondsSinceEpoch`, independently of UTC/local mode.
+For example, -1 microsecond and -999999 microseconds both return -1 second;
+-1000001 microseconds returns -2 seconds. Exact integer seconds are unchanged.
+This replaces the previous mixed millisecond-rounding/second-truncation behavior
+for negative fractions. Reconstructing from that integer returns the beginning
+of the containing second. Use microseconds or `CalendarInstant` storage when
+fractional precision must be retained.
 
 ### Generic Current Time
 

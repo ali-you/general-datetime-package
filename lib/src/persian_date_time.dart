@@ -1,4 +1,5 @@
 import 'general_date_time_interface.dart';
+import 'shared/calendar_field_normalization.dart';
 import 'shared/constants.dart';
 import 'shared/iranian_calendar_data.dart';
 import 'shared/persian_calendar_calculation.dart';
@@ -60,7 +61,6 @@ class PersianDateTime extends DateTime
   static const int _microsecondsPerSecond = 1000000;
   static const int _microsecondsPerMinute = 60 * _microsecondsPerSecond;
   static const int _microsecondsPerHour = 60 * _microsecondsPerMinute;
-  static const int _microsecondsPerDay = 24 * _microsecondsPerHour;
 
   static final DateTime _gregorianEpoch = DateTime.utc(
     IranianCalendarData.epochGregorianYear,
@@ -426,10 +426,18 @@ class PersianDateTime extends DateTime
   Duration difference(DateTime other) =>
       toDateTime().difference(_nativeComparisonValue(other));
 
-  /// Seconds since the Unix epoch.
+  /// Unix seconds, rounded down directly from [microsecondsSinceEpoch].
+  ///
+  /// This is the second containing the instant, independent of time zone.
+  /// For example, -1 microsecond maps to -1 second, not zero.
   @override
-  int get secondsSinceEpoch =>
-      millisecondsSinceEpoch ~/ Duration.millisecondsPerSecond;
+  int get secondsSinceEpoch {
+    final micros = microsecondsSinceEpoch;
+    final seconds = micros ~/ Duration.microsecondsPerSecond;
+    return micros.remainder(Duration.microsecondsPerSecond) < 0
+        ? seconds - 1
+        : seconds;
+  }
 
   /// Creates a copy with selected Solar Hijri wall-clock fields replaced.
   ///
@@ -515,9 +523,8 @@ class PersianDateTime extends DateTime
     int microsecond, {
     required bool isUtc,
   }) {
-    final int monthIndex = month - 1;
-    final int normalizedYear = year + _floorDiv(monthIndex, monthsPerYear);
-    final int normalizedMonth = _floorMod(monthIndex, monthsPerYear) + 1;
+    final (normalizedYear, normalizedMonth) =
+        normalizeCalendarMonth(year, month, minimumYear, maximumYear);
 
     // Keep the end sentinel available during normalization. For example,
     // (maximumYear + 1)-01-00 denotes the final supported calendar day.
@@ -530,17 +537,19 @@ class PersianDateTime extends DateTime
           _monthStartDay(normalizedYear, normalizedMonth);
     }
 
-    int dayOffset = monthStartOffset + day - 1;
-
-    final int timeMicroseconds = hour * _microsecondsPerHour +
-        minute * _microsecondsPerMinute +
-        second * _microsecondsPerSecond +
-        millisecond * _microsecondsPerMillisecond +
-        microsecond;
-    dayOffset += _floorDiv(timeMicroseconds, _microsecondsPerDay);
+    final (dayOffset, clockMicroseconds) = normalizeCalendarTime(
+      monthStartOffset,
+      _supportedDayCount,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+    );
     _requireSupportedDayOffset(dayOffset);
 
-    int remaining = _floorMod(timeMicroseconds, _microsecondsPerDay);
+    int remaining = clockMicroseconds;
     final int normalizedHour = remaining ~/ _microsecondsPerHour;
     remaining %= _microsecondsPerHour;
     final int normalizedMinute = remaining ~/ _microsecondsPerMinute;
@@ -677,17 +686,6 @@ class PersianDateTime extends DateTime
         '${daysInMonth(maximumYear, 12)})',
       );
     }
-  }
-
-  static int _floorDiv(int value, int divisor) {
-    final int quotient = value ~/ divisor;
-    final int remainder = value.remainder(divisor);
-    return remainder < 0 ? quotient - 1 : quotient;
-  }
-
-  static int _floorMod(int value, int divisor) {
-    final int remainder = value.remainder(divisor);
-    return remainder < 0 ? remainder + divisor : remainder;
   }
 
   static String _twoDigits(int value) => value.toString().padLeft(2, '0');

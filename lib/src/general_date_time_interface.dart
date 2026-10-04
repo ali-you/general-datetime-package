@@ -76,7 +76,10 @@ abstract class GeneralDateTimeInterface<T> {
   /// Convert to UTC time
   T toUtc();
 
-  /// Seconds since epoch
+  /// Unix seconds rounded down from [microsecondsSinceEpoch].
+  ///
+  /// The containing second is independent of time zone; -1 microsecond maps
+  /// to -1 second. Use [microsecondsSinceEpoch] to retain fractional precision.
   int get secondsSinceEpoch;
 
   /// Milliseconds since epoch

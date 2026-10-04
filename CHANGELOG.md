@@ -2,6 +2,16 @@
 
 ## [3.0.0] — release preparation
 
+- Define `secondsSinceEpoch` as the containing Unix second, rounded down
+  directly from microseconds in both calendars. Negative fractional instants
+  now use consistent floor rounding; -1 microsecond becomes -1 second and
+  -1000001 microseconds becomes -2 seconds. UTC/local mode does not affect it.
+
+- Prevent constructor/copyWith arithmetic from wrapping extreme month, day,
+  and clock components into valid dates. Exact normalization checks supported
+  bounds before narrowing; ordinary normalization, cancellation, microseconds,
+  UTC/local mode, and maximum-date sentinels remain supported.
+
 - Added version-1 JSON storage contracts: `CalendarInstant` serializes exact
   native Gregorian UTC timestamps with calendar and optional zone metadata;
   `CalendarDateRecord` stores validated calendar/year/month/day fields without
