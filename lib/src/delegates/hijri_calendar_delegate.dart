@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../hijri_date_time.dart';
+import 'range_picker_calendar_delegate.dart';
 
 /// A Material calendar delegate that accepts only [HijriDateTime] values.
 ///
@@ -12,6 +13,15 @@ class HijriCalendarDelegate extends CalendarDelegate<DateTime> {
   /// Creates a calendar delegate that uses the Hijri calendar and the
   /// conventions of the current [MaterialLocalizations].
   const HijriCalendarDelegate();
+
+  /// Delegate for [showDateRangePicker], including supported-range endpoints.
+  ///
+  /// Flutter probes empty leading cells and keyboard targets before checking
+  /// bounds. This adapter supplies native comparison dates for those probes;
+  /// all selectable dates and results remain [HijriDateTime]. Use this only
+  /// with the range picker, and this delegate for general calendar arithmetic.
+  CalendarDelegate<DateTime> get rangePickerDelegate =>
+      RangePickerCalendarDelegate(this, minimumYear: HijriDateTime.minimumYear);
 
   @override
   DateTime now() => HijriDateTime.now();

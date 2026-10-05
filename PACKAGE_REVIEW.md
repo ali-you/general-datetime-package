@@ -49,21 +49,56 @@ Resolution constructs the provisional year and the window endpoint before determ
 
 ### 3. P2 — Strict era parsing accepts a contradictory signed year
 
-**Location:** `D:/StudioProjects/general_date_format/packages/general_date_format_core/lib/src/date_builder.dart:182`
+**Status:** Fixed on 2026-10-05. Strict/loose parsing requires every era token's
+candidate set to include the era of the resolved year, using the formatter's
+year-zero convention. Identical labels and loose case/whitespace aliases retain
+all matching meanings. Numeric signs and permissive parsing are preserved.
+Added 15 regressions, including all bundled locale round trips for both calendars
+and distinct-name fixtures. Validation passed: 500 Flutter tests, 54 Dart-core
+tests, 43 Node parser regressions in each of Lord Howe, Monrovia, and Tehran,
+both analyzers, formatting, and whitespace checks. CI includes the new tests.
 
-Era verification only compares repeated era tokens with one another. It does not check an era against the resulting year's sign when the locale distinguishes before/after eras.
+**Location:** `D:/StudioProjects/general_date_format/packages/general_date_format_core/lib/src/date_builder.dart:192` and `date_format_field.dart:723`
 
-**Reproduced:** `GeneralDateFormat('G yyyy-MM-dd', 'en').parseStrict('AP -0001-01-01', PersianDateTime.utc(1403), true)` succeeds and returns Persian year -1. Formatting that returned date uses the before-era label.
+Era verification previously compared repeated era indices without checking them
+against the resulting year's sign or retaining ambiguous meanings.
+
+**Correction to the original reproduction:** The current pinned English symbols
+use `AP` for both Persian eras. Therefore `AP -0001-01-01` is valid ambiguous
+input and remains accepted; the original claim that English distinguishes these
+labels was incorrect. With distinct `BP`/`AP` and `Before Persia`/`Anno Persia`
+test symbols, the previous parser accepted after-era labels with negative/zero
+years and before-era labels with positive years. Combining an ambiguous short
+label with a compatible distinct full name also wrongly failed repeated-era
+verification. Before the fix, 12 of the 15 new regression tests failed.
 
 **Fix:** Validate distinguishable era labels against the resulting year. Preserve signed-year construction without implicitly changing the sign. Treat identical/ambiguous era labels as candidate sets rather than rejecting valid round trips.
 
 ### 4. P2 — Persian Material range picker crashes at the supported minimum
 
-**Location:** `D:/StudioProjects/general_date/lib/src/delegates/persian_calendar_delegate.dart:92`
+**Status:** Fixed on 2026-10-05 through the new `rangePickerDelegate` integration
+on both calendar delegates. Pass `const PersianCalendarDelegate().rangePickerDelegate`
+(or its Hijri equivalent) to Flutter's `showDateRangePicker`/`DateRangePickerDialog`.
+The adapter supplies native comparison dates for empty leading cells and
+out-of-range keyboard targets, while selectable dates/results, input guards,
+and chronology bounds retain their existing contracts. General calendar
+arithmetic continues to use the ordinary delegate. Usage is documented in README.
+Added 34 tests: actual range selection at both endpoints for all seven week
+starts, day/week keyboard limits, invalid input and recovery, and adapter guards.
+Validation passed: 323 chronology/picker tests, 500 formatter compatibility
+tests, repository analysis, formatting, and whitespace checks. Existing CI
+automatically runs the new tests in its SDK/timezone matrix.
+
+**Location:** `D:/StudioProjects/general_date/lib/src/delegates/persian_calendar_delegate.dart:23`,
+`hijri_calendar_delegate.dart:23`, and `range_picker_calendar_delegate.dart:13`.
 
 Flutter's range-picker grid calls `getDay` with a day before month day 1 when computing its leading edge, even when that edge is not highlighted. At the minimum supported Persian month, the delegate tries to construct a date outside chronology bounds.
 
 **Reproduced:** Open `showDateRangePicker` with `firstDate: PersianDateTime(-61, 1, 1)`, a matching current date/delegate/localization, and an initial range starting on that date. The widget raises RangeError. Temporary regression: `.dart_tool/review_range_test.dart`. The default English Hijri minimum probe passed; this result should not be generalized to all calendars/locales.
+
+The full week-start matrix subsequently reproduced the same failure at the
+Hijri minimum for six non-Sunday week starts. Before the adapter, 12 of the 28
+endpoint rendering/selection cases failed; all now pass using `rangePickerDelegate`.
 
 **Fix:** Provide boundary-aware range-picker integration or address the upstream padding calculation. Do not weaken chronology bounds or clamp selectable dates silently. Test actual range pickers at both endpoints and with different week starts; existing endpoint tests exercise CalendarDatePicker instead.
 
@@ -144,5 +179,5 @@ These are validation gaps, not demonstrated code defects:
 - Verify hosted dependency resolution without local overrides and publication contents for each independent package. Current local source-pair success does not verify hosted releases.
 - After fixing the findings, commit focused regressions and rerun the relevant suites.
 
-The initial review changed no production source. Issues 1 and 2 were subsequently fixed
+The initial review changed no production source. Issues 1 through 4 were subsequently fixed
 as recorded above. Review probes and logs remain under ignored .dart_tool directories.

@@ -2,6 +2,11 @@
 
 ## [3.0.0] — release preparation
 
+- Add `rangePickerDelegate` adapters for Persian and Umm al-Qura Material range
+  pickers at finite chronology bounds. Empty-cell highlight and keyboard probes
+  use native comparison dates; selectable dates retain their calendar types and
+  supported bounds.
+
 - Add the common `CalendarSystem` contract and immutable built-in registry,
   strict field construction, supported bounds, and chronology metadata.
 - Add immutable `CalendarDate`, explicit day/month/year arithmetic policies,

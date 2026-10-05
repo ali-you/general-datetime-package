@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../persian_date_time.dart';
+import 'range_picker_calendar_delegate.dart';
 
 /// A Material calendar delegate that accepts only [PersianDateTime] values.
 ///
@@ -12,6 +13,16 @@ class PersianCalendarDelegate extends CalendarDelegate<DateTime> {
   /// Creates a calendar delegate that uses the Persian calendar and the
   /// conventions of the current [MaterialLocalizations].
   const PersianCalendarDelegate();
+
+  /// Delegate for [showDateRangePicker], including supported-range endpoints.
+  ///
+  /// Flutter probes empty leading cells and keyboard targets before checking
+  /// bounds. This adapter supplies native comparison dates for those probes;
+  /// all selectable dates and results remain [PersianDateTime]. Use this only
+  /// with the range picker, and this delegate for general calendar arithmetic.
+  CalendarDelegate<DateTime> get rangePickerDelegate =>
+      RangePickerCalendarDelegate(this,
+          minimumYear: PersianDateTime.minimumYear);
 
   @override
   DateTime now() => PersianDateTime.now();

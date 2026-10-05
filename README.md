@@ -447,6 +447,28 @@ scope each picker with `Localizations.override`; avoid installing competing
 Material delegates in one scope. Flutter uses the first supported Material
 localization delegate in that scope.
 
+### Range selection at supported bounds
+
+Use `rangePickerDelegate` with Flutter's `showDateRangePicker` or
+`DateRangePickerDialog`, together with matching calendar localizations:
+
+```dart
+final range = await showDateRangePicker(
+  context: context,
+  firstDate: PersianDateTime(PersianDateTime.minimumYear),
+  lastDate: PersianDateTime(PersianDateTime.minimumYear, 2, 20),
+  currentDate: PersianDateTime(PersianDateTime.minimumYear),
+  calendarDelegate: const PersianCalendarDelegate().rangePickerDelegate,
+);
+```
+
+For Umm al-Qura, use `const HijriCalendarDelegate().rangePickerDelegate` and
+matching Hijri dates. Flutter probes empty leading cells and adjacent keyboard
+targets before checking the picker's bounds. The adapter supplies native
+comparison dates for those probes; selectable dates and returned range endpoints
+remain supported calendar objects. Use the ordinary delegate for general date
+arithmetic and single-date pickers.
+
 ### Standalone year selection
 
 Use Flutter's `YearPicker` and supply a matching `currentDate`. Its native
