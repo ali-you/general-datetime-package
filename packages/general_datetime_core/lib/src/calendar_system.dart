@@ -1,7 +1,7 @@
 import 'calendar_serialization.dart';
 import 'general_date_time_interface.dart';
-import 'hijri_date_time.dart';
-import 'persian_date_time.dart';
+import 'calendars/hijri/hijri_date_time.dart';
+import 'calendars/persian/persian_date_time.dart';
 
 /// Calendar fields describe a civil date, without assigning a timezone.
 typedef CalendarFields = ({int year, int month, int day});

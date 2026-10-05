@@ -1,6 +1,6 @@
 import 'general_date_time_interface.dart';
-import 'hijri_date_time.dart';
-import 'persian_date_time.dart';
+import 'calendars/hijri/hijri_date_time.dart';
+import 'calendars/persian/persian_date_time.dart';
 
 /// Calendar field operations that are safe for values typed as [DateTime].
 ///

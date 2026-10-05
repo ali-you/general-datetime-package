@@ -325,6 +325,23 @@ Use `general_date_format_core` for localized formatting in pure Dart. Named
 zone handling in the repository's calendar demo uses the `timezone` package
 in the application.
 
+## Source organization
+
+Calendar-specific implementations and data live under `lib/src/calendars`:
+
+| Directory | Contents |
+| --- | --- |
+| `calendars/gregorian/` | Gregorian calculation helper; Gregorian date-times use Dart's native `DateTime` |
+| `calendars/persian/` | `PersianDateTime`, Persian calendar calculation, and Iranian calendar data |
+| `calendars/hijri/` | `HijriDateTime`, Umm al-Qura calendar calculation, and month data |
+| `shared/` | Common field normalization and parsing constants |
+
+Cross-calendar APIs such as `CalendarDate`, `CalendarSystems`, field helpers,
+and serialization remain directly under `lib/src`. Previous date-time paths
+retain compatibility exports. The Flutter wrapper references
+calendar-specific helpers and data directly in `calendars/`.
+Applications should import `package:general_datetime_core/general_datetime_core.dart`.
+
 ## Example and development
 
 Run these commands from `packages/general_datetime_core` in a checkout:

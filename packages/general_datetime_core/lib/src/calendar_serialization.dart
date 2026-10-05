@@ -1,7 +1,7 @@
 import 'calendar_date_utils.dart';
 import 'general_date_time_interface.dart';
-import 'hijri_date_time.dart';
-import 'persian_date_time.dart';
+import 'calendars/hijri/hijri_date_time.dart';
+import 'calendars/persian/persian_date_time.dart';
 
 /// Unicode calendar identifiers supported by the version-1 storage schema.
 enum CalendarId {

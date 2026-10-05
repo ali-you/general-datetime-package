@@ -1,4 +1,5 @@
-import 'package:general_datetime_core/general_datetime_core.dart';
+import 'calendars/hijri/hijri_date_time.dart';
+import 'calendars/persian/persian_date_time.dart';
 
 abstract class GeneralDateTimeInterface<T> {
   static T now<T extends GeneralDateTimeInterface>() {

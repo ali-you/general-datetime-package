@@ -1,7 +1,7 @@
 # Third-party notices
 
 The encoded Umm al-Qura month data in
-`packages/general_datetime_core/lib/src/shared/umm_al_qura_data.dart` is derived from Unicode ICU's
+`packages/general_datetime_core/lib/src/calendars/hijri/umm_al_qura_data.dart` is derived from Unicode ICU's
 `IslamicCalendar` data and is distributed under the following license.
 
 Source: <https://github.com/unicode-org/icu/blob/release-78.3/icu4c/source/i18n/islamcal.cpp>

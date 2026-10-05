@@ -12,3 +12,7 @@
   serialization without runtime dependencies or a Flutter SDK requirement.
 - Document installation, conversion, arithmetic, validation, supported ranges,
   serialization, and integration with the Flutter and formatting packages.
+- Group chronology implementations and data by Gregorian, Persian, and
+  Umm al-Qura Hijri calendar, retaining compatibility exports for date-time paths.
+- Remove calendar-specific forwarding files from `shared/` and reference their
+  implementations in `calendars/` directly from the Flutter wrapper.
