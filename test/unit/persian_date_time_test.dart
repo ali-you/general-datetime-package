@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
-import 'package:general_datetime/src/shared/gregorian_helper.dart';
+import 'package:general_datetime_core/src/calendars/gregorian/gregorian_helper.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
 import '../fixtures/university_tehran_persian_fixture.dart';

@@ -2,6 +2,9 @@
 
 ## [3.0.0] — release preparation
 
+- Remove internal `src/shared` forwarding libraries; use calendar helpers and
+  shared implementation utilities from `general_datetime_core` directly.
+
 - Remove the unused scheduling package. Keep named-zone conversion and explicit
   DST policies in the calendar demo, which depends directly on `timezone`.
 
