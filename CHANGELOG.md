@@ -2,6 +2,11 @@
 
 ## [3.0.0] — release preparation
 
+- Seek recurrence queries using provider offsets, event duration and gap policy;
+  preserve anchored counts and moved overrides, and check inclusive `lastDate`
+  before constructing a later slot. Custom scheduling providers now supply all
+  possible zone offsets through `TimeZoneProvider.offsets`.
+
 - Add `rangePickerDelegate` adapters for Persian and Umm al-Qura Material range
   pickers at finite chronology bounds. Empty-cell highlight and keyboard probes
   use native comparison dates; selectable dates retain their calendar types and

@@ -35,8 +35,15 @@ final class WallClock {
 
 abstract interface class TimeZoneProvider {
   String get databaseRevision;
+
+  /// All possible UTC offsets for [zone], including historical offsets.
+  /// Expansion uses this finite, nonempty set to seek a safe query window.
+  Iterable<Duration> offsets(String zone);
+
   WallClock timeAt(DateTime instant, String zone);
   CalendarDate dateAt(DateTime instant, String zone, CalendarId calendar);
+
+  /// [MissingTimePolicy.nextValidMinute] advances by at most 48 wall hours.
   DateTime? resolve(CalendarDate date, WallClock time, String zone,
       {MissingTimePolicy missing = MissingTimePolicy.reject,
       RepeatedTimePolicy repeated = RepeatedTimePolicy.reject});
@@ -54,6 +61,16 @@ final class IanaTimeZoneProvider implements TimeZoneProvider {
   final String databaseRevision;
   tz.Location _location(String zone) =>
       zone == 'UTC' ? tz.UTC : tz.getLocation(zone);
+
+  @override
+  Iterable<Duration> offsets(String zone) => _location(zone).zones.map((value) {
+        // timezone 0.10 uses integer milliseconds; 0.11 uses Duration.
+        final Object offset = value.offset;
+        return offset is Duration
+            ? offset
+            : Duration(milliseconds: offset as int);
+      }).toSet();
+
   @override
   WallClock timeAt(DateTime instant, String zone) {
     final value = tz.TZDateTime.from(instant, _location(zone));
@@ -82,18 +99,12 @@ final class IanaTimeZoneProvider implements TimeZoneProvider {
         time.minute, time.second, time.millisecond, time.microsecond);
     // Enumerate offsets, then verify every candidate's actual wall fields.
     // Never rely on TZDateTime's gap/fold constructor normalization.
-    final offsets = location.zones.map((value) {
-      // timezone 0.10 uses integer milliseconds; 0.11 uses Duration.
-      final Object offset = value.offset;
-      return offset is Duration
-          ? offset.inMicroseconds
-          : (offset as int) * 1000;
-    }).toSet();
+    final zoneOffsets = offsets(zone);
     List<DateTime> candidates(DateTime requested) {
       final results = <DateTime>[];
-      for (final offset in offsets) {
+      for (final offset in zoneOffsets) {
         final instant = DateTime.fromMicrosecondsSinceEpoch(
-            requested.microsecondsSinceEpoch - offset,
+            requested.microsecondsSinceEpoch - offset.inMicroseconds,
             isUtc: true);
         final local = tz.TZDateTime.from(instant, location);
         if ((
@@ -282,15 +293,159 @@ final class CalendarSchedule {
     return null;
   }
 
+  BigInt _wallTime(BigInt dayIndex) =>
+      dayIndex * _microsecondsPerDay +
+      BigInt.from(Duration(
+              hours: time.hour,
+              minutes: time.minute,
+              seconds: time.second,
+              milliseconds: time.millisecond,
+              microseconds: time.microsecond)
+          .inMicroseconds);
+
+  BigInt _dayIndex(int index) =>
+      BigInt.from(startDate.dayIndex) +
+      BigInt.from(index) *
+          BigInt.from(interval) *
+          BigInt.from(frequency == RecurrenceFrequency.weekly ? 7 : 1);
+
+  ({BigInt year, int month}) _period(int index) {
+    final step = BigInt.from(index) * BigInt.from(interval);
+    if (frequency == RecurrenceFrequency.yearly) {
+      return (year: BigInt.from(startDate.year) + step, month: startDate.month);
+    }
+    final total = BigInt.from(startDate.year) * BigInt.from(12) +
+        BigInt.from(startDate.month - 1) +
+        step;
+    final year = _floorDivide(total, BigInt.from(12));
+    return (year: year, month: (total - year * BigInt.from(12)).toInt() + 1);
+  }
+
+  bool _periodAfter(({BigInt year, int month}) period, CalendarFields fields) =>
+      period.year > BigInt.from(fields.year) ||
+      (period.year == BigInt.from(fields.year) && period.month > fields.month);
+
+  bool _pastLastDate(int index) {
+    final last = lastDate;
+    if (last == null) return false;
+    if (frequency == RecurrenceFrequency.daily ||
+        frequency == RecurrenceFrequency.weekly) {
+      return _dayIndex(index) > BigInt.from(last.dayIndex);
+    }
+    final period = _period(index);
+    final fields = (year: last.year, month: last.month, day: last.day);
+    if (_periodAfter(period, fields)) return true;
+    if (period.year != BigInt.from(last.year) || period.month != last.month) {
+      return false;
+    }
+    var day = startDate.day;
+    if (datePolicy == RecurrenceDatePolicy.clamp) {
+      final length = startDate.system.daysInMonth(last.year, last.month);
+      if (day > length) day = length;
+    }
+    return day > last.day;
+  }
+
+  CalendarFields _fieldsAtDay(BigInt index) {
+    final system = startDate.system;
+    final minimum = system.minimumDate, maximum = system.maximumDate;
+    final low = BigInt.from(system
+            .toGregorianDay(minimum.year, minimum.month, minimum.day)
+            .microsecondsSinceEpoch) ~/
+        _microsecondsPerDay;
+    final high = BigInt.from(system
+            .toGregorianDay(maximum.year, maximum.month, maximum.day)
+            .microsecondsSinceEpoch) ~/
+        _microsecondsPerDay;
+    final bounded = index < low ? low : (index > high ? high : index);
+    return system.fromGregorianDay(DateTime.fromMicrosecondsSinceEpoch(
+        (bounded * _microsecondsPerDay).toInt(),
+        isUtc: true));
+  }
+
+  int _firstIndex(_ExpansionWindow window) {
+    if (frequency == RecurrenceFrequency.daily ||
+        frequency == RecurrenceFrequency.weekly) {
+      final stride = BigInt.from(interval) *
+          BigInt.from(frequency == RecurrenceFrequency.weekly ? 7 : 1) *
+          _microsecondsPerDay;
+      final index = _floorDivide(
+              window.lower - _wallTime(BigInt.from(startDate.dayIndex)),
+              stride) +
+          BigInt.one;
+      return index.isNegative ? 0 : index.toInt();
+    }
+    final fields =
+        _fieldsAtDay(_floorDivide(window.lower, _microsecondsPerDay));
+    final distance = frequency == RecurrenceFrequency.monthly
+        ? (fields.year - startDate.year) * 12 + fields.month - startDate.month
+        : fields.year - startDate.year;
+    // An overflow anchor can land in the next month. Inspect its preceding
+    // slot's coordinates, then discard it without construction if irrelevant.
+    final index = BigInt.from(distance) ~/ BigInt.from(interval) - BigInt.one;
+    return index.isNegative ? 0 : index.toInt();
+  }
+
+  ({BigInt first, BigInt last}) _slotWallRange(int index) {
+    if (frequency == RecurrenceFrequency.daily ||
+        frequency == RecurrenceFrequency.weekly) {
+      final wall = _wallTime(_dayIndex(index));
+      return (first: wall, last: wall);
+    }
+    final period = _period(index);
+    final system = startDate.system;
+    if (period.year < BigInt.from(system.minimumDate.year) ||
+        period.year > BigInt.from(system.maximumDate.year)) {
+      throw RangeError('Recurrence outside supported calendar years');
+    }
+    final year = period.year.toInt(), month = period.month;
+    final length = system.daysInMonth(year, month);
+    final minimum = system.minimumDate;
+    // Gregorian's first supported month starts partway through the month.
+    final anchorDay =
+        year == minimum.year && month == minimum.month ? minimum.day : 1;
+    final firstDay = BigInt.from(system
+                .toGregorianDay(year, month, anchorDay)
+                .microsecondsSinceEpoch) ~/
+            _microsecondsPerDay -
+        BigInt.from(anchorDay - 1);
+    var day = startDate.day;
+    if (day > length) {
+      if (datePolicy == RecurrenceDatePolicy.clamp) {
+        day = length;
+      } else if (datePolicy != RecurrenceDatePolicy.overflow) {
+        // A missing day belongs to this anchor month. Reject it only when
+        // that month is queried; a historical invalid slot cannot poison a
+        // later query. Skipped slots still count when the month is relevant.
+        return (
+          first: _wallTime(firstDay),
+          last: _wallTime(firstDay + BigInt.from(length - 1))
+        );
+      }
+    }
+    final wall = _wallTime(firstDay + BigInt.from(day - 1));
+    return (first: wall, last: wall);
+  }
+
   /// Returns occurrences overlapping [from, until), in UTC order. Exhausting
-  /// [maxCandidates] throws rather than returning an incomplete success.
+  /// [maxCandidates] relevant anchored slots throws rather than returning an
+  /// incomplete success. Historical slots outside the query do not consume it.
   List<ScheduleOccurrence> expand(
       TimeZoneProvider provider, DateTime from, DateTime until,
       {int maxCandidates = 10000}) {
     if (!from.isBefore(until) || maxCandidates <= 0) {
       throw ArgumentError('Invalid expansion window or limit');
     }
-    final upper = provider.dateAt(until, zone, CalendarId.gregory).dayIndex + 2;
+    final window = _ExpansionWindow(provider.offsets(zone), from, until,
+        duration, missing == MissingTimePolicy.nextValidMinute);
+    final upperDay =
+        _floorDivide(window.upper - BigInt.one, _microsecondsPerDay);
+    final maximum = startDate.system.maximumDate;
+    final maximumDay = BigInt.from(startDate.system
+            .toGregorianDay(maximum.year, maximum.month, maximum.day)
+            .microsecondsSinceEpoch) ~/
+        _microsecondsPerDay;
+    final upperFields = upperDay > maximumDay ? null : _fieldsAtDay(upperDay);
     final results = <ScheduleOccurrence>[];
     void append(CalendarDate date, DateTime instant) {
       final occurrence = ScheduleOccurrence(
@@ -304,28 +459,29 @@ final class CalendarSchedule {
       }
     }
 
-    var finished = false;
-    for (var index = 0; index < maxCandidates; index++) {
-      if (count != null && index >= count!) {
-        finished = true;
+    var examined = 0;
+    for (var index = _firstIndex(window);; index++) {
+      if ((count != null && index >= count!) || _pastLastDate(index)) break;
+      if (frequency != RecurrenceFrequency.daily &&
+          frequency != RecurrenceFrequency.weekly &&
+          upperFields != null &&
+          _periodAfter(_period(index), upperFields)) {
         break;
+      }
+      final coordinates = _slotWallRange(index);
+      if (coordinates.first >= window.upper) break;
+      if (!window.mayOverlap(coordinates.first, coordinates.last)) continue;
+      if (examined++ >= maxCandidates) {
+        throw StateError(
+            'Recurrence candidate limit exhausted; narrow the rule/window or increase the limit');
       }
       final date = _candidate(index);
       if (date == null) continue;
-      if (date.dayIndex > upper ||
-          (lastDate != null && date.compareTo(lastDate!) > 0)) {
-        finished = true;
-        break;
-      }
+      if (lastDate != null && date.compareTo(lastDate!) > 0) break;
       if (excludedDates.contains(date) || overrides.containsKey(date)) continue;
       final instant = provider.resolve(date, time, zone,
           missing: missing, repeated: repeated);
       if (instant != null) append(date, instant);
-    }
-    if (count != null && count! <= maxCandidates) finished = true;
-    if (!finished) {
-      throw StateError(
-          'Recurrence candidate limit exhausted; narrow the rule/window or increase the limit');
     }
     // Moved exceptions are queried by their new instants even if their original
     // dates lie beyond this window.
@@ -335,6 +491,41 @@ final class CalendarSchedule {
     results.sort((a, b) => a.start.compareTo(b.start));
     return List.unmodifiable(results);
   }
+}
+
+final _microsecondsPerDay = BigInt.from(Duration.microsecondsPerDay);
+
+BigInt _floorDivide(BigInt value, BigInt divisor) {
+  final result = value ~/ divisor;
+  return value.isNegative && value.remainder(divisor) != BigInt.zero
+      ? result - BigInt.one
+      : result;
+}
+
+final class _ExpansionWindow {
+  _ExpansionWindow(Iterable<Duration> zoneOffsets, DateTime from,
+      DateTime until, Duration duration, bool advanceMissing)
+      : offsets = zoneOffsets
+            .map((value) => BigInt.from(value.inMicroseconds))
+            .toSet(),
+        from = BigInt.from(from.microsecondsSinceEpoch),
+        until = BigInt.from(until.microsecondsSinceEpoch),
+        duration = BigInt.from(duration.inMicroseconds),
+        advance = BigInt.from(
+            advanceMissing ? const Duration(hours: 48).inMicroseconds : 0) {
+    if (offsets.isEmpty) {
+      throw StateError('Zone offset bounds must not be empty');
+    }
+  }
+  final Set<BigInt> offsets;
+  final BigInt from, until, duration, advance;
+  BigInt get lower =>
+      from - duration + offsets.reduce((a, b) => a < b ? a : b) - advance;
+  BigInt get upper => until + offsets.reduce((a, b) => a > b ? a : b);
+
+  bool mayOverlap(BigInt firstWall, BigInt lastWall) => offsets.any((offset) =>
+      firstWall - offset < until &&
+      lastWall - offset + advance + duration > from);
 }
 
 final class BusinessDayPolicy {

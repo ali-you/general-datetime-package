@@ -104,7 +104,20 @@ endpoint rendering/selection cases failed; all now pass using `rangePickerDelega
 
 ### 5. P2 — Recurrence queries resolve irrelevant historical dates
 
-**Location:** `D:/StudioProjects/general_date/packages/general_calendar_schedule/lib/general_calendar_schedule.dart:308`
+**Status:** Fixed on 2026-10-05. Expansion seeks the first potentially overlapping
+anchored slot using possible zone offsets, elapsed duration, and the maximum
+48-hour gap advance. It filters slot coordinates before date construction or
+zone resolution, preserves original counts/exclusions, and searches moved
+overrides independently. The candidate limit now applies to relevant query slots.
+Custom `TimeZoneProvider` implementations supply `offsets(zone)`; the IANA
+provider supplies all offsets from its initialized dataset.
+Combined validation for issues 5 and 6 passed: 50 scheduling tests (44 new),
+including 1,296 comparisons with bounded expansion across three calendars,
+four frequencies, date policies, intervals, and durations; 8 demo consumer tests;
+repository/package analysis, formatting, and whitespace checks. Existing CI
+automatically runs the new tests.
+
+**Location:** `D:/StudioProjects/general_date/packages/general_calendar_schedule/lib/general_calendar_schedule.dart:366` and `:463`
 
 Expansion starts at slot zero and resolves every earlier candidate before filtering occurrences against the requested UTC window. An irrelevant old DST gap/fold can prevent a valid later query. Old daily rules can also exhaust the default 10,000-slot limit even for a narrow recent query; narrowing the query does not reduce the historical prefix.
 
@@ -114,7 +127,15 @@ Expansion starts at slot zero and resolves every earlier candidate before filter
 
 ### 6. P2 — Inclusive lastDate is checked after a potentially invalid next candidate
 
-**Location:** `D:/StudioProjects/general_date/packages/general_calendar_schedule/lib/general_calendar_schedule.dart:313`
+**Status:** Fixed on 2026-10-05. Expansion compares a slot's exact civil-day or
+calendar-period coordinates against inclusive `lastDate` before construction,
+including clamp/overflow policy behavior and large intervals. Ended rules do
+not construct a later missing or unsupported date. Required invalid dates and
+chronology violations still reject. Regressions cover all four frequencies at
+both finite calendar endpoints and ordinary missing-day cases. Combined
+validation is recorded under issue 5 above.
+
+**Location:** `D:/StudioProjects/general_date/packages/general_calendar_schedule/lib/general_calendar_schedule.dart:328` and `:464`
 
 The next candidate is constructed before the inclusive ending condition is checked. Construction can throw even though the schedule already ended successfully.
 
@@ -179,5 +200,5 @@ These are validation gaps, not demonstrated code defects:
 - Verify hosted dependency resolution without local overrides and publication contents for each independent package. Current local source-pair success does not verify hosted releases.
 - After fixing the findings, commit focused regressions and rerun the relevant suites.
 
-The initial review changed no production source. Issues 1 through 4 were subsequently fixed
+The initial review changed no production source. Issues 1 through 6 were subsequently fixed
 as recorded above. Review probes and logs remain under ignored .dart_tool directories.

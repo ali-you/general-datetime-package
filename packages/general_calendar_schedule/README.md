@@ -56,6 +56,24 @@ holiday dates; it does not download or infer a country's holidays.
 `ReminderDelivery` is an interface for OS/backend delivery, not a background
 worker or notification permission flow.
 
+Expansion seeks the first anchored slot that could overlap the UTC query using
+the zone's possible offsets, elapsed duration, and the gap policy's maximum
+48-hour advance. It does not resolve irrelevant historical gaps/folds. Monthly
+overflow can contribute an occurrence from the preceding anchor month, and moved
+overrides are queried independently by their replacement instants. `count` still
+measures slots from the original start; `maxCandidates` limits relevant slots
+examined by the current query, including skipped/cancelled slots. Exceeding that
+limit still throws. An inclusive `lastDate` is checked in slot coordinates before
+constructing a following date, so an ended rule cannot fail on a later missing
+day or chronology boundary. A relevant invalid slot still fails under rejection
+policies.
+
+Custom `TimeZoneProvider` implementations must provide `offsets(zone)`: a finite,
+nonempty set containing every possible UTC offset for that zone, including
+historical offsets. The supplied `IanaTimeZoneProvider` obtains this directly
+from its initialized timezone dataset. Providers must also honor the 48-hour
+maximum for `MissingTimePolicy.nextValidMinute`.
+
 SDK 3.4 can select timezone 0.10; newer SDKs can select 0.11. Offset representation
 differences are adapted explicitly. Calendar engine/version-1 storage contracts
 are unchanged.
