@@ -40,10 +40,9 @@ Additional tests cover normalization, local/UTC representation, epoch
 constructors, comparisons, native equality/hashing, arithmetic, `copyWith`,
 parsing, formatting, and rejection outside the finite interval.
 
-The complete native Flutter suite passed all 165 tests. Flutter analysis and
-the repository formatting check passed. A Chrome run was attempted but did not
-reach the tests: the installed Flutter SDK failed to load CanvasKit assets and
-generated a malformed Windows test path. Browser execution is unverified.
+The 2026-10-05 native Flutter run passed all 289 chronology/picker tests.
+Flutter analysis and the repository formatting check passed. Browser execution
+remains unverified; earlier Windows Chrome attempts did not reach assertions.
 
 Numeric offsets are applied before validating the final UTC date. For example,
 `1601-01-01T00:00:00+01:00` resolves to the supported AH 1600-12-30 at 23:00 UTC.
@@ -80,7 +79,7 @@ Install its localization delegate in the picker scope using
 Delegate and widget tests exercise customized names/formats/parsing, input
 submission, navigation, range rejection, week alignment, and scoped pickers.
 Shared critical regression suites and time-zone CI coverage are described in
-[CALENDAR_TESTING.md](CALENDAR_TESTING.md).
+[Development and testing](README.md#development-and-testing).
 
 Umm al-Qura data must not be extended using a repeating arithmetic Islamic
 leap cycle. Adding support beyond this interval requires a separately verified

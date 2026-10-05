@@ -82,7 +82,7 @@ it as an independent oracle. They verify:
   headers, signed years, date-picker navigation, input mode, and range failures.
 
 Shared critical regression suites and time-zone CI coverage are described in
-[CALENDAR_TESTING.md](CALENDAR_TESTING.md).
+[Development and testing](README.md#development-and-testing).
 
 Run the validation with:
 

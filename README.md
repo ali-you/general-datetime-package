@@ -1,31 +1,32 @@
-# General DateTime (Dynamic Calendar)
+# General DateTime
 
 <a href="https://pub.dev/packages/general_datetime">
    <img src="https://img.shields.io/pub/v/general_datetime?label=pub.dev&labelColor=333940&logo=dart">
 </a>
-<a href="https://github.com/ali-you/general-datetime-package/issues">
-   <img alt="Issues" src="https://img.shields.io/github/issues/ali-you/general-datetime-package?color=0088ff" />
+<a href="https://github.com/ali-you/general-date-package/issues">
+   <img alt="Issues" src="https://img.shields.io/github/issues/ali-you/general-date-package?color=0088ff" />
 </a>
-<a href="https://github.com/ali-you/general-datetime-package/issues?q=is%3Aclosed">
-   <img alt="Issues" src="https://img.shields.io/github/issues-closed/ali-you/general-datetime-package?color=0088ff" />
+<a href="https://github.com/ali-you/general-date-package/issues?q=is%3Aclosed">
+   <img alt="Issues" src="https://img.shields.io/github/issues-closed/ali-you/general-date-package?color=0088ff" />
 </a>
-<a href="https://github.com/ali-you/general-datetime-package/pulls">
-   <img alt="GitHub Pull Requests" src="https://badgen.net/github/prs/ali-you/general-datetime-package" />
+<a href="https://github.com/ali-you/general-date-package/pulls">
+   <img alt="GitHub Pull Requests" src="https://badgen.net/github/prs/ali-you/general-date-package" />
 </a>
-<a href="https://github.com/ali-you/general-datetime-package/blob/main/LICENSE" rel="ugc">
-   <img src="https://img.shields.io/github/license/ali-you/general-datetime-package?color=#007A88&amp;labelColor=333940;" alt="GitHub">
+<a href="https://github.com/ali-you/general-date-package/blob/main/LICENSE" rel="ugc">
+   <img src="https://img.shields.io/github/license/ali-you/general-date-package?color=#007A88&amp;labelColor=333940;" alt="GitHub">
 </a>
-<a href="https://github.com/ali-you/general-datetime-package">
-   <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/general-datetime-package">
+<a href="https://github.com/ali-you/general-date-package">
+   <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/ali-you/general-date-package">
 </a>
 
 ![Flutter CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)
 
-A Flutter/Dart Package for working with dates across several calendar systems. Using a unified
-interface, you can convert, manipulate, and compare dates in Gregorian, Persian (Jalali),
-Hijri (Umm al-Qura), and other
-calendar systems—all while preserving time components and handling timezone, leap year, and negative
-value normalization within each calendar's documented range.
+Gregorian, Persian (Jalali), and Hijri (Umm al-Qura) chronology with exact
+instant conversion, civil-date arithmetic, JSON storage, and Flutter Material
+date-picker adapters. Requires Dart 3.4 or newer and Flutter 3.32 or newer.
+For servers and command-line applications, use the
+[`general_datetime_core`](packages/general_datetime_core/README.md) package
+without Flutter.
 
 Persian and Hijri constructors normalize fields using exact arithmetic before
 checking the supported calendar bounds. Extreme inputs that would previously
@@ -200,10 +201,9 @@ using an external Gregorian helper. Convert the result back explicitly with
 `dateOnly` returns a date-time with cleared clock fields, retaining UTC/local
 mode. Local DST rules can normalize a nonexistent midnight. Changing `isUtc`
 through `copyWith` reinterprets wall-clock fields; use `toUtc()`/`toLocal()` to
-preserve the instant. Material pickers should continue using the matching
-calendar delegate's local-date policy. A timezone-free civil-date model and
-calendar-period policies are separate work tracked in issue 18 of
-[the checklist](CALENDAR_ISSUES_CHECKLIST.md).
+preserve the instant. Material pickers use the matching delegate's local-date
+policy. Use `CalendarDate` for timezone-free dates and explicit month/year
+arithmetic, as shown in [Application calendar API](#application-calendar-api).
 
 ### Safe JSON storage
 
@@ -260,8 +260,10 @@ conversion to the calendar then follows its normal range checks. Input
 local/UTC mode is not retained. The optional `timeZone` must be a nonempty,
 trimmed string and is retained as opaque application metadata, normally an IANA
 name. The package does not validate zone existence, infer a zone name from a
-local value, or resolve zone offsets/DST. A future wall-clock schedule or a
-recurrence requires its own policy (issue 19).
+local value, or resolve zone offsets/DST. Named-zone wall-clock schedules and
+recurrences use the optional
+[`general_calendar_schedule`](packages/general_calendar_schedule/README.md)
+package and its explicit DST policies.
 
 The timestamp schema uses a strict UTC subset of
 [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339.html#section-5.6):
@@ -277,7 +279,7 @@ They support signed Persian years including zero, and native Gregorian UTC date
 bounds. `fromDateTime` explicitly extracts the input's wall date and discards
 clock fields and timezone mode without converting it. Use the field constructor
 when the source is already a civil date. All-day records must not be encoded as
-midnight timestamps. Calendar arithmetic remains separate work (issue 18).
+midnight timestamps. Use `CalendarDate` for civil-date arithmetic.
 
 Both decoders throw `FormatException` for missing/unknown fields, wrong types,
 unknown identifiers, unsupported versions, wrong record kinds, or invalid field
@@ -507,18 +509,6 @@ Data provenance and the Unicode license notice are recorded in
 Source checks, exhaustive coverage, and differences from `hijri` 3.0.1 are
 documented in [`HIJRI_CALENDAR_VALIDATION.md`](HIJRI_CALENDAR_VALIDATION.md).
 
-## Contributions
-
-See [CALENDAR_TESTING.md](CALENDAR_TESTING.md) for exhaustive calendar coverage,
-critical regression cases, and the UTC/Tehran/New York CI test matrix.
-
-Contributions are welcome! If you have suggestions, fixes, or new features, please submit a pull
-request or open an issue on GitHub.
-
-## Licence
-
-This project is licensed under the BSD 3-Clause License. See the [LICENSE](https://github.com/ali-you/general-datetime-package/blob/main/LICENSE) file for details.
-
 ## Application calendar API
 
 `CalendarSystems.forId(CalendarId.persian)` exposes strict construction,
@@ -551,3 +541,67 @@ Named-zone resolution and recurrence live in the independent optional
 [`general_calendar_schedule`](packages/general_calendar_schedule/README.md)
 package. The runnable [`calendar_demo`](apps/calendar_demo/README.md) owns event
 views/controller state. Neither layer adds dependencies to the chronology core.
+
+## Development and testing
+
+From the repository root, resolve the unpublished core through the tracked
+override template, then run:
+
+```powershell
+Copy-Item pubspec_overrides.yaml.example pubspec_overrides.yaml
+flutter pub get
+flutter analyze
+flutter test
+dart format --output=none --set-exit-if-changed lib test example/lib
+```
+
+For the [picker example](example/README.md), also copy
+`example/pubspec_overrides.yaml.example` to `example/pubspec_overrides.yaml`,
+then run `flutter pub get` and `flutter run` from `example`.
+The [calendar demo](apps/calendar_demo/README.md) documents its own setup.
+
+Run the critical chronology and picker suites with:
+
+```sh
+flutter test test/unit/calendar_critical_test.dart test/unit/calendar_picker_critical_test.dart
+```
+
+From `packages/general_datetime_core`, run `dart pub get`, `dart analyze`,
+and `dart test`. Its CLI example also supports `dart compile exe`.
+From `packages/general_calendar_schedule`, copy its override template before
+running the same Dart checks. From `apps/calendar_demo`, run `flutter test`.
+
+The suites compare all 1,183,020 supported Persian days and all 106,665
+Umm al-Qura days against independent fixtures. Critical regressions cover
+constructor/epoch overflow, negative epochs, microseconds, leap/month bounds,
+UTC/local conversion, equality/hash keys, strict JSON storage, runtime delegate
+guards, and picker navigation/input. Source provenance and calendar-specific
+validation are retained in the linked [Persian](PERSIAN_CALENDAR_VALIDATION.md)
+and [Umm al-Qura](HIJRI_CALENDAR_VALIDATION.md) documents.
+
+Local verification on 2026-10-05 used Flutter 3.47.5 and Dart 3.13.4:
+
+| Suite | Tests passed |
+| --- | ---: |
+| Flutter chronology and pickers | 289 |
+| Standalone chronology core | 20 |
+| Named-zone scheduling | 6 |
+| Calendar demo | 8 |
+
+Static analysis and format checks passed. The compiled core CLI preserved
+microseconds through JSON storage. Historical Tehran 23/25-hour DST assertions
+also passed with `--dart-define=CALENDAR_TEST_TZ=Asia/Tehran`.
+
+CI is configured for UTC, Tehran, and New York on Linux, with minimum/current
+SDK jobs and the formatter peer pinned in `.github/calendar_pair.json`.
+Windows tests use the operating system's timezone; setting `TZ` alone does not
+verify another process timezone. Browser JavaScript/Wasm, Android/iOS, minimum
+SDK execution, the full timezone matrix, and hosted dependency resolution were
+not verified in that local run. Coverage percentages were not recalculated.
+
+## Contributions and license
+
+Open an issue or pull request on the
+[repository](https://github.com/ali-you/general-date-package).
+This project uses the BSD 3-Clause [LICENSE](LICENSE). Calendar data attribution
+and the Unicode license are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
