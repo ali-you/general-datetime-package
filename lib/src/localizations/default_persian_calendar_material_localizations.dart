@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:general_datetime_core/general_datetime_core.dart'
+    show PersianDateTime;
 
 import '../delegates/persian_calendar_delegate.dart';
-import '../persian_date_time.dart';
 
 class _PersianCalendarMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {

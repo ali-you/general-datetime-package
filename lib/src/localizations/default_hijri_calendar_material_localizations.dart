@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:general_datetime_core/general_datetime_core.dart'
+    show HijriDateTime;
 
 import '../delegates/hijri_calendar_delegate.dart';
-import '../hijri_date_time.dart';
 
 class _HijriCalendarMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {

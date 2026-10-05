@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../calendar_date_utils.dart';
+import 'package:general_datetime_core/general_datetime_core.dart'
+    show CalendarDateUtils;
 
 /// Internal adapter for Flutter's range-picker comparison probes.
 class RangePickerCalendarDelegate extends CalendarDelegate<DateTime> {

@@ -4,6 +4,9 @@
 
 - Remove internal `src/shared` forwarding libraries; use calendar helpers and
   shared implementation utilities from `general_datetime_core` directly.
+- Remove the remaining internal chronology forwarding libraries from `src/`.
+  Material delegates and localizations import the core public library directly;
+  `general_datetime.dart` continues to re-export the core public API.
 
 - Remove the unused scheduling package. Keep named-zone conversion and explicit
   DST policies in the calendar demo, which depends directly on `timezone`.

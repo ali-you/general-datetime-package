@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:general_datetime_core/general_datetime_core.dart'
+    show HijriDateTime;
 
-import '../hijri_date_time.dart';
 import 'range_picker_calendar_delegate.dart';
 
 /// A Material calendar delegate that accepts only [HijriDateTime] values.
