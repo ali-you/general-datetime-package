@@ -25,7 +25,17 @@ The verification compares the constructed hour with the requested hour, but neve
 
 ### 2. P2 — Two-digit year resolution breaks at chronology limits and negative centuries
 
-**Location:** `D:/StudioProjects/general_date_format/packages/general_date_format_core/lib/src/date_builder.dart:262`
+**Status:** Fixed on 2026-10-05. Century windows now compare calendar wall fields
+without constructing unsupported endpoints, use floor centuries for negative
+years, and require a supported result inside the window. Repeated-year checks
+preserve FormatException/nullable parsing contracts and share one clock reading.
+Added 13 regressions covering local/UTC bounds, negative centuries, repeated
+years, clock precision, ordinal/overflow fields, and unsupported references.
+Validation passed: 500 Flutter tests, 39 Dart-core tests, 28 Node regressions in
+each of Lord Howe, Monrovia, and Tehran, and both analyzers. The Node regressions
+are included in the CI timezone matrix.
+
+**Location:** `D:/StudioProjects/general_date_format/packages/general_date_format_core/lib/src/date_builder.dart:271`
 
 Resolution constructs the provisional year and the window endpoint before determining the final century. These intermediate dates can be unsupported even when the final result is supported. Negative century calculation also uses truncating division rather than floor division.
 
@@ -134,5 +144,5 @@ These are validation gaps, not demonstrated code defects:
 - Verify hosted dependency resolution without local overrides and publication contents for each independent package. Current local source-pair success does not verify hosted releases.
 - After fixing the findings, commit focused regressions and rerun the relevant suites.
 
-The initial review changed no production source. Issue 1 was subsequently fixed
+The initial review changed no production source. Issues 1 and 2 were subsequently fixed
 as recorded above. Review probes and logs remain under ignored .dart_tool directories.
