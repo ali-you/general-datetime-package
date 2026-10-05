@@ -34,7 +34,8 @@ build/
 **/pubspec.lock
 **/pubspec_overrides.yaml
 
-# The Dart core is published independently.
-packages/
+# Keep nested packages traversable so they can be published independently.
+# Exclude their contents here; each package's .pubignore can opt back in.
+packages/*/*
 apps/
 **/pubspec_overrides.yaml.example

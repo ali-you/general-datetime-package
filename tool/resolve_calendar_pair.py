@@ -28,6 +28,6 @@ all_dependencies = {'general_datetime': chronology, 'general_datetime_core': cor
                     'general_date_format_core': format_core, 'general_date_format': formatter}
 for directory in [chronology, chronology / 'example', formatter, formatter / 'example', chronology / 'apps/calendar_demo']:
     write(directory, all_dependencies)
-for directory in [format_core, chronology / 'packages/general_calendar_schedule']:
+for directory in [format_core]:
     write(directory, {'general_datetime_core': core})
 print(f'Chronology: {chronology}\nFormatter: {formatter}')

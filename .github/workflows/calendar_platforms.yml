@@ -29,7 +29,7 @@ jobs:
       - run: python tool/resolve_calendar_pair.py --chronology "$GITHUB_WORKSPACE" --formatter "$GITHUB_WORKSPACE/.dart_tool/calendar_dependencies/general_date_format"
       - run: flutter pub get
       - run: flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }} test/platform_calendar_smoke_test.dart
-      - run: flutter pub get && dart run tool/generate_timezone_revision.dart && flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
+      - run: flutter pub get && flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
         working-directory: apps/calendar_demo
       - run: flutter build web --release ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
         working-directory: apps/calendar_demo
@@ -66,7 +66,7 @@ jobs:
           api-level: 35
           arch: x86_64
           working-directory: apps/calendar_demo
-          script: flutter pub get && dart run tool/generate_timezone_revision.dart && flutter test integration_test/calendar_smoke_test.dart -d emulator-5554
+          script: flutter pub get && flutter test integration_test/calendar_smoke_test.dart -d emulator-5554
   ios:
     runs-on: macos-latest
     steps:
@@ -88,5 +88,5 @@ jobs:
           xcrun simctl boot "$DEVICE" || true
           xcrun simctl bootstatus "$DEVICE" -b
           echo "SIMULATOR_ID=$DEVICE" >> "$GITHUB_ENV"
-      - run: flutter pub get && dart run tool/generate_timezone_revision.dart && flutter test integration_test/calendar_smoke_test.dart -d "$SIMULATOR_ID"
+      - run: flutter pub get && flutter test integration_test/calendar_smoke_test.dart -d "$SIMULATOR_ID"
         working-directory: apps/calendar_demo

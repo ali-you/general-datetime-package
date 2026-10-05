@@ -12,8 +12,6 @@ dependencies:
     sdk: flutter
   general_datetime_core: ^1.0.0
   general_date_format_core: ^1.0.0
-  general_calendar_schedule:
-    path: ../../packages/general_calendar_schedule
   timezone: '>=0.10.0 <0.12.0'
   intl: ^0.20.2
 dev_dependencies:

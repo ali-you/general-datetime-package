@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:general_calendar_schedule/general_calendar_schedule.dart';
 import 'package:general_datetime_core/general_datetime_core.dart';
+
+import 'demo_time_zones.dart';
 
 enum CalendarView { month, week, day, agenda }
 
@@ -56,7 +57,7 @@ final class CalendarController extends ChangeNotifier {
       this.view = CalendarView.month,
       this.weekRules = const CalendarWeekRules()});
   final CalendarEventSource source;
-  final TimeZoneProvider zones;
+  final DemoTimeZones zones;
   final CalendarWeekRules weekRules;
   CalendarDate selectedDate;
   String zone;
@@ -107,10 +108,10 @@ final class CalendarController extends ChangeNotifier {
     final gregorian = date.toCalendar(CalendarId.gregory);
     final start = zones.resolve(gregorian, WallClock(0), zone,
         missing: MissingTimePolicy.nextValidMinute,
-        repeated: RepeatedTimePolicy.earlier)!;
+        repeated: RepeatedTimePolicy.earlier);
     final end = zones.resolve(gregorian.addDays(1), WallClock(0), zone,
         missing: MissingTimePolicy.nextValidMinute,
-        repeated: RepeatedTimePolicy.earlier)!;
+        repeated: RepeatedTimePolicy.earlier);
     return (start: start, end: end);
   }
 

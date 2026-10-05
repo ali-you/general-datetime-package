@@ -72,16 +72,11 @@ jobs:
           git -C .dart_tool/calendar_dependencies/general_date_format rev-parse HEAD
           flutter pub get
           (cd packages/general_datetime_core && dart pub get)
-          (cd packages/general_calendar_schedule && dart pub get)
-          (cd apps/calendar_demo && flutter pub get && dart run tool/generate_timezone_revision.dart)
+          (cd apps/calendar_demo && flutter pub get)
       - if: matrix.flutter == ''
         run: dart format --output=none --set-exit-if-changed lib test example/lib packages apps/calendar_demo/lib apps/calendar_demo/test apps/calendar_demo/integration_test
       - run: flutter analyze
       - run: flutter test --dart-define=CALENDAR_TEST_TZ=${{ matrix.timezone }}
-      - run: dart analyze
-        working-directory: packages/general_calendar_schedule
-      - run: dart test
-        working-directory: packages/general_calendar_schedule
       - run: flutter analyze
         working-directory: apps/calendar_demo
       - run: flutter test

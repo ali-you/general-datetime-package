@@ -2,10 +2,8 @@
 
 ## [3.0.0] — release preparation
 
-- Seek recurrence queries using provider offsets, event duration and gap policy;
-  preserve anchored counts and moved overrides, and check inclusive `lastDate`
-  before constructing a later slot. Custom scheduling providers now supply all
-  possible zone offsets through `TimeZoneProvider.offsets`.
+- Remove the unused scheduling package. Keep named-zone conversion and explicit
+  DST policies in the calendar demo, which depends directly on `timezone`.
 
 - Add `rangePickerDelegate` adapters for Persian and Umm al-Qura Material range
   pickers at finite chronology bounds. Empty-cell highlight and keyboard probes
@@ -16,9 +14,8 @@
   strict field construction, supported bounds, and chronology metadata.
 - Add immutable `CalendarDate`, explicit day/month/year arithmetic policies,
   half-open date ranges, and calendar-aware week rules in the Dart core.
-- Add an optional unpublished scheduling package with named-zone providers,
-  explicit DST policies, bounded recurrence, exceptions, business days, and
-  reminder interfaces. Add a separate four-view Flutter calendar demo.
+- Add a separate four-view Flutter calendar demo with named-zone presentation
+  and explicit DST policies.
 - Add pinned two-repository CI setup, minimum/current SDK and timezone jobs,
   JavaScript/Wasm coverage, and Android/iOS smoke workflows. Platform execution
   remains a release gate; local verification does not establish device support.

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:general_calendar_schedule/general_calendar_schedule.dart';
 import 'package:general_datetime_core/general_datetime_core.dart';
 import 'package:timezone/data/latest.dart' as data;
 
 import 'calendar_controller.dart';
 import 'calendar_screen.dart';
-import 'timezone_revision.dart';
+import 'demo_time_zones.dart';
 
 void main() {
   data.initializeTimeZones();
@@ -20,7 +19,7 @@ class CalendarDemo extends StatefulWidget {
 }
 
 class _CalendarDemoState extends State<CalendarDemo> {
-  final zones = IanaTimeZoneProvider(databaseRevision: bundledTimeZoneRevision);
+  final zones = DemoTimeZones();
   late final CalendarController controller;
   late final MemoryEventSource source;
   bool persianLanguage = false;
@@ -29,7 +28,7 @@ class _CalendarDemoState extends State<CalendarDemo> {
     super.initState();
     final today =
         zones.dateAt(DateTime.now(), 'Asia/Tehran', CalendarId.persian);
-    final start = zones.resolve(today, WallClock(9), 'Asia/Tehran')!;
+    final start = zones.resolve(today, WallClock(9), 'Asia/Tehran');
     source = MemoryEventSource([
       CalendarEvent.timed(
           id: 'planning',
@@ -60,7 +59,7 @@ class _CalendarDemoState extends State<CalendarDemo> {
     } else {
       final clock = zones.timeAt(event.start!, controller.zone);
       // Moving to a gap/fold requires a user policy; default rejection is shown.
-      final start = zones.resolve(date, clock, controller.zone)!;
+      final start = zones.resolve(date, clock, controller.zone);
       replacement = CalendarEvent.timed(
           id: event.id,
           title: event.title,

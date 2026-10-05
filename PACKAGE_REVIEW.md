@@ -102,48 +102,11 @@ endpoint rendering/selection cases failed; all now pass using `rangePickerDelega
 
 **Fix:** Provide boundary-aware range-picker integration or address the upstream padding calculation. Do not weaken chronology bounds or clamp selectable dates silently. Test actual range pickers at both endpoints and with different week starts; existing endpoint tests exercise CalendarDatePicker instead.
 
-### 5. P2 — Recurrence queries resolve irrelevant historical dates
+### 5�6. Retired scheduling findings
 
-**Status:** Fixed on 2026-10-05. Expansion seeks the first potentially overlapping
-anchored slot using possible zone offsets, elapsed duration, and the maximum
-48-hour gap advance. It filters slot coordinates before date construction or
-zone resolution, preserves original counts/exclusions, and searches moved
-overrides independently. The candidate limit now applies to relevant query slots.
-Custom `TimeZoneProvider` implementations supply `offsets(zone)`; the IANA
-provider supplies all offsets from its initialized dataset.
-Combined validation for issues 5 and 6 passed: 50 scheduling tests (44 new),
-including 1,296 comparisons with bounded expansion across three calendars,
-four frequencies, date policies, intervals, and durations; 8 demo consumer tests;
-repository/package analysis, formatting, and whitespace checks. Existing CI
-automatically runs the new tests.
-
-**Location:** `D:/StudioProjects/general_date/packages/general_calendar_schedule/lib/general_calendar_schedule.dart:366` and `:463`
-
-Expansion starts at slot zero and resolves every earlier candidate before filtering occurrences against the requested UTC window. An irrelevant old DST gap/fold can prevent a valid later query. Old daily rules can also exhaust the default 10,000-slot limit even for a narrow recent query; narrowing the query does not reduce the historical prefix.
-
-**Reproduced:** Daily New York 02:30 rule starting 2024-03-09, count 5, default gap rejection. Querying only 2024-03-12 through 2024-03-13 fails on the 2024-03-10 gap.
-
-**Fix:** Seek the first candidate that could overlap the requested window, accounting for duration and zone resolution policies. Preserve anchored slot counting and query moved overrides independently. Reject invalid gap/fold candidates that are relevant to the query.
-
-### 6. P2 — Inclusive lastDate is checked after a potentially invalid next candidate
-
-**Status:** Fixed on 2026-10-05. Expansion compares a slot's exact civil-day or
-calendar-period coordinates against inclusive `lastDate` before construction,
-including clamp/overflow policy behavior and large intervals. Ended rules do
-not construct a later missing or unsupported date. Required invalid dates and
-chronology violations still reject. Regressions cover all four frequencies at
-both finite calendar endpoints and ordinary missing-day cases. Combined
-validation is recorded under issue 5 above.
-
-**Location:** `D:/StudioProjects/general_date/packages/general_calendar_schedule/lib/general_calendar_schedule.dart:328` and `:464`
-
-The next candidate is constructed before the inclusive ending condition is checked. Construction can throw even though the schedule already ended successfully.
-
-**Reproduced:**
-- Monthly Gregorian rule starting 2024-01-31, `lastDate` equal to the start, `datePolicy: reject`. Query January: the valid January occurrence is followed by a failure constructing February 31.
-- Daily Umm al-Qura rule starting AH 1600-12-30 with the same `lastDate`. Query its supported day: expansion throws attempting the following unsupported day.
-
-**Fix:** Determine whether a candidate slot is beyond the rule's ending bound before constructing it. Preserve errors for genuinely required invalid candidates. Add both ordinary missing-day and chronology-end regressions.
+The recurrence query and inclusive last-date findings were fixed, then retired
+when the unused scheduling package was removed on 2026-10-05. Named-zone
+conversion remains local to the demo; recurrence is no longer provided.
 
 ### 7. P2 — Demo clips boundary month dates without preserving weekday columns
 
@@ -181,7 +144,7 @@ Existing suites all passed with the locally resolved source pair:
 | --- | ---: |
 | general_datetime Flutter chronology/picker suite | 289 |
 | general_datetime_core Dart suite | 20 |
-| general_calendar_schedule Dart suite | 6 |
+| Removed scheduling Dart suite (historical) | 6 |
 | calendar_demo suite | 8 |
 | general_date_format Flutter suite | 500 |
 | general_date_format_core Dart suite | 12 |

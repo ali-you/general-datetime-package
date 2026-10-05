@@ -1,8 +1,9 @@
 # Calendar application demo
 
-This separate application consumes the corrected pure Dart chronology,
-formatter and scheduling packages. It provides month, week, day and agenda
-views, Gregorian/Persian/Umm al-Qura selection, named-zone event presentation,
+This separate application consumes the pure Dart chronology and formatter
+packages, with `timezone` used directly in the demo. It provides month, week,
+day and agenda views, Gregorian/Persian/Umm al-Qura selection, named-zone
+event presentation,
 secondary dates, asynchronous controller state, deterministic overlap columns,
 all-day events and midnight splitting. Its sample event source is in memory.
 
@@ -12,12 +13,11 @@ From the two neighboring repositories, resolve local sources:
 python tool/resolve_calendar_pair.py --chronology . --formatter ../general_date_format
 cd apps/calendar_demo
 flutter pub get
-dart run tool/generate_timezone_revision.dart
 flutter run -d chrome
 ```
 
-Rerun the timezone revision generator after dependency/data changes. It reads
-the resolved package's bundled IANA revision instead of guessing a version.
+Named-zone conversion and explicit DST policies live in `lib/demo_time_zones.dart`.
+The demo initializes the bundled `timezone` data at startup.
 The alternative local `pubspec_overrides.yaml.example` resolves both cores
 directly. On a device, run `flutter run -d <device-id>`.
 

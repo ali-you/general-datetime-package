@@ -21,7 +21,7 @@ pickers.
 - [Calendar system API](#calendar-system-api)
 - [JSON storage](#json-storage)
 - [Flutter Material pickers](#flutter-material-pickers)
-- [Formatting, scheduling, and examples](#formatting-scheduling-and-examples)
+- [Formatting and examples](#formatting-and-examples)
 - [Testing and release checks](#development-and-testing)
 
 ## Choose a package
@@ -32,12 +32,10 @@ pickers.
 | [`general_datetime_core`](packages/general_datetime_core/README.md) | Calendar date-times, strict calendar systems, civil dates, and JSON storage | No |
 | `general_date_format` | Localized Persian/Hijri formatting and multilingual Material adapters, in the neighboring repository | Yes |
 | `general_date_format_core` | Localized Persian/Hijri formatting and parsing for servers and CLIs | No |
-| [`general_calendar_schedule`](packages/general_calendar_schedule/README.md) | Optional named-zone resolution, recurrence, and business-day policies | No |
 
 The Flutter wrapper re-exports the core's exact classes. A `PersianDateTime`
 created through either import has the same runtime type; there are no competing
-copies of the chronology engine. The scheduling package is separate and has
-`publish_to: none`.
+copies of the chronology engine.
 
 Use these public libraries:
 
@@ -494,18 +492,15 @@ Widget persianYears(BuildContext context, ValueChanged<DateTime> onChanged) {
 `CalendarDatePicker` already defaults its current date through the calendar
 delegate. This package exports no `CalendarYearPicker` wrapper.
 
-## Formatting, scheduling, and examples
+## Formatting and examples
 
 Use the neighboring `general_date_format` / `general_date_format_core`
 packages for localized patterns, names, digits, and strict parsing. Chronology
 ISO-like output is intended for its matching calendar parser.
 
-The optional [`general_calendar_schedule`](packages/general_calendar_schedule/README.md)
-package provides initialized IANA zone providers, explicit missing/repeated
-wall-time policies, bounded daily/weekly/monthly/yearly recurrences, exclusions,
-moved exceptions, business days, and a reminder-delivery interface. It does not
-supply an ICS/RRULE importer, automatic holiday data, or notification delivery.
-It depends on `timezone`; the chronology core has no zone dependency.
+The calendar application demo uses `timezone` directly for named-zone event
+presentation and explicit missing/repeated wall-time policies. Timezone handling
+is local to the demo; the chronology packages have no zone dependency.
 
 - [Picker example](example/README.md): three calendar pickers with separate scopes.
 - [Calendar application demo](apps/calendar_demo/README.md): month/week/day/agenda
@@ -524,8 +519,8 @@ flutter test test/unit/calendar_critical_test.dart test/unit/calendar_picker_cri
 dart format --output=none --set-exit-if-changed lib test example/lib
 ```
 
-Run `dart analyze` and `dart test` inside the chronology core and scheduling
-package (resolve each package's dependencies first). Run `flutter test` in
+Run `dart analyze` and `dart test` inside the chronology core
+(resolve its dependencies first). Run `flutter test` in
 `apps/calendar_demo`. Both Dart cores include compilable CLI examples.
 
 Tests compare all 1,183,020 supported Persian days and all 106,665 Umm al-Qura

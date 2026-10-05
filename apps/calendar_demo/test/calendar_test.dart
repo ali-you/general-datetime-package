@@ -2,18 +2,18 @@ import 'dart:async';
 
 import 'package:calendar_demo/calendar_controller.dart';
 import 'package:calendar_demo/calendar_screen.dart';
+import 'package:calendar_demo/demo_time_zones.dart';
 import 'package:calendar_demo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:general_calendar_schedule/general_calendar_schedule.dart';
 import 'package:general_datetime_core/general_datetime_core.dart';
 import 'package:intl/date_symbol_data_local.dart' as intl_data;
 import 'package:timezone/data/latest.dart' as data;
 
 CalendarDate g(int y, int m, int d) =>
     CalendarDate(calendar: CalendarId.gregory, year: y, month: m, day: d);
-final zones = IanaTimeZoneProvider(databaseRevision: 'fixture');
+final zones = DemoTimeZones();
 
 class PendingSource implements CalendarEventSource {
   final pending = <Completer<List<CalendarEvent>>>[];
@@ -27,6 +27,43 @@ class PendingSource implements CalendarEventSource {
 
 void main() {
   setUpAll(data.initializeTimeZones);
+  test('New York gap rejects or advances to the next valid minute', () {
+    final date = g(2024, 3, 10);
+    expect(() => zones.resolve(date, WallClock(2, 30), 'America/New_York'),
+        throwsArgumentError);
+    expect(
+        zones.resolve(date, WallClock(2, 30), 'America/New_York',
+            missing: MissingTimePolicy.nextValidMinute),
+        DateTime.utc(2024, 3, 10, 7));
+  });
+  test('fold resolution uses independent UTC instants and retains fractions',
+      () {
+    final date = g(2024, 11, 3), clock = WallClock(1, 30, 0, 123, 456);
+    expect(() => zones.resolve(date, clock, 'America/New_York'),
+        throwsArgumentError);
+    expect(
+        zones.resolve(date, clock, 'America/New_York',
+            repeated: RepeatedTimePolicy.earlier),
+        DateTime.utc(2024, 11, 3, 5, 30, 0, 123, 456));
+    expect(
+        zones.resolve(date, clock, 'America/New_York',
+            repeated: RepeatedTimePolicy.later),
+        DateTime.utc(2024, 11, 3, 6, 30, 0, 123, 456));
+  });
+  test('Persian and Hijri wall dates project into the selected zone', () {
+    for (final date in [
+      CalendarDate(calendar: CalendarId.persian, year: 1403, month: 1, day: 1),
+      CalendarDate(
+          calendar: CalendarId.islamicUmalqura, year: 1445, month: 9, day: 10)
+    ]) {
+      expect(zones.resolve(date, WallClock(9), 'Asia/Tehran'),
+          DateTime.utc(2024, 3, 20, 5, 30));
+      expect(
+          zones.dateAt(
+              DateTime.utc(2024, 3, 19, 22), 'Asia/Tehran', date.calendar),
+          date);
+    }
+  });
   // Standalone CalendarScreen tests choose bundled intl locale initialization.
   // The full demo app initializes intl through Flutter's Material delegate.
   setUpAll(intl_data.initializeDateFormatting);

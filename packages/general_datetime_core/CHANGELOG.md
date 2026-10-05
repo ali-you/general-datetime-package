@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 — release preparation
+## 1.0.0
 
 - Extract the corrected pure Dart implementation from the Flutter package.
 - Add `CalendarSystem` and a registry for the three built-in calendars, with
@@ -8,3 +8,7 @@
 - Add immutable `CalendarDate`, explicit arithmetic overflow policies,
   half-open `CalendarDateRange`, and calendar-aware `CalendarWeekRules`.
 - Return the requested concrete type from `GeneralDateTimeInterface.now<T>()`.
+- Provide calendar-safe field helpers and versioned instant/civil-date JSON
+  serialization without runtime dependencies or a Flutter SDK requirement.
+- Document installation, conversion, arithmetic, validation, supported ranges,
+  serialization, and integration with the Flutter and formatting packages.
