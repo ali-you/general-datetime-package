@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0] — release preparation
+## [4.0.0]
 
 - Remove internal `src/shared` forwarding libraries; use calendar helpers and
   shared implementation utilities from `general_datetime_core` directly.
@@ -22,15 +22,15 @@
   half-open date ranges, and calendar-aware week rules in the Dart core.
 - Add a separate four-view Flutter calendar demo with named-zone presentation
   and explicit DST policies.
-- Add pinned two-repository CI setup, minimum/current SDK and timezone jobs,
+- Resolve published cores in CI; add minimum/current SDK and timezone jobs,
   JavaScript/Wasm coverage, and Android/iOS smoke workflows. Platform execution
   remains a release gate; local verification does not establish device support.
 
 - Extract chronology, conversion, field utilities, and serialization into
   `general_datetime_core` 1.0.0, usable with the Dart SDK alone. Retain the
   existing Flutter imports as re-exports of the same types and keep picker
-  delegates/default Material localizations in this wrapper. Publish the Dart
-  core first; use the tracked local override templates before publication.
+  delegates/default Material localizations in this wrapper. Resolve the published
+  core through `general_datetime_core ^1.0.0` without local overrides.
 
 - Define `secondsSinceEpoch` as the containing Unix second, rounded down
   directly from microseconds in both calendars. Negative fractional instants
@@ -62,7 +62,8 @@
 
 - Breaking: replaces the published 2.1.0 chronology and native-instant contracts
   with the corrected implementations described below. Unsupported calendar
-  dates now fail explicitly. Publish this core before general_date_format 2.0.0.
+  dates now fail explicitly. The companion formatter wrapper is
+  `general_date_format` 3.0.0; both pure Dart cores remain at 1.0.0.
 
 - Added shared critical suites for both calendars: independent seeded
   normalization, precision/epoch boundaries, adversarial parsing, DST, calendar

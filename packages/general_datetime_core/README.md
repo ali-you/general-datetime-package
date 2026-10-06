@@ -26,8 +26,8 @@ dependencies:
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.
-The hosted dependency becomes available after the first release is published.
-Before publication, use a path dependency pointing to your local checkout:
+Version 1.0.0 is published and is re-exported by `general_datetime` 4.0.0.
+For development against a local core checkout, you can use a path dependency:
 
 ```yaml
 dependencies:

@@ -54,17 +54,29 @@ import 'package:general_datetime_core/general_datetime_core.dart';
 
 ## Installation and local setup
 
-The checked-in manifests target `general_datetime` **3.0.0** and
+The current wrapper version is `general_datetime` **4.0.0**, with
 `general_datetime_core` **1.0.0**. The Flutter wrapper requires Dart
 `>=3.4.0 <4.0.0` and Flutter `>=3.32.0`; the core requires only Dart
 `>=3.4.0 <4.0.0`.
 
-When those matching releases are available from your package source:
+Add the Flutter wrapper to your application:
 
 ```yaml
 dependencies:
-  general_datetime: ^3.0.0
+  general_datetime: ^4.0.0
 ```
+
+Run `flutter pub get`. For a pure Dart application, use
+`general_datetime_core: ^1.0.0` and run `dart pub get` instead.
+
+The picker example uses this checkout's 4.0.0 wrapper through a path dependency.
+The calendar demo uses the two published 1.0.0 cores directly. Neither requires
+local dependency overrides.
+
+When combining this wrapper with `general_date_format` 3.0.0, check the
+formatter's chronology constraint: its current manifest still requires
+`general_datetime ^3.0.0`, which excludes 4.0.0. The wrapper constraint must be
+aligned before both new wrapper versions can resolve together.
 
 ## Quick start
 

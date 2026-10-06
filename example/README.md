@@ -5,7 +5,8 @@ screen. Each calendar picker has matching date values, a calendar delegate,
 and its own localization scope. Startup also demonstrates converting a native
 Gregorian instant to Persian and Hijri dates.
 
-From this directory, resolve the published core and run:
+This example uses the local `general_datetime` 4.0.0 wrapper and the published
+`general_datetime_core` 1.0.0. From this directory, run:
 
 ```powershell
 flutter pub get
