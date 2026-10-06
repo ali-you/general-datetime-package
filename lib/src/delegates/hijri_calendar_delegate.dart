@@ -1,85 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:general_datetime_core/general_datetime_core.dart'
+    show HijriDateTime;
 
-import '../hijri_date_time.dart';
+import 'range_picker_calendar_delegate.dart';
 
+/// A Material calendar delegate that accepts only [HijriDateTime] values.
+///
+/// All date inputs and non-null localization parser results are checked at
+/// runtime. Incompatible values throw [ArgumentError]; convert Gregorian or
+/// other-calendar instants with [HijriDateTime.fromDateTime] explicitly.
+/// Date-only and navigation results use the picker's local-midnight policy.
 class HijriCalendarDelegate extends CalendarDelegate<DateTime> {
-  /// Creates a calendar delegate that uses the Hijri calendar.
-  ///
-  /// Week layout follows the current [MaterialLocalizations], while Hijri date
-  /// names, formatting, and parsing are provided by this delegate.
+  /// Creates a calendar delegate that uses the Hijri calendar and the
+  /// conventions of the current [MaterialLocalizations].
   const HijriCalendarDelegate();
 
-  static const List<String> _shortWeekdays = <String>[
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
-  ];
-
-  static const List<String> _weekdays = <String>[
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
-
-  static const List<String> _shortMonths = <String>[
-    'Muh',
-    'Saf',
-    'Ra1',
-    'Ra2',
-    'Ju1',
-    'Ju2',
-    'Raj',
-    'Sha',
-    'Ram',
-    'Shaw',
-    'DhuQ',
-    'DhuH',
-  ];
-
-  static const List<String> _months = <String>[
-    'Muharram',
-    'Safar',
-    "Rabi' al-Awwal",
-    "Rabi' al-Thani",
-    'Jumada al-Awwal',
-    'Jumada al-Thani',
-    'Rajab',
-    "Sha'ban",
-    'Ramadan',
-    'Shawwal',
-    "Dhu al-Qi'dah",
-    'Dhu al-Hijjah',
-  ];
-
-  static const String _dateSeparator = '/';
-  static const String _dateHelpText = 'dd/mm/yyyy';
+  /// Delegate for [showDateRangePicker], including supported-range endpoints.
+  ///
+  /// Flutter probes empty leading cells and keyboard targets before checking
+  /// bounds. This adapter supplies native comparison dates for those probes;
+  /// all selectable dates and results remain [HijriDateTime]. Use this only
+  /// with the range picker, and this delegate for general calendar arithmetic.
+  /// On Flutter 3.32, also pass `calendarDateRangePickerBuilder` from
+  /// `package:general_datetime/delegates.dart` as the range picker's builder.
+  CalendarDelegate<DateTime> get rangePickerDelegate =>
+      RangePickerCalendarDelegate(this, minimumYear: HijriDateTime.minimumYear);
 
   @override
   DateTime now() => HijriDateTime.now();
 
   @override
-  DateTime dateOnly(DateTime date) =>
-      HijriDateTime(date.year, date.month, date.day);
+  DateTime dateOnly(DateTime date) {
+    final value = _requireCalendarDate(date, 'date');
+    return HijriDateTime(value.year, value.month, value.day);
+  }
 
   @override
-  int monthDelta(DateTime startDate, DateTime endDate) =>
-      (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
+  DateTimeRange<DateTime> datesOnly(DateTimeRange<DateTime> range) {
+    _requireCalendarDate(range.start, 'range.start');
+    _requireCalendarDate(range.end, 'range.end');
+    return super.datesOnly(range);
+  }
+
+  @override
+  bool isSameDay(DateTime? dateA, DateTime? dateB) {
+    if (dateA != null) _requireCalendarDate(dateA, 'dateA');
+    if (dateB != null) _requireCalendarDate(dateB, 'dateB');
+    return super.isSameDay(dateA, dateB);
+  }
+
+  @override
+  bool isSameMonth(DateTime? dateA, DateTime? dateB) {
+    if (dateA != null) _requireCalendarDate(dateA, 'dateA');
+    if (dateB != null) _requireCalendarDate(dateB, 'dateB');
+    return super.isSameMonth(dateA, dateB);
+  }
+
+  @override
+  int monthDelta(DateTime startDate, DateTime endDate) {
+    _requireCalendarDate(startDate, 'startDate');
+    _requireCalendarDate(endDate, 'endDate');
+    return (endDate.year - startDate.year) * 12 +
+        endDate.month -
+        startDate.month;
+  }
 
   @override
   DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+    _requireCalendarDate(monthDate, 'monthDate');
     return HijriDateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 
   @override
   DateTime addDaysToDate(DateTime date, int days) {
+    _requireCalendarDate(date, 'date');
     return HijriDateTime(date.year, date.month, date.day + days);
   }
 
@@ -113,82 +107,59 @@ class HijriCalendarDelegate extends CalendarDelegate<DateTime> {
 
   @override
   String formatMonthYear(DateTime date, MaterialLocalizations localizations) {
-    return '${_months[date.month - 1]} ${date.year}';
-  }
-
-  @override
-  String formatYear(int year, MaterialLocalizations localizations) {
-    return year.toString();
+    return localizations.formatMonthYear(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatMediumDate(DateTime date, MaterialLocalizations localizations) {
-    final String weekday = _shortWeekdays[date.weekday - 1];
-    final String month = _shortMonths[date.month - 1];
-    return '$weekday, $month ${date.day}';
+    return localizations.formatMediumDate(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatShortMonthDay(
       DateTime date, MaterialLocalizations localizations) {
-    return '${_shortMonths[date.month - 1]} ${date.day}';
+    return localizations
+        .formatShortMonthDay(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatShortDate(DateTime date, MaterialLocalizations localizations) {
-    return '${_shortMonths[date.month - 1]} ${date.day}, ${date.year}';
+    return localizations.formatShortDate(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatFullDate(DateTime date, MaterialLocalizations localizations) {
-    final String weekday = _weekdays[date.weekday - 1];
-    final String month = _months[date.month - 1];
-    return '$weekday, $month ${date.day}, ${date.year}';
+    return localizations.formatFullDate(_requireCalendarDate(date, 'date'));
   }
 
   @override
   String formatCompactDate(DateTime date, MaterialLocalizations localizations) {
-    final String day = _twoDigits(date.day);
-    final String month = _twoDigits(date.month);
-    final String year = date.year.toString().padLeft(4, '0');
-    return '$day$_dateSeparator$month$_dateSeparator$year';
+    return localizations.formatCompactDate(_requireCalendarDate(date, 'date'));
   }
 
+  /// Returns null for invalid input. A non-null result in another calendar
+  /// throws [ArgumentError], indicating incompatible localization configuration.
   @override
   DateTime? parseCompactDate(
       String? inputString, MaterialLocalizations localizations) {
-    if (inputString == null) return null;
-
-    final List<String> parts = inputString.trim().split(_dateSeparator);
-    if (parts.length != 3) return null;
-
-    final int? day = int.tryParse(parts[0].trim(), radix: 10);
-    final int? month = int.tryParse(parts[1].trim(), radix: 10);
-    final int? year = int.tryParse(parts[2].trim(), radix: 10);
-    if (day == null || month == null || year == null || year < 1) {
-      return null;
-    }
-    if (month < 1 || month > HijriDateTime.monthsPerYear || day < 1) {
-      return null;
-    }
-
-    try {
-      if (day > getDaysInMonth(year, month)) return null;
-
-      final HijriDateTime date = HijriDateTime(year, month, day);
-      if (date.year != year || date.month != month || date.day != day) {
-        return null;
-      }
-      return date;
-    } on ArgumentError {
-      return null;
-    }
+    final parsed = localizations.parseCompactDate(inputString);
+    return parsed == null
+        ? null
+        : _requireCalendarDate(parsed, 'localizations.parseCompactDate result');
   }
 
   @override
   String dateHelpText(MaterialLocalizations localizations) {
-    return _dateHelpText;
+    return localizations.dateHelpText;
   }
 
-  static String _twoDigits(int value) => value.toString().padLeft(2, '0');
+  HijriDateTime _requireCalendarDate(DateTime date, String argumentName) {
+    if (date is HijriDateTime) return date;
+    throw ArgumentError.value(
+      date,
+      argumentName,
+      'HijriCalendarDelegate requires HijriDateTime, received '
+      '${date.runtimeType}. Convert explicitly with HijriDateTime.fromDateTime.',
+    );
+  }
 }

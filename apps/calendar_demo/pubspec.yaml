@@ -1,0 +1,28 @@
+name: calendar_demo
+description: Application calendar views and controller using the corrected calendar pair.
+publish_to: none
+version: 1.0.0
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.32.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  general_datetime_core: ^1.0.0
+  general_date_format_core: ^1.0.0
+  timezone: '>=0.10.0 <0.12.0'
+  intl: ^0.20.2
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: NotoSansArabic
+      fonts:
+        - asset: assets/fonts/NotoSansArabic.ttf

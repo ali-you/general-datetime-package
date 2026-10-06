@@ -1,0 +1,520 @@
+/// Independent test oracle sourced from the University of Tehran Calendar
+/// Center CSV fixture beside this file. The same rows are embedded below so
+/// this oracle remains usable by browser-hosted tests without `dart:io`.
+///
+/// Civil dates are derived from the official anchor SH 1404-01-01 =
+/// 2025-03-21 and the source's per-year leap markers. Production calendar
+/// code is deliberately not imported here.
+final class UniversityTehranPersianFixture {
+  static const int minimumYear = 1206;
+  static const int maximumYear = 1498;
+  static const int anchorYear = 1404;
+  static const String csvPath =
+      'test/fixtures/university_tehran_persian_years_1206_1498.csv';
+
+  static final DateTime anchorGregorianUtc = DateTime.utc(2025, 3, 21);
+
+  static final List<UniversityTehranPersianYear> rows = _loadRows();
+
+  static final List<int> _yearStartOffsets = _buildYearStartOffsets();
+
+  static final DateTime firstGregorianUtc = anchorGregorianUtc.subtract(
+    Duration(days: _yearStartOffsets[anchorYear - minimumYear]),
+  );
+
+  static final DateTime lastGregorianUtc = firstGregorianUtc.add(
+    Duration(days: totalSupportedDays - 1),
+  );
+
+  static int get rowCount => rows.length;
+
+  static int get totalSupportedDays => _yearStartOffsets.last;
+
+  static UniversityTehranPersianYear row(int year) {
+    RangeError.checkValueInInterval(
+      year,
+      minimumYear,
+      maximumYear,
+      'year',
+    );
+    return rows[year - minimumYear];
+  }
+
+  static bool isLeapYear(int year) => row(year).isLeapYear;
+
+  static int yearLength(int year) => isLeapYear(year) ? 366 : 365;
+
+  static int monthLength(int year, int month) {
+    RangeError.checkValueInInterval(month, 1, 12, 'month');
+    if (month <= 6) return 31;
+    if (month <= 11) return 30;
+    return isLeapYear(year) ? 30 : 29;
+  }
+
+  static int dayOffset(int year, int month, int day) {
+    RangeError.checkValueInInterval(
+      day,
+      1,
+      monthLength(year, month),
+      'day',
+    );
+    int offset = _yearStartOffsets[year - minimumYear];
+    for (int currentMonth = 1; currentMonth < month; currentMonth++) {
+      offset += monthLength(year, currentMonth);
+    }
+    return offset + day - 1;
+  }
+
+  static DateTime yearStartUtc(int year) => firstGregorianUtc.add(
+        Duration(days: _yearStartOffsets[year - minimumYear]),
+      );
+
+  static ReferencePersianDate dateAfter(
+    int year,
+    int month,
+    int day,
+    int deltaDays,
+  ) {
+    final int targetOffset = dayOffset(year, month, day) + deltaDays;
+    RangeError.checkValueInInterval(
+      targetOffset,
+      0,
+      totalSupportedDays - 1,
+      'targetOffset',
+    );
+
+    int resolvedYear = minimumYear;
+    while (_yearStartOffsets[resolvedYear - minimumYear + 1] <= targetOffset) {
+      resolvedYear++;
+    }
+    int dayWithinYear =
+        targetOffset - _yearStartOffsets[resolvedYear - minimumYear];
+    int resolvedMonth = 1;
+    while (dayWithinYear >= monthLength(resolvedYear, resolvedMonth)) {
+      dayWithinYear -= monthLength(resolvedYear, resolvedMonth);
+      resolvedMonth++;
+    }
+    return ReferencePersianDate(
+      resolvedYear,
+      resolvedMonth,
+      dayWithinYear + 1,
+    );
+  }
+
+  static DateTime gregorianUtc(
+    int year,
+    int month,
+    int day, [
+    int hour = 0,
+    int minute = 0,
+    int second = 0,
+    int millisecond = 0,
+    int microsecond = 0,
+  ]) {
+    final DateTime date = firstGregorianUtc.add(
+      Duration(days: dayOffset(year, month, day)),
+    );
+    return DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+      hour,
+      minute,
+      second,
+      millisecond,
+      microsecond,
+    );
+  }
+
+  static List<int> _buildYearStartOffsets() {
+    final List<int> offsets = <int>[0];
+    int offset = 0;
+    for (final UniversityTehranPersianYear row in rows) {
+      offset += row.isLeapYear ? 366 : 365;
+      offsets.add(offset);
+    }
+    return List<int>.unmodifiable(offsets);
+  }
+
+  static List<UniversityTehranPersianYear> _loadRows() {
+    final List<String> dataLines = _embeddedCsvRows
+        .split('\n')
+        .where((String line) =>
+            line.isNotEmpty &&
+            !line.startsWith('#') &&
+            !line.startsWith('persian_year,'))
+        .toList(growable: false);
+
+    final List<UniversityTehranPersianYear> parsed =
+        dataLines.map((String line) {
+      final List<String> columns = line.split(',');
+      if (columns.length != 3) {
+        throw FormatException('Invalid University of Tehran CSV row', line);
+      }
+      final int year = int.parse(columns[0]);
+      final List<int> printedGregorianParts =
+          columns[1].split('-').map(int.parse).toList(growable: false);
+      if (printedGregorianParts.length != 3) {
+        throw FormatException('Invalid printed Gregorian date', columns[1]);
+      }
+      final String marker = columns[2];
+      if (marker != '' && marker != '*' && marker != '**') {
+        throw FormatException('Invalid leap marker', marker);
+      }
+      return UniversityTehranPersianYear(
+        year: year,
+        printedGregorianDateUtc: DateTime.utc(
+          printedGregorianParts[0],
+          printedGregorianParts[1],
+          printedGregorianParts[2],
+        ),
+        leapMarker: marker,
+      );
+    }).toList(growable: false);
+
+    final int expectedCount = maximumYear - minimumYear + 1;
+    if (parsed.length != expectedCount) {
+      throw StateError(
+        'Expected $expectedCount official years, found ${parsed.length}',
+      );
+    }
+    for (int index = 0; index < parsed.length; index++) {
+      final int expectedYear = minimumYear + index;
+      if (parsed[index].year != expectedYear) {
+        throw StateError(
+          'Expected official year $expectedYear at row $index, found '
+          '${parsed[index].year}',
+        );
+      }
+    }
+    return List<UniversityTehranPersianYear>.unmodifiable(parsed);
+  }
+}
+
+// Keep this byte-for-byte equivalent to the data section in [csvPath]. The
+// standalone CSV carries the source notes and checksums; this compile-time
+// copy makes the test oracle portable to Flutter's browser test platform.
+const String _embeddedCsvRows = r'''
+persian_year,printed_gregorian_date,leap_marker
+1206,1827-03-21,
+1207,1828-03-20,
+1208,1829-03-21,
+1209,1830-03-21,
+1210,1831-03-21,**
+1211,1832-03-20,
+1212,1833-03-20,
+1213,1834-03-21,
+1214,1835-03-21,*
+1215,1836-03-20,
+1216,1837-03-20,
+1217,1838-03-21,
+1218,1839-03-21,*
+1219,1840-03-20,
+1220,1841-03-20,
+1221,1842-03-21,
+1222,1843-03-21,*
+1223,1844-03-20,
+1224,1845-03-20,
+1225,1846-03-21,
+1226,1847-03-21,*
+1227,1848-03-20,
+1228,1849-03-20,
+1229,1850-03-21,
+1230,1851-03-21,*
+1231,1852-03-20,
+1232,1853-03-20,
+1233,1854-03-21,
+1234,1855-03-21,*
+1235,1856-03-20,
+1236,1857-03-20,
+1237,1858-03-21,
+1238,1859-03-21,*
+1239,1860-03-20,
+1240,1861-03-20,
+1241,1862-03-21,
+1242,1863-03-21,
+1243,1864-03-20,**
+1244,1865-03-20,
+1245,1866-03-20,
+1246,1867-03-21,
+1247,1868-03-20,*
+1248,1869-03-20,
+1249,1870-03-20,
+1250,1871-03-21,
+1251,1872-03-20,*
+1252,1873-03-20,
+1253,1874-03-20,
+1254,1875-03-21,
+1255,1876-03-20,*
+1256,1877-03-20,
+1257,1878-03-20,
+1258,1879-03-21,
+1259,1880-03-20,*
+1260,1881-03-20,
+1261,1882-03-20,
+1262,1883-03-21,
+1263,1884-03-20,*
+1264,1885-03-20,
+1265,1886-03-20,
+1266,1887-03-21,
+1267,1888-03-20,*
+1268,1889-03-20,
+1269,1890-03-20,
+1270,1891-03-21,
+1271,1892-03-20,*
+1272,1893-03-20,
+1273,1894-03-20,
+1274,1895-03-21,
+1275,1896-03-20,
+1276,1897-03-20,**
+1277,1898-03-20,
+1278,1899-03-20,
+1279,1900-03-21,
+1280,1901-03-21,*
+1281,1902-03-21,
+1282,1903-03-21,
+1283,1904-03-21,
+1284,1905-03-21,*
+1285,1906-03-21,
+1286,1907-03-21,
+1287,1908-03-21,
+1288,1909-03-21,*
+1289,1910-03-21,
+1290,1911-03-21,
+1291,1912-03-21,
+1292,1913-03-21,*
+1293,1914-03-21,
+1294,1915-03-21,
+1295,1916-03-21,
+1296,1917-03-21,*
+1297,1918-03-21,
+1298,1919-03-21,
+1299,1920-03-21,
+1300,1921-03-21,*
+1301,1922-03-21,
+1302,1923-03-21,
+1303,1924-03-21,
+1304,1925-03-21,*
+1305,1926-03-21,
+1306,1927-03-21,
+1307,1928-03-21,
+1308,1929-03-21,
+1309,1930-03-21,**
+1310,1931-03-21,
+1311,1932-03-20,
+1312,1933-03-21,
+1313,1934-03-21,*
+1314,1935-03-21,
+1315,1936-03-20,
+1316,1937-03-21,
+1317,1938-03-21,*
+1318,1939-03-21,
+1319,1940-03-20,
+1320,1941-03-21,
+1321,1942-03-21,*
+1322,1943-03-21,
+1323,1944-03-20,
+1324,1945-03-21,
+1325,1946-03-21,*
+1326,1947-03-21,
+1327,1948-03-20,
+1328,1949-03-21,
+1329,1950-03-21,*
+1330,1951-03-21,
+1331,1952-03-20,
+1332,1953-03-21,
+1333,1954-03-21,*
+1334,1955-03-21,
+1335,1956-03-20,
+1336,1957-03-21,
+1337,1958-03-21,*
+1338,1959-03-21,
+1339,1960-03-20,
+1340,1961-03-21,
+1341,1962-03-21,
+1342,1963-03-21,**
+1343,1964-03-20,
+1344,1965-03-20,
+1345,1966-03-21,
+1346,1967-03-21,*
+1347,1968-03-20,
+1348,1969-03-20,
+1349,1970-03-21,
+1350,1971-03-21,*
+1351,1972-03-20,
+1352,1973-03-20,
+1353,1974-03-21,
+1354,1975-03-21,*
+1355,1976-03-20,
+1356,1977-03-20,
+1357,1978-03-21,
+1358,1979-03-21,*
+1359,1980-03-20,
+1360,1981-03-20,
+1361,1982-03-21,
+1362,1983-03-21,*
+1363,1984-03-20,
+1364,1985-03-20,
+1365,1986-03-21,
+1366,1987-03-21,*
+1367,1988-03-20,
+1368,1989-03-20,
+1369,1990-03-21,
+1370,1991-03-21,*
+1371,1992-03-20,
+1372,1993-03-20,
+1373,1994-03-20,
+1374,1995-03-21,
+1375,1996-03-20,**
+1376,1997-03-20,
+1377,1998-03-20,
+1378,1999-03-21,
+1379,2000-03-20,*
+1380,2001-03-20,
+1381,2002-03-20,
+1382,2003-03-21,
+1383,2004-03-20,*
+1384,2005-03-20,
+1385,2006-03-20,
+1386,2007-03-21,
+1387,2008-03-20,*
+1388,2009-03-20,
+1389,2010-03-20,
+1390,2011-03-21,
+1391,2012-03-20,*
+1392,2013-03-20,
+1393,2014-03-20,
+1394,2015-03-21,
+1395,2016-03-20,*
+1396,2017-03-20,
+1397,2018-03-20,
+1398,2019-03-21,
+1399,2020-03-20,*
+1400,2021-03-20,
+1401,2022-03-20,
+1402,2023-03-21,
+1403,2024-03-20,*
+1404,2025-03-20,
+1405,2026-03-20,
+1406,2027-03-20,
+1407,2028-03-20,
+1408,2029-03-20,**
+1409,2030-03-20,
+1410,2031-03-20,
+1411,2032-03-20,
+1412,2033-03-20,*
+1413,2034-03-20,
+1414,2035-03-20,
+1415,2036-03-20,
+1416,2037-03-20,*
+1417,2038-03-20,
+1418,2039-03-20,
+1419,2040-03-20,
+1420,2041-03-20,*
+1421,2042-03-20,
+1422,2043-03-20,
+1423,2044-03-20,
+1424,2045-03-20,*
+1425,2046-03-20,
+1426,2047-03-20,
+1427,2048-03-20,
+1428,2049-03-20,*
+1429,2050-03-20,
+1430,2051-03-20,
+1431,2052-03-20,
+1432,2053-03-20,*
+1433,2054-03-20,
+1434,2055-03-20,
+1435,2056-03-20,
+1436,2057-03-20,*
+1437,2058-03-20,
+1438,2059-03-20,
+1439,2060-03-20,
+1440,2061-03-20,
+1441,2062-03-20,**
+1442,2063-03-20,
+1443,2064-03-19,
+1444,2065-03-20,
+1445,2066-03-20,*
+1446,2067-03-20,
+1447,2068-03-19,
+1448,2069-03-20,
+1449,2070-03-20,*
+1450,2071-03-20,
+1451,2072-03-19,
+1452,2073-03-20,
+1453,2074-03-20,*
+1454,2075-03-20,
+1455,2076-03-19,
+1456,2077-03-20,
+1457,2078-03-20,*
+1458,2079-03-20,
+1459,2080-03-19,
+1460,2081-03-20,
+1461,2082-03-20,*
+1462,2083-03-20,
+1463,2084-03-19,
+1464,2085-03-20,
+1465,2086-03-20,*
+1466,2087-03-20,
+1467,2088-03-19,
+1468,2089-03-20,
+1469,2090-03-20,*
+1470,2091-03-20,
+1471,2092-03-19,
+1472,2093-03-20,
+1473,2094-03-20,
+1474,2095-03-20,**
+1475,2096-03-19,
+1476,2097-03-19,
+1477,2098-03-20,
+1478,2099-03-20,*
+1479,2100-03-20,
+1480,2101-03-20,
+1481,2102-03-21,
+1482,2103-03-21,*
+1483,2104-03-20,
+1484,2105-03-20,
+1485,2106-03-21,
+1486,2107-03-21,*
+1487,2108-03-20,
+1488,2109-03-20,
+1489,2110-03-21,
+1490,2111-03-21,*
+1491,2112-03-20,
+1492,2113-03-20,
+1493,2114-03-21,
+1494,2115-03-21,*
+1495,2116-03-20,
+1496,2117-03-20,
+1497,2118-03-21,
+1498,2119-03-21,*
+''';
+
+final class UniversityTehranPersianYear {
+  const UniversityTehranPersianYear({
+    required this.year,
+    required this.printedGregorianDateUtc,
+    required this.leapMarker,
+  });
+
+  final int year;
+  final DateTime printedGregorianDateUtc;
+  final String leapMarker;
+
+  bool get isLeapYear => leapMarker.isNotEmpty;
+
+  bool get beginsFiveYearLeapInterval => leapMarker == '**';
+}
+
+final class ReferencePersianDate {
+  const ReferencePersianDate(this.year, this.month, this.day);
+
+  final int year;
+  final int month;
+  final int day;
+
+  @override
+  String toString() => '$year-${month.toString().padLeft(2, '0')}-'
+      '${day.toString().padLeft(2, '0')}';
+}

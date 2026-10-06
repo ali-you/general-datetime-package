@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:general_datetime_core/general_datetime_core.dart'
+    show PersianDateTime;
 
-import '../persian_date_time.dart';
+import '../delegates/persian_calendar_delegate.dart';
 
 class _PersianCalendarMaterialLocalizationsDelegate
     extends LocalizationsDelegate<MaterialLocalizations> {
@@ -18,9 +20,15 @@ class _PersianCalendarMaterialLocalizationsDelegate
   bool shouldReload(_PersianCalendarMaterialLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
+  String toString() =>
+      'DefaultPersianCalendarMaterialLocalizations.delegate(en_US)';
 }
 
+/// US-English Material localizations with Solar Hijri names and date formats.
+///
+/// [PersianCalendarDelegate] uses the ambient [MaterialLocalizations] for date
+/// formatting and parsing. Load [delegate] for a Persian date picker, either in
+/// its [MaterialApp] or through a picker-specific [Localizations.override].
 class DefaultPersianCalendarMaterialLocalizations
     implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
@@ -30,7 +38,7 @@ class DefaultPersianCalendarMaterialLocalizations
   /// function, rather than constructing this class directly.
   const DefaultPersianCalendarMaterialLocalizations();
 
-  // Ordered to match DateTime.monday=1, DateTime.sunday=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=7.
   static const List<String> _shortWeekdays = <String>[
     'Mon',
     'Tue',
@@ -41,7 +49,7 @@ class DefaultPersianCalendarMaterialLocalizations
     'Sun',
   ];
 
-  // Ordered to match DateTime.monday=1, DateTime.sunday=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=7.
   static const List<String> _weekdays = <String>[
     'Monday',
     'Tuesday',
@@ -92,33 +100,9 @@ class DefaultPersianCalendarMaterialLocalizations
     'Esfand',
   ];
 
-  /// Returns the number of days in a month, according to the proleptic
-  /// Gregorian calendar.
-  ///
-  /// This applies the leap year logic introduced by the Gregorian reforms of
-  /// 1582. It will not give valid results for dates prior to that time.
-  int _getDaysInMonth(int year, int month) {
-    if (month == PersianDateTime.esfand) {
-      final bool isLeapYear = PersianDateTime(year).isLeapYear;
-      if (isLeapYear) return 30;
-      return 29;
-    }
-    const List<int> daysInMonth = <int>[
-      31,
-      31,
-      31,
-      31,
-      31,
-      31,
-      30,
-      30,
-      30,
-      30,
-      30,
-      -1
-    ];
-    return daysInMonth[month - 1];
-  }
+  /// Returns the Solar Hijri length of [month] in [year].
+  int _getDaysInMonth(int year, int month) =>
+      PersianDateTime.daysInMonth(year, month);
 
   @override
   String formatHour(TimeOfDay timeOfDay, {bool alwaysUse24HourFormat = false}) {
@@ -157,10 +141,11 @@ class DefaultPersianCalendarMaterialLocalizations
 
   @override
   String formatCompactDate(DateTime date) {
-    // Assumes IR dd/mm/yyyy format
+    // Preserves the legacy dd/mm/yyyy contract of this English localization.
     final String month = _formatTwoDigitZeroPad(date.month);
     final String day = _formatTwoDigitZeroPad(date.day);
-    final String year = date.year.toString().padLeft(4, '0');
+    final String year =
+        '${date.year < 0 ? '-' : ''}${date.year.abs().toString().padLeft(4, '0')}';
     return '$day/$month/$year';
   }
 
@@ -200,23 +185,25 @@ class DefaultPersianCalendarMaterialLocalizations
   DateTime? parseCompactDate(String? inputString) {
     if (inputString == null) return null;
 
-    // Assumes Iran dd/mm/yyyy format
+    // Preserves the legacy dd/mm/yyyy contract of this English localization.
     final List<String> inputParts = inputString.split('/');
     if (inputParts.length != 3) return null;
 
-    final int? year = int.tryParse(inputParts[2], radix: 10);
-    if (year == null || year < 1) return null;
+    final int? year = int.tryParse(inputParts[2].trim(), radix: 10);
+    if (year == null) return null;
 
-    final int? month = int.tryParse(inputParts[1], radix: 10);
+    final int? month = int.tryParse(inputParts[1].trim(), radix: 10);
     if (month == null || month < 1 || month > 12) return null;
 
-    final int? day = int.tryParse(inputParts[0], radix: 10);
-    if (day == null || day < 1 || day > _getDaysInMonth(year, month)) {
-      return null;
-    }
+    final int? day = int.tryParse(inputParts[0].trim(), radix: 10);
+    if (day == null) return null;
 
     try {
+      if (!PersianDateTime.isValidDate(year, month, day)) return null;
+      if (day > _getDaysInMonth(year, month)) return null;
       return PersianDateTime(year, month, day);
+    } on RangeError {
+      return null;
     } on ArgumentError {
       return null;
     }
@@ -589,16 +576,15 @@ class DefaultPersianCalendarMaterialLocalizations
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expandedHint => 'Collapsed';
+  String get expandedHint => 'Expanded';
 
   @override
-  String get collapsedHint => 'Expanded';
+  String get collapsedHint => 'Collapsed';
 
   @override
   String get refreshIndicatorSemanticLabel => 'Refresh';
 
-  /// Creates an object that provides US English resource values for the material
-  /// library widgets.
+  /// Creates legacy US-English Material values with Solar Hijri date formats.
   ///
   /// The [locale] parameter is ignored.
   ///
@@ -612,7 +598,8 @@ class DefaultPersianCalendarMaterialLocalizations
   /// A [LocalizationsDelegate] that uses [DefaultPersianCalendarMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
+  /// Install this delegate for a [PersianCalendarDelegate] picker to supply
+  /// Solar Hijri month names, date formats, and parsing.
   static const LocalizationsDelegate<MaterialLocalizations> delegate =
       _PersianCalendarMaterialLocalizationsDelegate();
 

@@ -1,7 +1,4 @@
-/// This file is startup of general_datetime library
-/// you can use the package consider the example
+/// Calendar dates shared with general_datetime_core, for Flutter applications.
 library;
 
-export 'src/general_date_time_interface.dart';
-export 'src/hijri_date_time.dart';
-export 'src/persian_date_time.dart';
+export 'package:general_datetime_core/general_datetime_core.dart';

@@ -1,7 +1,109 @@
 # Changelog
 
-## Unreleased
+## [4.0.0]
 
+- Add `calendarDateRangePickerBuilder` to preserve the calendar delegate on
+  Flutter 3.32, whose `showDateRangePicker` omits it when creating the dialog.
+  Keep selected Persian/Hijri range endpoints in their calendar types while
+  preserving localization, text direction, and dialog options.
+
+- Remove internal `src/shared` forwarding libraries; use calendar helpers and
+  shared implementation utilities from `general_datetime_core` directly.
+- Remove the remaining internal chronology forwarding libraries from `src/`.
+  Material delegates and localizations import the core public library directly;
+  `general_datetime.dart` continues to re-export the core public API.
+
+- Remove the unused scheduling package. Keep named-zone conversion and explicit
+  DST policies in the calendar demo, which depends directly on `timezone`.
+
+- Add `rangePickerDelegate` adapters for Persian and Umm al-Qura Material range
+  pickers at finite chronology bounds. Empty-cell highlight and keyboard probes
+  use native comparison dates; selectable dates retain their calendar types and
+  supported bounds.
+
+- Add the common `CalendarSystem` contract and immutable built-in registry,
+  strict field construction, supported bounds, and chronology metadata.
+- Add immutable `CalendarDate`, explicit day/month/year arithmetic policies,
+  half-open date ranges, and calendar-aware week rules in the Dart core.
+- Add a separate four-view Flutter calendar demo with named-zone presentation
+  and explicit DST policies.
+- Resolve published cores in CI; add minimum/current SDK and timezone jobs,
+  JavaScript/Wasm coverage, and Android/iOS smoke workflows. Platform execution
+  remains a release gate; local verification does not establish device support.
+
+- Extract chronology, conversion, field utilities, and serialization into
+  `general_datetime_core` 1.0.0, usable with the Dart SDK alone. Retain the
+  existing Flutter imports as re-exports of the same types and keep picker
+  delegates/default Material localizations in this wrapper. Resolve the published
+  core through `general_datetime_core ^1.0.0` without local overrides.
+
+- Define `secondsSinceEpoch` as the containing Unix second, rounded down
+  directly from microseconds in both calendars. Negative fractional instants
+  now use consistent floor rounding; -1 microsecond becomes -1 second and
+  -1000001 microseconds becomes -2 seconds. UTC/local mode does not affect it.
+
+- Prevent constructor/copyWith arithmetic from wrapping extreme month, day,
+  and clock components into valid dates. Exact normalization checks supported
+  bounds before narrowing; ordinary normalization, cancellation, microseconds,
+  UTC/local mode, and maximum-date sentinels remain supported.
+
+- Added version-1 JSON storage contracts: `CalendarInstant` serializes exact
+  native Gregorian UTC timestamps with calendar and optional zone metadata;
+  `CalendarDateRecord` stores validated calendar/year/month/day fields without
+  an implied instant. Added Unicode calendar identifiers, strict decoders,
+  microsecond-preserving round trips, and storage warnings on calendar ISO output.
+
+- Persian/Hijri calendar delegates now reject incompatible runtime date types
+  with `ArgumentError` across field operations, ranges, nullable comparisons,
+  formatting, and non-null localization parser results. Callers must explicitly
+  convert Gregorian/other-calendar instants. Added 38 shared regression tests
+  including Material picker constructor validation and localization forwarding.
+
+- Added `CalendarDateUtils.copyWith`, `dateOnly`, and `toGregorian` as explicit
+  calendar-field and native-instant boundaries for `DateTime`-typed values.
+  Field operations preserve Persian/Hijri types, precision, and UTC/local mode;
+  unsupported calendar interfaces fail explicitly. Documented the upstream
+  `DateTime.copyWith`/`DateUtils` limitation and added shared regressions.
+
+- Breaking: replaces the published 2.1.0 chronology and native-instant contracts
+  with the corrected implementations described below. Unsupported calendar
+  dates now fail explicitly. The companion formatter wrapper is
+  `general_date_format` 3.0.0; both pure Dart cores remain at 1.0.0.
+
+- Added shared critical suites for both calendars: independent seeded
+  normalization, precision/epoch boundaries, adversarial parsing, DST, calendar
+  interoperability, and picker validation/navigation/localization isolation.
+- Added exhaustive compact parsing checks over all reference months and a
+  three-time-zone CI matrix with explicit DST assertions.
+- Fixed oversized epoch seconds/milliseconds wrapping into dates near 1970
+  in both calendars, with regressions for positive and negative 64-bit inputs.
+- Aligned Hijri calculations, data-coverage APIs, Material localizations,
+  delegates, scoped picker examples, and tests with the Persian structure.
+- Added customized Hijri formatting/parsing and input-picker coverage, and
+  corrected the Hijri localization's expansion-state hints.
+- Fixed Hijri parsing to apply numeric time-zone offsets before validating
+  supported endpoints, retaining microsecond precision.
+- Cross-checked all 3,612 Umm al-Qura months with ICU 78.3 and Java/OpenJDK 21;
+  replaced incompatible `hijri` 3.0.1 comparisons with primary-source regressions.
+
+- Extended Persian support to SH -61 through 3177 (Gregorian 0560-03-20
+  through 3799-03-19), retaining published data for SH 1206–1498 and using
+  Borkowski's finite break-year model elsewhere.
+- Exposed official-data bounds and coverage separately from calculation bounds.
+- Added signed-year formatting, expanded boundary tests, and exhaustive
+  conversion checks over the extended interval.
+
+- Replaced the mixed Persian leap algorithms with a finite official data model
+  sourced from the University of Tehran Calendar Center for SH 1206–1498.
+- Rebuilt Persian conversion, normalization, parsing, UTC/local handling, epoch
+  factories, arithmetic, equality, hashing, and `copyWith` around the true
+  native `DateTime` instant.
+- Made dates outside the finite Persian calculation range fail explicitly
+  instead of extrapolating a 33-year or 2820-year cycle.
+- Restored `PersianCalendarDelegate` to use the current Material localizations
+  for month names, date formatting, parsing, and input help.
+- Added official-source fixtures and exhaustive Persian calendar, boundary,
+  precision, parsing, delegate, and widget tests.
 - Replaced the approximate tabular Hijri implementation with the official
   Unicode ICU/OpenJDK Umm al-Qura month data for AH 1300 through AH 1600.
 - Rebuilt Hijri conversion, normalization, parsing, UTC/local handling, epoch
@@ -9,8 +111,8 @@
   `DateTime` instant.
 - Made unsupported Umm al-Qura dates fail explicitly instead of silently
   extrapolating another Islamic calendar.
-- Made `HijriCalendarDelegate` own Hijri formatting and parsing so it remains
-  correct under Gregorian or Persian ambient Material localizations.
+- Made `HijriCalendarDelegate` use the current Material localizations for
+  month names, date formatting, parsing, and input help, like the Persian delegate.
 - Added exhaustive calendar, boundary, precision, parsing, delegate, and widget
   tests, independently cross-validated with ICU and OpenJDK.
 - Raised the declared Flutter minimum to 3.32.0, where `CalendarDelegate` is

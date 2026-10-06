@@ -29,3 +29,7 @@ migrate_working_dir/
 .flutter-plugins
 .flutter-plugins-dependencies
 build/
+
+# Nested library packages and local development resolution.
+**/pubspec.lock
+**/pubspec_overrides.yaml

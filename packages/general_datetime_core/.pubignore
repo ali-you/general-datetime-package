@@ -1,0 +1,14 @@
+# Include this independently published package despite parent ignore rules.
+!**
+
+# Generated files and local development configuration.
+.dart_tool/
+build/
+doc/api/
+pubspec.lock
+pubspec_overrides.yaml
+pubspec_overrides.yaml.example
+coverage/
+*.log
+.idea/
+.vscode/

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:general_datetime/general_datetime.dart';
-import 'package:general_datetime/default_localizations.dart';
 import 'package:general_datetime/delegates.dart';
+import 'package:general_datetime/default_localizations.dart';
 
 void main() {
   // Create a Gregorian date and convert it to Persian dates:
@@ -57,7 +57,7 @@ class AppStartup extends StatelessWidget {
                     child: CalendarDatePicker(
                       initialDate: PersianDateTime.now(),
                       firstDate: PersianDateTime(1400, 1, 1),
-                      lastDate: PersianDateTime(1450, 12, 31),
+                      lastDate: PersianDateTime(1450, 12, 29),
                       currentDate: PersianDateTime.now(),
                       onDateChanged: (value) {
                         debugPrint('Persian selected: $value');
@@ -67,15 +67,21 @@ class AppStartup extends StatelessWidget {
                   ),
                   const Divider(),
                   const Text('Hijri Calendar'),
-                  CalendarDatePicker(
-                    initialDate: HijriDateTime.now(),
-                    firstDate: HijriDateTime(1440, 1, 1),
-                    lastDate: HijriDateTime(1460, 12, 29),
-                    currentDate: HijriDateTime.now(),
-                    onDateChanged: (value) {
-                      debugPrint('Hijri selected: $value');
-                    },
-                    calendarDelegate: const HijriCalendarDelegate(),
+                  Localizations.override(
+                    context: context,
+                    delegates: const <LocalizationsDelegate<dynamic>>[
+                      DefaultHijriCalendarMaterialLocalizations.delegate,
+                    ],
+                    child: CalendarDatePicker(
+                      initialDate: HijriDateTime.now(),
+                      firstDate: HijriDateTime(1440, 1, 1),
+                      lastDate: HijriDateTime(1460, 12, 29),
+                      currentDate: HijriDateTime.now(),
+                      onDateChanged: (value) {
+                        debugPrint('Hijri selected: $value');
+                      },
+                      calendarDelegate: const HijriCalendarDelegate(),
+                    ),
                   ),
                 ],
               ),

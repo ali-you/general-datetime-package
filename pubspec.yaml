@@ -1,6 +1,6 @@
 name: general_datetime
-description: "general_datetime is an package to handle all calendars and dates. The powerful interface can make any custom calendars"
-version: 2.1.0
+description: "Gregorian, Persian and Umm al-Qura chronology, strict civil-date contracts and Flutter Material date-picker adapters."
+version: 4.0.0
 homepage: https://github.com/ali-you
 repository: https://github.com/ali-you/general-datetime-package
 documentation: https://github.com/ali-you/general-datetime-package
@@ -17,6 +17,7 @@ environment:
   flutter: ">=3.32.0"
 
 dependencies:
+  general_datetime_core: ^1.0.0
   flutter:
     sdk: flutter
 
