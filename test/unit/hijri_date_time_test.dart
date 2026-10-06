@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:general_datetime/general_datetime.dart';
+// Used only by the archived third-party comparisons below.
+// import 'package:hijri/hijri_calendar.dart';
 
 import '../fixtures/umm_al_qura_openjdk21_fixture.dart';
 
@@ -980,6 +982,73 @@ void main() {
           DateTime.utc(2024, 12, 2));
     });
   });
+
+  // Compared with hijri 3.0.1 on 2026-10-06: 764/1,740 month lengths differ.
+  // Across 51,383 days, 20,741 forward and 20,730 reverse conversions differ.
+  // These equality tests failed; ICU/OpenJDK fixture tests remain authoritative.
+  // Restore the hijri dev dependency and commented import to rerun.
+  // group('Third-party comparison with hijri 3.0.1', () {
+  //   test('compares every shared month length', () {
+  //     final reference = HijriCalendar();
+  //     var checked = 0;
+  //     var mismatches = 0;
+  //     final examples = <String>[];
+  //     for (var year = 1356; year <= 1500; year++) {
+  //       for (var month = 1; month <= 12; month++) {
+  //         final actual = HijriDateTime.daysInMonth(year, month);
+  //         final expected = reference.getDaysInMonth(year, month);
+  //         checked++;
+  //         if (actual != expected) {
+  //           mismatches++;
+  //           if (examples.length < 5) {
+  //             examples.add('$year-$month: ICU/OpenJDK=$actual, hijri=$expected');
+  //           }
+  //         }
+  //       }
+  //     }
+  //     final report = '$mismatches of $checked month lengths differ; $examples';
+  //     print(report);
+  //     expect(mismatches, 0, reason: report);
+  //   });
+  //
+  //   test('compares both conversions for every shared Gregorian day', () {
+  //     final reference = HijriCalendar();
+  //     final first = reference.hijriToGregorian(1356, 1, 1);
+  //     final last = reference.hijriToGregorian(
+  //         1500, 12, reference.getDaysInMonth(1500, 12));
+  //     final end = DateTime.utc(last.year, last.month, last.day);
+  //     var checked = 0;
+  //     var forwardMismatches = 0;
+  //     var reverseMismatches = 0;
+  //     final examples = <String>[];
+  //     for (var date = DateTime.utc(first.year, first.month, first.day);
+  //         !date.isAfter(end);
+  //         date = date.add(const Duration(days: 1))) {
+  //       final expected = HijriCalendar.fromDate(date);
+  //       final actual = HijriDateTime.fromDateTime(date);
+  //       checked++;
+  //       if (actual.year != expected.hYear ||
+  //           actual.month != expected.hMonth ||
+  //           actual.day != expected.hDay) {
+  //         forwardMismatches++;
+  //         if (examples.length < 5) {
+  //           examples.add('${date.toIso8601String()}: '
+  //               'ICU/OpenJDK=${actual.year}-${actual.month}-${actual.day}, '
+  //               'hijri=${expected.hYear}-${expected.hMonth}-${expected.hDay}');
+  //         }
+  //       }
+  //       final reverse = HijriDateTime.utc(
+  //               expected.hYear, expected.hMonth, expected.hDay)
+  //           .toDateTime();
+  //       if (reverse != date) reverseMismatches++;
+  //     }
+  //     final report = '$checked shared days: $forwardMismatches forward and '
+  //         '$reverseMismatches reverse differences; $examples';
+  //     print(report);
+  //     expect(forwardMismatches, 0, reason: report);
+  //     expect(reverseMismatches, 0, reason: report);
+  //   });
+  // });
 }
 
 const List<_ReferenceAnchor> _referenceAnchors = <_ReferenceAnchor>[

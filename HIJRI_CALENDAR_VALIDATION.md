@@ -63,6 +63,23 @@ validate the chosen chronology or its full range. Primary-source regression
 anchors replace those assertions; exhaustive independent fixture validation
 continues to cover the entire interval.
 
+## Third-party comparison run
+
+On 2026-10-06, an exhaustive comparison with `hijri` 3.0.1 over its AH 1356–1500
+range found 764 differences among 1,740 month lengths. Across 51,383 shared
+Gregorian days, 20,741 Gregorian-to-Hijri conversions and 20,730 reverse
+conversions differed. Both equality comparison tests failed; the active
+ICU/OpenJDK regression anchors and independent fixture tests remain in place.
+
+The comparison cases and import are preserved as comments in
+`test/unit/hijri_date_time_test.dart`. `hijri` is removed from `dev_dependencies`.
+To reproduce, restore `hijri: ^3.0.1`, the commented import and comparison group,
+then run `flutter pub get` and:
+
+```console
+flutter test test/unit/hijri_date_time_test.dart --plain-name "Third-party comparison with hijri 3.0.1"
+```
+
 ## Structure and Flutter integration
 
 The structure follows the Persian calendar: `UmmAlQuraData` holds source data,

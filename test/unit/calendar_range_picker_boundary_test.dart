@@ -9,6 +9,61 @@ import 'package:general_datetime/general_datetime.dart';
 import '../support/calendar_test_case.dart';
 
 void main() {
+  testWidgets(
+      'range builder repairs an omitted delegate and preserves wrappers',
+      (tester) async {
+    final delegate = const HijriCalendarDelegate().rangePickerDelegate;
+    final first = HijriDateTime(1446, 1, 1);
+    final last = HijriDateTime(1446, 1, 30);
+    final builder = calendarDateRangePickerBuilder(delegate,
+        builder: (context, child) => Padding(
+              key: const ValueKey('application builder'),
+              padding: const EdgeInsets.all(8),
+              child: child,
+            ));
+    await tester.pumpWidget(MaterialApp(
+      localizationsDelegates: [
+        DefaultHijriCalendarMaterialLocalizations.delegate,
+      ],
+      home: Builder(builder: (context) {
+        // Simulate Flutter 3.32 constructing the dialog with its default
+        // Gregorian delegate, then applying locale/direction wrappers.
+        return builder(
+          context,
+          Localizations.override(
+            context: context,
+            locale: const Locale('en', 'US'),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: _DialogWithoutDelegate(
+                firstDate: first,
+                lastDate: last,
+                currentDate: first,
+                initialDateRange: DateTimeRange(start: first, end: last),
+                initialEntryMode: DatePickerEntryMode.input,
+                helpText: 'Custom range help',
+                fieldStartLabelText: 'Custom start',
+                fieldEndLabelText: 'Custom end',
+              ),
+            ),
+          ),
+        );
+      }),
+    ));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final dialog = find.byType(DateRangePickerDialog);
+    expect(tester.widget<DateRangePickerDialog>(dialog).calendarDelegate,
+        same(delegate));
+    expect(Localizations.localeOf(tester.element(dialog)),
+        const Locale('en', 'US'));
+    expect(Directionality.of(tester.element(dialog)), TextDirection.rtl);
+    expect(find.byKey(const ValueKey('application builder')), findsOneWidget);
+    expect(find.text('Custom range help'), findsOneWidget);
+    expect(find.text('Custom start'), findsOneWidget);
+    expect(find.text('Custom end'), findsOneWidget);
+  });
+
   for (final calendar in calendarTestCases) {
     test('${calendar.name} range probes preserve chronology and input guards',
         () {
@@ -69,6 +124,7 @@ void main() {
           final localizations = calendar.name == 'Persian'
               ? _PersianWeekStart(weekStart)
               : _HijriWeekStart(weekStart);
+          final rangeDelegate = _rangeDelegate(calendar);
           await tester.pumpWidget(MaterialApp(
             localizationsDelegates: [_ValueLocalizations(localizations)],
             home: Builder(
@@ -81,7 +137,8 @@ void main() {
                       lastDate: last,
                       currentDate: endpoint,
                       initialDateRange: initial,
-                      calendarDelegate: _rangeDelegate(calendar),
+                      calendarDelegate: rangeDelegate,
+                      builder: calendarDateRangePickerBuilder(rangeDelegate),
                     );
                   },
                   child: const Text('open'),
@@ -141,6 +198,7 @@ void main() {
             year, month, calendar.delegate.getDaysInMonth(year, month),
             isUtc: false);
         final localizations = calendar.localizations;
+        final rangeDelegate = _rangeDelegate(calendar);
         DateTimeRange<DateTime>? selected;
         await tester.pumpWidget(MaterialApp(
           localizationsDelegates: [calendar.localizationDelegate],
@@ -155,7 +213,8 @@ void main() {
                     currentDate: atMinimum ? first : last,
                     initialDateRange: DateTimeRange(start: first, end: last),
                     initialEntryMode: DatePickerEntryMode.input,
-                    calendarDelegate: _rangeDelegate(calendar),
+                    calendarDelegate: rangeDelegate,
+                    builder: calendarDateRangePickerBuilder(rangeDelegate),
                   );
                 },
                 child: const Text('open'),
@@ -184,6 +243,27 @@ void main() {
       });
     }
   }
+}
+
+// Flutter 3.32 exposes currentDate directly; newer SDKs normalize it through
+// the dialog's delegate. Preserve the older behavior in this regression fixture.
+class _DialogWithoutDelegate extends DateRangePickerDialog {
+  const _DialogWithoutDelegate({
+    required super.firstDate,
+    required super.lastDate,
+    required DateTime currentDate,
+    super.initialDateRange,
+    super.initialEntryMode,
+    super.helpText,
+    super.fieldStartLabelText,
+    super.fieldEndLabelText,
+  })  : _originalCurrentDate = currentDate,
+        super(currentDate: currentDate);
+
+  final DateTime _originalCurrentDate;
+
+  @override
+  DateTime get currentDate => _originalCurrentDate;
 }
 
 CalendarDelegate<DateTime> _rangeDelegate(CalendarTestCase calendar) =>

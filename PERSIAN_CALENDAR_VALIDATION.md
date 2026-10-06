@@ -62,17 +62,11 @@ fixture for auditability but is never used for conversion.
 
 ## Verification coverage
 
-The tests keep the official CSV fixture separate from production data and use
-it as an independent oracle. They verify:
+The active tests keep the official CSV fixture separate from production data
+and use it as an independent oracle. They verify:
 
 - all 293 published leap/common-year markers and all 3,516 month lengths;
 - every one of the 107,016 published-data days in both conversion directions;
-- all 3,239 supported year starts and leap statuses against `shamsi_date`;
-- all 1,183,020 calculated-range days against external year starts, including
-  conversion round trips and Julian day numbers;
-- reverse conversion for every day in the external oracle's shared range
-  (its final date is Gregorian 3798-12-31; this implementation covers the
-  remaining 78 days of the final Persian year as well);
 - continuity at both published-data edges and signed-year formatting;
 - the three annual-calendar civil anchors above and both range boundaries;
 - Julian day numbers, weekdays, normalization, parsing and offsets;
@@ -80,6 +74,21 @@ it as an independent oracle. They verify:
   hashing, comparisons, arithmetic, and `copyWith`;
 - Persian Material localization formatting and parsing, customized month
   headers, signed years, date-picker navigation, input mode, and range failures.
+
+On 2026-10-06, all three comparisons with `shamsi_date` 1.1.1 passed:
+3,239 year starts and leap statuses, all 1,183,020 calculated-range days against
+external year starts, and every Gregorian day in the shared conversion range.
+The external oracle ends at Gregorian 3798-12-31; this package covers the
+remaining 78 days of the final Persian year as well.
+
+Those comparison cases and imports are now commented in
+`test/unit/persian_date_time_test.dart`, and `shamsi_date` is removed from
+`dev_dependencies`. To rerun, restore `shamsi_date: ^1.1.1`, the commented imports,
+and the three cases, then run `flutter pub get` and:
+
+```console
+flutter test test/unit/persian_date_time_test.dart --name "matches external year starts and leap status throughout the range|Third-party comparison"
+```
 
 Shared critical regression suites and time-zone CI coverage are described in
 [Development and testing](README.md#development-and-testing).

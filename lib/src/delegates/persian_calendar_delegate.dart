@@ -21,6 +21,8 @@ class PersianCalendarDelegate extends CalendarDelegate<DateTime> {
   /// bounds. This adapter supplies native comparison dates for those probes;
   /// all selectable dates and results remain [PersianDateTime]. Use this only
   /// with the range picker, and this delegate for general calendar arithmetic.
+  /// On Flutter 3.32, also pass `calendarDateRangePickerBuilder` from
+  /// `package:general_datetime/delegates.dart` as the range picker's builder.
   CalendarDelegate<DateTime> get rangePickerDelegate =>
       RangePickerCalendarDelegate(this,
           minimumYear: PersianDateTime.minimumYear);

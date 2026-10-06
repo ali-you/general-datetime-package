@@ -2,6 +2,11 @@
 
 ## [4.0.0]
 
+- Add `calendarDateRangePickerBuilder` to preserve the calendar delegate on
+  Flutter 3.32, whose `showDateRangePicker` omits it when creating the dialog.
+  Keep selected Persian/Hijri range endpoints in their calendar types while
+  preserving localization, text direction, and dialog options.
+
 - Remove internal `src/shared` forwarding libraries; use calendar helpers and
   shared implementation utilities from `general_datetime_core` directly.
 - Remove the remaining internal chronology forwarding libraries from `src/`.

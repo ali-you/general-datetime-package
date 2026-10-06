@@ -463,17 +463,26 @@ Use `rangePickerDelegate` with Flutter's `showDateRangePicker` or
 `DateRangePickerDialog`, together with matching calendar localizations:
 
 ```dart
+final delegate = const PersianCalendarDelegate().rangePickerDelegate;
 final range = await showDateRangePicker(
   context: context,
   firstDate: PersianDateTime(PersianDateTime.minimumYear),
   lastDate: PersianDateTime(PersianDateTime.minimumYear, 2, 20),
   currentDate: PersianDateTime(PersianDateTime.minimumYear),
-  calendarDelegate: const PersianCalendarDelegate().rangePickerDelegate,
+  calendarDelegate: delegate,
+  builder: calendarDateRangePickerBuilder(delegate),
 );
 ```
 
 For Umm al-Qura, use `const HijriCalendarDelegate().rangePickerDelegate` and
-matching Hijri dates. Flutter probes empty leading cells and adjacent keyboard
+matching Hijri dates. Import the builder from `package:general_datetime/delegates.dart`.
+Flutter 3.32 does not forward `showDateRangePicker`'s delegate to its dialog;
+`calendarDateRangePickerBuilder` supplies it explicitly. It preserves locale,
+text direction, and dialog options, and passes through the dialog on newer SDKs.
+For application-specific wrapping, pass your builder as its optional `builder`
+argument. With `DateRangePickerDialog`, supply `calendarDelegate` directly.
+
+Flutter probes empty leading cells and adjacent keyboard
 targets before checking the picker's bounds. The adapter supplies native
 comparison dates for those probes; selectable dates and returned range endpoints
 remain supported calendar objects. Use the ordinary delegate for general date
