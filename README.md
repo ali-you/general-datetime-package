@@ -457,36 +457,130 @@ scope each picker with `Localizations.override`; avoid installing competing
 Material delegates in one scope. Flutter uses the first supported Material
 localization delegate in that scope.
 
-### Range selection at supported bounds
+### Complete date-range picker example
 
-Use `rangePickerDelegate` with Flutter's `showDateRangePicker` or
-`DateRangePickerDialog`, together with matching calendar localizations:
+Use `rangePickerDelegate` for Persian and Umm al-Qura ranges, together with
+matching calendar localizations. This function can be called from a button in
+an ordinary `MaterialApp`; the localization applies only to the dialog:
 
 ```dart
-final delegate = const PersianCalendarDelegate().rangePickerDelegate;
-final range = await showDateRangePicker(
-  context: context,
-  firstDate: PersianDateTime(PersianDateTime.minimumYear),
-  lastDate: PersianDateTime(PersianDateTime.minimumYear, 2, 20),
-  currentDate: PersianDateTime(PersianDateTime.minimumYear),
-  calendarDelegate: delegate,
-  builder: calendarDateRangePickerBuilder(delegate),
-);
+import 'package:flutter/material.dart';
+import 'package:general_datetime/general_datetime.dart';
+import 'package:general_datetime/delegates.dart';
+import 'package:general_datetime/default_localizations.dart';
+
+Future<DateTimeRange<DateTime>?> pickPersianRange(
+  BuildContext context, {
+  DateTimeRange<DateTime>? initialDateRange,
+}) {
+  final delegate = const PersianCalendarDelegate().rangePickerDelegate;
+  return showDateRangePicker(
+    context: context,
+    firstDate: PersianDateTime(1400),
+    lastDate: PersianDateTime(1410, 12, 29),
+    initialDateRange: initialDateRange,
+    calendarDelegate: delegate,
+    builder: calendarDateRangePickerBuilder(
+      delegate,
+      builder: (context, child) => Localizations.override(
+        context: context,
+        locale: const Locale('en'),
+        delegates: const [
+          DefaultPersianCalendarMaterialLocalizations.delegate,
+        ],
+        child: child,
+      ),
+    ),
+  );
+}
 ```
 
-For Umm al-Qura, use `const HijriCalendarDelegate().rangePickerDelegate` and
-matching Hijri dates. Import the builder from `package:general_datetime/delegates.dart`.
-Flutter 3.32 does not forward `showDateRangePicker`'s delegate to its dialog;
-`calendarDateRangePickerBuilder` supplies it explicitly. It preserves locale,
-text direction, and dialog options, and passes through the dialog on newer SDKs.
-For application-specific wrapping, pass your builder as its optional `builder`
-argument. With `DateRangePickerDialog`, supply `calendarDelegate` directly.
+For example, call `await pickPersianRange(context)` or pass
+`DateTimeRange(start: PersianDateTime(1403, 1, 1), end: PersianDateTime(1403, 1, 5))`
+as `initialDateRange`. The result is `null` on cancellation. Otherwise, `start`
+and `end` are `PersianDateTime` objects, even though the return type uses
+`DateTime`. Save that result and pass it back when reopening the same calendar.
+
+For Umm al-Qura, replace the dates with `HijriDateTime`, the delegate with
+`const HijriCalendarDelegate().rangePickerDelegate`, and the localization with
+`DefaultHijriCalendarMaterialLocalizations.delegate`. Keep bounds within the
+calendar's supported years. The example explicitly selects English because
+these built-in localizations only support `en`. For a translated picker, use
+the matching `general_date_format` localization delegate and a supported locale
+instead; configure the app's Flutter widget localizations for RTL languages.
+
+### Why the range-picker builder exists
+
+`calendarDateRangePickerBuilder` is a Flutter compatibility helper. In
+[Flutter 3.32.0's implementation](https://github.com/flutter/flutter/blob/3.32.0/packages/flutter/lib/src/material/date_picker.dart#L1178-L1199),
+`showDateRangePicker` accepts `calendarDelegate` but does not pass it to the
+`DateRangePickerDialog` it creates. The dialog then uses its default Gregorian
+delegate. Wrapping that dialog in `Localizations.override` changes its labels
+and parsing, but does not replace its calendar arithmetic.
+
+The helper supplies the missing delegate while preserving locale, text
+direction, and dialog options. Pass the **same delegate instance** to
+`showDateRangePicker` and `calendarDateRangePickerBuilder`. Put your
+`Localizations.override`, `Theme`, or other wrapper in the helper's optional
+`builder` argument, as shown above.
+
+On Flutter SDKs that forward the delegate correctly, you can call
+`showDateRangePicker` directly with your localization builder:
+
+```dart
+// Use the same dates and delegate as in pickPersianRange above.
+builder: (context, child) => Localizations.override(
+  context: context,
+  locale: const Locale('en'),
+  delegates: const [DefaultPersianCalendarMaterialLocalizations.delegate],
+  child: child,
+),
+```
+
+The helper is optional on those SDKs and passes their dialog through unchanged.
+Keep it when your app or package must support Flutter 3.32; this package's
+minimum Flutter version is 3.32.0. If you construct `DateRangePickerDialog`
+yourself, pass `calendarDelegate` directly to its constructor and wrap it in
+the matching localizations; the compatibility helper is unnecessary.
+
+### Switching calendars and handling supported bounds
+
+For an app-defined `CalendarType` enum, choose the range delegate like this:
+
+```dart
+final CalendarDelegate<DateTime> delegate = switch (widget.calendarType) {
+  CalendarType.persian => const PersianCalendarDelegate().rangePickerDelegate,
+  CalendarType.gregorian => const GregorianCalendarDelegate(),
+};
+```
+
+Use that delegate with the builder pattern above, choosing the Persian
+localization only for the Persian branch and the app's ordinary Gregorian
+Material localizations for the Gregorian branch. An empty override delegate
+list inherits the app's localizations; this assumes the app has not globally
+installed a Persian or Hijri Material localization.
+
+`firstDate`, `lastDate`, optional `currentDate`, and both `initialDateRange`
+endpoints must match the selected calendar's runtime type. Use native
+Gregorian `DateTime` values for Gregorian, `PersianDateTime` for Persian, and
+`HijriDateTime` for Umm al-Qura. On a calendar switch, explicitly convert saved
+dates to the new calendar or clear the initial range. For example,
+`PersianDateTime.fromDateTime(gregorianDate)` converts an instant; constructing
+`PersianDateTime(gregorianDate.year, gregorianDate.month, gregorianDate.day)`
+would instead interpret those numbers as Persian fields. Ensure the initial
+range is ordered and lies inside the picker bounds.
 
 Flutter probes empty leading cells and adjacent keyboard
 targets before checking the picker's bounds. The adapter supplies native
 comparison dates for those probes; selectable dates and returned range endpoints
 remain supported calendar objects. Use the ordinary delegate for general date
 arithmetic and single-date pickers.
+
+To display the earliest supported month, for example, use
+`PersianDateTime(PersianDateTime.minimumYear)` as both `firstDate` and
+`currentDate`, and a later supported Persian date as `lastDate`. The
+`rangePickerDelegate` adapter handles probes outside that boundary; it does
+not allow users to select dates outside the calendar's supported range.
 
 ### Standalone year selection
 
