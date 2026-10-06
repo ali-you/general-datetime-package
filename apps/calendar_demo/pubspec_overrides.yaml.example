@@ -1,5 +1,0 @@
-dependency_overrides:
-  general_datetime_core:
-    path: ../../packages/general_datetime_core
-  general_date_format_core:
-    path: ../../../general_date_format/packages/general_date_format_core

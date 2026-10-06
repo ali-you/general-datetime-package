@@ -546,7 +546,7 @@ flutter test --dart-define=CALENDAR_TEST_TZ=Asia/Tehran test/unit/calendar_criti
 ```
 
 CI is configured for minimum/current SDKs and UTC/Tehran/New York Linux jobs;
-source peers are pinned in `.github/calendar_pair.json`. Windows local tests
+dependencies resolve from pub.dev without local overrides. Windows local tests
 use the OS timezone. Browser JavaScript/Wasm, Android/iOS, minimum SDK execution,
 the full process-timezone matrix, and hosted dependency resolution were not
 certified by that local run. Coverage percentages were not recalculated.

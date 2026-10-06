@@ -1,6 +1,6 @@
 name: general_datetime
 description: "Gregorian, Persian and Umm al-Qura chronology, strict civil-date contracts and Flutter Material date-picker adapters."
-version: 3.0.0
+version: 3  .0.0
 homepage: https://github.com/ali-you
 repository: https://github.com/ali-you/general-datetime-package
 documentation: https://github.com/ali-you/general-datetime-package

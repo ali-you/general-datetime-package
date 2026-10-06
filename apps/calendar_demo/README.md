@@ -7,10 +7,9 @@ event presentation,
 secondary dates, asynchronous controller state, deterministic overlap columns,
 all-day events and midnight splitting. Its sample event source is in memory.
 
-From the two neighboring repositories, resolve local sources:
+From the repository root, resolve the published cores:
 
 ```sh
-python tool/resolve_calendar_pair.py --chronology . --formatter ../general_date_format
 cd apps/calendar_demo
 flutter pub get
 flutter run -d chrome
@@ -18,8 +17,7 @@ flutter run -d chrome
 
 Named-zone conversion and explicit DST policies live in `lib/demo_time_zones.dart`.
 The demo initializes the bundled `timezone` data at startup.
-The alternative local `pubspec_overrides.yaml.example` resolves both cores
-directly. On a device, run `flutter run -d <device-id>`.
+On a device, run `flutter run -d <device-id>`.
 
 For checks:
 

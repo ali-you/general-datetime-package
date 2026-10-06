@@ -5,10 +5,9 @@ screen. Each calendar picker has matching date values, a calendar delegate,
 and its own localization scope. Startup also demonstrates converting a native
 Gregorian instant to Persian and Hijri dates.
 
-From this directory, resolve the neighboring unpublished packages and run:
+From this directory, resolve the published core and run:
 
 ```powershell
-Copy-Item pubspec_overrides.yaml.example pubspec_overrides.yaml
 flutter pub get
 flutter run
 ```

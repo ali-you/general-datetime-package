@@ -8,22 +8,6 @@ on:
 permissions:
   contents: read
 jobs:
-  pair:
-    runs-on: ubuntu-latest
-    outputs:
-      repository: ${{ steps.pin.outputs.repository }}
-      revision: ${{ steps.pin.outputs.revision }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: pin
-        run: |
-          python - <<'PY'
-          import json, os, re
-          pin = json.load(open('.github/calendar_pair.json'))
-          assert re.fullmatch(r'[0-9a-f]{40}', pin['peerRevision'])
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('repository=' + pin['peerRepository'] + '\nrevision=' + pin['peerRevision'] + '\n')
-          PY
   dart-core:
     runs-on: ubuntu-latest
     strategy:
@@ -45,7 +29,6 @@ jobs:
       - run: dart compile exe example/cli.dart -o .dart_tool/calendar_cli
       - run: .dart_tool/calendar_cli
   test:
-    needs: pair
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -56,20 +39,13 @@ jobs:
       TZ: ${{ matrix.timezone }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: ${{ needs.pair.outputs.repository }}
-          ref: ${{ needs.pair.outputs.revision }}
-          path: .dart_tool/calendar_dependencies/general_date_format
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ matrix.flutter }}
-      - name: Resolve and record exact source pair
+      - name: Resolve published dependencies
         run: |
-          python tool/resolve_calendar_pair.py --chronology "$GITHUB_WORKSPACE" --formatter "$GITHUB_WORKSPACE/.dart_tool/calendar_dependencies/general_date_format"
           git rev-parse HEAD
-          git -C .dart_tool/calendar_dependencies/general_date_format rev-parse HEAD
           flutter pub get
           (cd packages/general_datetime_core && dart pub get)
           (cd apps/calendar_demo && flutter pub get)

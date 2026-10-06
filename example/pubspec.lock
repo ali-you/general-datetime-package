@@ -75,11 +75,12 @@ packages:
     source: path
     version: "3.0.0"
   general_datetime_core:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../packages/general_datetime_core"
-      relative: true
-    source: path
+      name: general_datetime_core
+      sha256: "5dd3cbc88d25cf1416f11cfd2acb1a17088858d318103535c65edc828344a32d"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   leak_tracker:
     dependency: transitive
@@ -216,4 +217,4 @@ packages:
     version: "14.3.1"
 sdks:
   dart: ">=3.11.0-0 <4.0.0"
-  flutter: ">=3.18.0-18.0.pre.54"
+  flutter: ">=3.32.0"
