@@ -5,6 +5,9 @@ Flutter. Convert exact instants, work with calendar fields and all-day dates,
 serialize values safely, and use Persian or Hijri calendars in Material date
 pickers.
 
+See the [documentation index](docs/README.md) for focused guides, calendar
+validation reports, and the calendar expansion review.
+
 [![pub.dev](https://img.shields.io/pub/v/general_datetime.svg)](https://pub.dev/packages/general_datetime)
 [![Calendar CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml)
 
@@ -134,8 +137,8 @@ mode or adding a duration near an endpoint can throw `RangeError` if the new
 wall date falls outside that calendar's bounds.
 
 Data sources, hashes, independent fixtures, and source decisions are documented
-in [Persian validation](PERSIAN_CALENDAR_VALIDATION.md) and
-[Umm al-Qura validation](HIJRI_CALENDAR_VALIDATION.md).
+in [Persian validation](docs/persian-calendar-validation.md) and
+[Umm al-Qura validation](docs/hijri-calendar-validation.md).
 
 ## Construction, validation, and parsing
 

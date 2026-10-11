@@ -1,5 +1,9 @@
 # Hijri calendar validation
 
+[Documentation index](README.md)
+
+Repository paths and commands below are relative to the repository root.
+
 `HijriDateTime` implements the data-backed Umm al-Qura calendar. Its supported
 interval is AH 1300-01-01 through AH 1600-12-30, corresponding to Gregorian
 1882-11-12 through 2174-11-25, inclusive: 301 years and 106,665 calendar days.
@@ -9,7 +13,7 @@ The table contains 190 years of 354 days and 111 years of 355 days.
 
 - [Unicode ICU 78.3 `islamcal.cpp`](https://github.com/unicode-org/icu/blob/release-78.3/icu4c/source/i18n/islamcal.cpp)
   supplies the production month masks. Attribution and the Unicode license are
-  in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+  in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
 - [OpenJDK 21's Hijrah-umalqura configuration](https://github.com/openjdk/jdk21u/blob/master/src/java.base/share/classes/java/time/chrono/hijrah-config-Hijrah-umalqura_islamic-umalqura.properties)
   provides independently represented month lengths and the Gregorian epoch.
 - Java 21.0.8's `java.time.chrono.HijrahDate` was checked separately: all 3,612
@@ -96,7 +100,7 @@ Install its localization delegate in the picker scope using
 Delegate and widget tests exercise customized names/formats/parsing, input
 submission, navigation, range rejection, week alignment, and scoped pickers.
 Shared critical regression suites and time-zone CI coverage are described in
-[Development and testing](README.md#development-and-testing).
+[Development and testing](development.md).
 
 Umm al-Qura data must not be extended using a repeating arithmetic Islamic
 leap cycle. Adding support beyond this interval requires a separately verified

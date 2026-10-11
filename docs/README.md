@@ -1,0 +1,43 @@
+# General DateTime documentation
+
+Guides for the APIs implemented in this repository. Start with
+[getting started](getting-started.md), then choose the guide that matches your
+application.
+
+| Guide | What it covers |
+| --- | --- |
+| [Getting started](getting-started.md) | Package choice, requirements, imports, and a first conversion |
+| [Architecture](architecture.md) | Core/wrapper boundaries, source layout, and extension constraints |
+| [Calendar operations](calendar-operations.md) | Bounds, validation, parsing, instants, civil arithmetic, and weeks |
+| [Serialization](serialization.md) | Version-1 JSON schemas, timestamps, all-day dates, and decoder errors |
+| [Flutter integration](flutter-integration.md) | Material pickers, localization scopes, range adapters, and calendar switching |
+| [Migration](migration.md) | Existing integration changes and release metadata discrepancies |
+| [Development and testing](development.md) | Local checks, fixtures, CI coverage, and release gates |
+| [Persian calendar validation](persian-calendar-validation.md) | Published leap data, calculation bounds, source decisions, and verification history |
+| [Umm al-Qura validation](hijri-calendar-validation.md) | Month-table provenance, independent checks, and verification history |
+| [Calendar expansion review](calendar-expansion-review.md) | Proposed architecture for additional calendars; a design plan rather than available APIs |
+
+The [root README](../README.md) contains a combined API overview. The
+[core README](../packages/general_datetime_core/README.md) focuses on pure Dart.
+The [picker example](../example/lib/main.dart) and
+[calendar application demo](../apps/calendar_demo/README.md) provide working
+integration references.
+
+Package entry points, release history, and licensing remain beside the packages
+and applications they describe:
+
+- [Third-party notices](../THIRD_PARTY_NOTICES.md)
+- [License](../LICENSE)
+- [Changelog](../CHANGELOG.md)
+
+The core retains its own [changelog](../packages/general_datetime_core/CHANGELOG.md),
+[third-party notices](../packages/general_datetime_core/THIRD_PARTY_NOTICES.md),
+and [license](../packages/general_datetime_core/LICENSE) for independent distribution.
+The [picker example README](../example/README.md) and
+[demo README](../apps/calendar_demo/README.md) retain component-specific run instructions.
+
+These guides describe checkout behavior. The wrapper manifest declares **3.0.0**,
+while the root README and changelog describe **4.0.0**. See
+[migration](migration.md) before choosing a release constraint. A documented
+feature in this checkout does not establish that it is available in a hosted
+package release.

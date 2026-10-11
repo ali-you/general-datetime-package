@@ -1,5 +1,9 @@
 # Persian calendar data and validation
 
+[Documentation index](README.md)
+
+Repository paths and commands below are relative to the repository root.
+
 `PersianDateTime` supports Solar Hijri -61-01-01 through 3177-12-29
 (Gregorian 0560-03-20 through 3799-03-19). Published Iranian calendar data
 remains authoritative for SH 1206–1498; outside that interval, dates use
@@ -91,7 +95,7 @@ flutter test test/unit/persian_date_time_test.dart --name "matches external year
 ```
 
 Shared critical regression suites and time-zone CI coverage are described in
-[Development and testing](README.md#development-and-testing).
+[Development and testing](development.md).
 
 Run the validation with:
 
