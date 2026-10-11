@@ -4,9 +4,15 @@
 
 ## Dependency resolution
 
-The wrapper and calendar demo use hosted core dependencies. Running tests in
+The wrapper and calendar demo manifests use hosted core dependencies. CI uses
+the `use-local-core` composite action to select this checkout's core for the
+wrapper, picker example, and demo before resolving dependencies. This ensures
+new core APIs are tested together with their Flutter integrations.
+Running tests in
 `packages/general_datetime_core` checks local core source; running wrapper tests
 with its ordinary manifest checks the resolved hosted core.
+Hebrew support currently requires the local override below until the matching
+core release is published and consumer minimum constraints are updated.
 
 When changing the core and wrapper together, a temporary root
 `pubspec_overrides.yaml` can select local chronology source:
@@ -69,6 +75,7 @@ example lives in `example` and uses a path dependency on the wrapper.
 | --- | --- |
 | Persian calculations/data | [`persian_date_time_test.dart`](../test/unit/persian_date_time_test.dart) |
 | Umm al-Qura calculations/data | [`hijri_date_time_test.dart`](../test/unit/hijri_date_time_test.dart) |
+| Hebrew calculation, month identities, arithmetic and pickers | [`hebrew_calendar_test.dart`](../packages/general_datetime_core/test/hebrew_calendar_test.dart), [`hebrew_calendar_delegate_test.dart`](../test/unit/hebrew_calendar_delegate_test.dart) |
 | Normalization, precision, DST, interoperability | [`calendar_critical_test.dart`](../test/unit/calendar_critical_test.dart), [`constructor_overflow_test.dart`](../test/unit/constructor_overflow_test.dart), [`epoch_seconds_test.dart`](../test/unit/epoch_seconds_test.dart) |
 | Field helpers | [`calendar_date_utils_test.dart`](../test/unit/calendar_date_utils_test.dart) |
 | JSON contracts | [`calendar_serialization_test.dart`](../test/unit/calendar_serialization_test.dart) |

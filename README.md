@@ -1,11 +1,12 @@
 # General DateTime
 
-Gregorian, Persian (Jalali), and Hijri (Umm al-Qura) chronology for Dart and
+Gregorian, Persian (Jalali), Hebrew, and Hijri (Umm al-Qura) chronology for Dart and
 Flutter. Convert exact instants, work with calendar fields and all-day dates,
-serialize values safely, and use Persian or Hijri calendars in Material date
-pickers.
+serialize values safely, and use Persian, Hebrew, or Hijri calendars in Material
+date pickers.
 
-See the [documentation index](docs/README.md) for focused guides, calendar
+See the [Hebrew calendar guide](docs/hebrew-calendar.md) for the new calendar's
+month slots, arithmetic, storage, and picker setup. See the [documentation index](docs/README.md) for focused guides, calendar
 validation reports, and the calendar expansion review.
 
 [![pub.dev](https://img.shields.io/pub/v/general_datetime.svg)](https://pub.dev/packages/general_datetime)
@@ -113,6 +114,7 @@ implementation.
 | --- | --- | --- | --- |
 | Gregorian | Native Dart date bounds | -271821-04-20 through 275760-09-13 | Proleptic Gregorian |
 | Persian | SH -61-01-01 through 3177-12-29 | 0560-03-20 through 3799-03-19 | Published Tehran leap data for SH 1206–1498; finite Borkowski calculation elsewhere |
+| Hebrew | AM 1-01-01 through 9999-13-29 | Query `CalendarSystems.hebrew` bounds | Fixed Hebrew arithmetic; midnight civil days |
 | Umm al-Qura | AH 1300-01-01 through 1600-12-30 | 1882-11-12 through 2174-11-25 | Finite verified month table; no arithmetic fallback |
 
 Persian years include zero. Calculated Persian dates outside SH 1206–1498 are
@@ -120,7 +122,7 @@ not a guarantee of official historical usage or future astronomical decisions.
 Umm al-Qura is one specific Hijri chronology; observational/religious calendars
 and other Islamic algorithms may produce different dates.
 
-Both calendar date-time classes expose:
+The Persian and Hijri date-time classes expose:
 
 | API | Meaning |
 | --- | --- |
@@ -410,6 +412,7 @@ A picker needs both a calendar delegate (date arithmetic) and matching
 | Calendar | Arithmetic delegate | Built-in English localization |
 | --- | --- | --- |
 | Persian | `PersianCalendarDelegate` | `DefaultPersianCalendarMaterialLocalizations.delegate` |
+| Hebrew | `HebrewCalendarDelegate` | `DefaultHebrewCalendarMaterialLocalizations.delegate` |
 | Umm al-Qura | `HijriCalendarDelegate` | `DefaultHijriCalendarMaterialLocalizations.delegate` |
 
 The built-in localizations support English (`en`) only and use the legacy
@@ -462,7 +465,7 @@ localization delegate in that scope.
 
 ### Complete date-range picker example
 
-Use `rangePickerDelegate` for Persian and Umm al-Qura ranges, together with
+Use `rangePickerDelegate` for Persian, Hebrew, and Umm al-Qura ranges, together with
 matching calendar localizations. This function can be called from a button in
 an ordinary `MaterialApp`; the localization applies only to the dialog:
 

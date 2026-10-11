@@ -15,6 +15,7 @@ application.
 | [Development and testing](development.md) | Local checks, fixtures, CI coverage, and release gates |
 | [Persian calendar validation](persian-calendar-validation.md) | Published leap data, calculation bounds, source decisions, and verification history |
 | [Umm al-Qura validation](hijri-calendar-validation.md) | Month-table provenance, independent checks, and verification history |
+| [Hebrew calendar](hebrew-calendar.md) | Stable month slots, leap-month arithmetic, storage, English Material pickers, and verification |
 | [Calendar expansion review](calendar-expansion-review.md) | Proposed architecture for additional calendars; a design plan rather than available APIs |
 
 The [root README](../README.md) contains a combined API overview. The

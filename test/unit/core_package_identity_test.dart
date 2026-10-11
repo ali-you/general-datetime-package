@@ -7,6 +7,7 @@ void main() {
       () {
     expect(flutter_api.PersianDateTime, core.PersianDateTime);
     expect(flutter_api.HijriDateTime, core.HijriDateTime);
+    expect(flutter_api.HebrewDateTime, core.HebrewDateTime);
     expect(flutter_api.GeneralDateTimeInterface, core.GeneralDateTimeInterface);
     expect(flutter_api.CalendarDateUtils, core.CalendarDateUtils);
     expect(flutter_api.CalendarInstant, core.CalendarInstant);

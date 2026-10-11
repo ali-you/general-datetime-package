@@ -11,6 +11,15 @@ void main() {
     expect((value.year, value.month, value.day), (1403, 1, 1));
     expect(value.microsecondsSinceEpoch, instant.microsecondsSinceEpoch);
     expect(HijriDateTime.fromDateTime(instant).day, 10);
+    final hebrew = HebrewDateTime.fromDateTime(instant);
+    expect((hebrew.year, hebrew.month, hebrew.day), (5784, 7, 10));
+    expect(hebrew.toDateTime(), instant);
+    expect(HebrewDateTime.parse(hebrew.toIso8601String()), hebrew);
+    expect(
+        CalendarDate(calendar: CalendarId.hebrew, year: 5785, month: 5, day: 1)
+            .addMonths(1)
+            .month,
+        7);
     expect(CalendarDate.fromDateTime(value).addDays(1).day, 2);
     expect(
         PersianDateTime.fromMicrosecondsSinceEpoch(-1, isUtc: true)

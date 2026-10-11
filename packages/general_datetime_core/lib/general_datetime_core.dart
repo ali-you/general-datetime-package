@@ -8,3 +8,4 @@ export 'src/calendar_system.dart';
 export 'src/general_date_time_interface.dart';
 export 'src/calendars/hijri/hijri_date_time.dart';
 export 'src/calendars/persian/persian_date_time.dart';
+export 'src/calendars/hebrew/hebrew_date_time.dart';

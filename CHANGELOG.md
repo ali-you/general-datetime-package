@@ -1,6 +1,16 @@
 # Changelog
 
-## [4.0.0]
+## Unreleased
+
+- Add fixed Hebrew civil chronology for AM 1–9999, preserving native instants
+  through `HebrewDateTime` and supporting calendar systems, field helpers,
+  civil arithmetic, weeks, ranges, and version-1 JSON with identifier `hebrew`.
+- Add `HebrewCalendarDelegate` and English Hebrew-calendar Material
+  localizations, including leap-month navigation and range-picker endpoints.
+- Expose actual month lists and an explicit missing-month policy for Hebrew
+  year arithmetic. Keep month slots stable across leap and common years.
+
+## [3.0.0]
 
 - Add `calendarDateRangePickerBuilder` to preserve the calendar delegate on
   Flutter 3.32, whose `showDateRangePicker` omits it when creating the dialog.

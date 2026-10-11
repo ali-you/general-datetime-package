@@ -2,9 +2,13 @@
 
 The encoded Umm al-Qura month data in
 `lib/src/calendars/hijri/umm_al_qura_data.dart` is derived from Unicode ICU's
-`IslamicCalendar` data and is distributed under the following license.
+`IslamicCalendar` data. The fixed Hebrew year-start calculations in
+`lib/src/calendars/hebrew/hebrew_calendar_calculation.dart` are adapted from
+Unicode ICU's `HebrewCalendar`. Both are distributed under the following license.
 
 Source: <https://github.com/unicode-org/icu/blob/release-78.3/icu4c/source/i18n/islamcal.cpp>
+
+Hebrew source: <https://github.com/unicode-org/icu/blob/release-78.3/icu4c/source/i18n/hebrwcal.cpp>
 
 ## Unicode License V3
 

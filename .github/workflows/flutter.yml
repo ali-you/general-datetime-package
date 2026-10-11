@@ -39,11 +39,12 @@ jobs:
       TZ: ${{ matrix.timezone }}
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/use-local-core
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ matrix.flutter }}
-      - name: Resolve published dependencies
+      - name: Resolve checkout dependencies
         run: |
           git rev-parse HEAD
           flutter pub get

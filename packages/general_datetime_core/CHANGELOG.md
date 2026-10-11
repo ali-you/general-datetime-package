@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Add `HebrewDateTime` and `CalendarSystems.hebrew` for the fixed midnight-based
+  Hebrew civil calendar, AM 1–9999, using ICU-compatible stable month slots.
+- Support Hebrew through conversion, validation, field helpers, civil dates,
+  weeks, ranges, instant/civil JSON, and `GeneralDateTimeInterface.now`.
+- Add `CalendarId.hebrew`, `CalendarSystems.monthsOfYear`, actual-month
+  arithmetic, and `MissingMonthPolicy` for Adar I in common destination years.
+- Validate independent Hebcal anchors, every supported year and month boundary,
+  representative day round trips, arithmetic policies, serialization and bounds.
+
 ## 1.0.0
 
 - Extract the corrected pure Dart implementation from the Flutter package.
