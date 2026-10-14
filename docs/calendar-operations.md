@@ -12,11 +12,16 @@ Examples use the public `general_datetime_core` import. The Flutter wrapper's
 | `CalendarId.gregory` | Native Dart bounds | -271821-04-20 through 275760-09-13 | Proleptic Gregorian |
 | `CalendarId.persian` | -61-01-01 through 3177-12-29 | 0560-03-20 through 3799-03-19 | Tehran leap data in SH 1206–1498; finite Borkowski calculation elsewhere |
 | `CalendarId.islamicUmalqura` | 1300-01-01 through 1600-12-30 | 1882-11-12 through 2174-11-25 | Verified Umm al-Qura month table; no fallback |
+| `CalendarId.hebrew` | AM 1-01-01 through 9999-13-29 | Query `CalendarSystems.hebrew` bounds | Fixed arithmetic, midnight civil days |
 
 Persian years include zero. Published Persian data and the calculated extension
 are distinct: `hasOfficialCalendarData` on a date-time and `hasPublishedData` on
 a civil date expose coverage. All supported Umm al-Qura years use table data.
 Umm al-Qura is a specific Hijri chronology; other Islamic calendars may disagree.
+Hebrew month numbers are stable slots rather than year-relative positions.
+Use `CalendarSystems.monthsOfYear(CalendarId.hebrew, year)` to iterate actual
+months and `MissingMonthPolicy` for year arithmetic involving Adar I.
+See [Hebrew calendar](hebrew-calendar.md) for leap/common-year examples.
 
 Read the [Persian](persian-calendar-validation.md) and
 [Umm al-Qura](hijri-calendar-validation.md) validation reports for provenance.
@@ -76,9 +81,11 @@ instants. `toDateTime` returns native Gregorian with the same epoch and mode;
 `toUtc`/`toLocal` retain the calendar subclass. A day-long `Duration` is 24 elapsed
 hours and may change the wall clock across DST.
 
-`secondsSinceEpoch` floors microseconds to the containing Unix second, including
+`secondsSinceEpoch` floors the precise native instant to the containing Unix second, including
 negative values: -1 microsecond is -1 second. Use microsecond storage when the
 fraction matters.
+Large JavaScript epoch-microsecond integers can round; use native split
+components or `CalendarInstant` timestamp strings for exact round trips.
 
 Use calendar-aware helpers when a value is statically typed `DateTime`:
 

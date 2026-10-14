@@ -1,6 +1,6 @@
 name: general_datetime_core
 description: Pure Dart Gregorian, Persian, Hebrew and Umm al-Qura calendar chronology, date operations, and serialization.
-version: 1.0.0
+version: 2.0.0
 repository: https://github.com/ali-you/general-date-package
 issue_tracker: https://github.com/ali-you/general-date-package/issues
 topics:
@@ -8,6 +8,7 @@ topics:
   - datetime
   - persian
   - hijri
+  - hebrew
 environment:
   sdk: '>=3.4.0 <4.0.0'
 dev_dependencies:

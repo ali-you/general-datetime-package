@@ -7,7 +7,13 @@ event presentation,
 secondary dates, asynchronous controller state, deterministic overlap columns,
 all-day events and midnight splitting. Its sample event source is in memory.
 
-From the repository root, resolve the published cores:
+The demo declares chronology and formatter cores `^2.0.0`. Its UI currently
+offers Gregorian/Persian/Umm al-Qura selection; Hebrew chronology and picker
+usage are shown in the package's [Hebrew guide](../../docs/hebrew-calendar.md).
+Until the prepared core releases are published, use the two local overrides in
+[development setup](../../docs/development.md#dependency-resolution).
+
+From the repository root:
 
 ```sh
 cd apps/calendar_demo

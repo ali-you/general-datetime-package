@@ -34,8 +34,8 @@ validation reports, and the calendar expansion review.
 | --- | --- | --- |
 | `general_datetime` | Chronology core re-exports and Material calendar/localization delegates | Yes |
 | [`general_datetime_core`](packages/general_datetime_core/README.md) | Calendar date-times, strict calendar systems, civil dates, and JSON storage | No |
-| `general_date_format` | Localized Persian/Hijri formatting and multilingual Material adapters, in the neighboring repository | Yes |
-| `general_date_format_core` | Localized Persian/Hijri formatting and parsing for servers and CLIs | No |
+| `general_date_format` | Localized Persian/Hebrew/Hijri formatting and multilingual Material adapters, in the neighboring repository | Yes |
+| `general_date_format_core` | Localized Persian/Hebrew/Hijri formatting and parsing for servers and CLIs | No |
 
 The Flutter wrapper re-exports the core's exact classes. A `PersianDateTime`
 created through either import has the same runtime type; there are no competing
@@ -58,8 +58,8 @@ import 'package:general_datetime_core/general_datetime_core.dart';
 
 ## Installation and local setup
 
-The current wrapper version is `general_datetime` **4.0.0**, with
-`general_datetime_core` **1.0.0**. The Flutter wrapper requires Dart
+The prepared wrapper version is `general_datetime` **4.0.0**, with
+`general_datetime_core` **2.0.0**. The Flutter wrapper requires Dart
 `>=3.4.0 <4.0.0` and Flutter `>=3.32.0`; the core requires only Dart
 `>=3.4.0 <4.0.0`.
 
@@ -71,16 +71,18 @@ dependencies:
 ```
 
 Run `flutter pub get`. For a pure Dart application, use
-`general_datetime_core: ^1.0.0` and run `dart pub get` instead.
+`general_datetime_core: ^2.0.0` and run `dart pub get` instead.
 
-The picker example uses this checkout's 4.0.0 wrapper through a path dependency.
-The calendar demo uses the two published 1.0.0 cores directly. Neither requires
-local dependency overrides.
+These versions are prepared in source; publication has not been performed.
+Until matching hosted releases are available, use the local overrides in
+[development setup](docs/development.md#dependency-resolution).
+The picker example uses the local wrapper; the calendar demo declares both
+2.0.0 cores and needs its own overrides during development.
 
-When combining this wrapper with `general_date_format` 3.0.0, check the
-formatter's chronology constraint: its current manifest still requires
-`general_datetime ^3.0.0`, which excludes 4.0.0. The wrapper constraint must be
-aligned before both new wrapper versions can resolve together.
+The companion `general_date_format` **3.0.0** requires
+`general_datetime ^4.0.0` and `general_date_format_core ^2.0.0`.
+See [migration](docs/migration.md) for the version matrix and compatibility
+changes, and [release preparation](docs/release-preparation.md) for publish order.
 
 ## Quick start
 
@@ -91,9 +93,11 @@ void main() {
   final native = DateTime.utc(2024, 3, 20, 12, 34, 56, 789, 123);
   final persian = PersianDateTime.fromDateTime(native);
   final hijri = HijriDateTime.fromDateTime(native);
+  final hebrew = HebrewDateTime.fromDateTime(native);
 
   print(persian.toIso8601String()); // 1403-01-01T12:34:56.789123Z
   print(hijri.toIso8601String()); // 1445-09-10T12:34:56.789123Z
+  print(hebrew.toIso8601String()); // 5784-07-10T12:34:56.789123Z
   print(persian.toDateTime().toIso8601String());
   // 2024-03-20T12:34:56.789123Z
 
@@ -102,7 +106,7 @@ void main() {
 }
 ```
 
-`PersianDateTime` and `HijriDateTime` extend `DateTime` and implement
+`PersianDateTime`, `HijriDateTime`, and `HebrewDateTime` extend `DateTime` and implement
 `GeneralDateTimeInterface`. Their year/month/day getters use their own
 calendar, while their epoch values and duration operations describe the same
 native instant. Native Gregorian `DateTime` remains the Gregorian date-time
@@ -144,7 +148,7 @@ in [Persian validation](docs/persian-calendar-validation.md) and
 
 ## Construction, validation, and parsing
 
-Both classes provide the same constructor family:
+All three calendar classes provide the same constructor family:
 
 | Constructor | Behavior |
 | --- | --- |
@@ -156,7 +160,9 @@ Both classes provide the same constructor family:
 | `fromSecondsSinceEpoch`, `fromMillisecondsSinceEpoch`, `fromMicrosecondsSinceEpoch` | Epoch constructors; named `isUtc` defaults to `false` |
 | `parse(text)`, `tryParse(text)` | Calendar-specific ISO-like input |
 
-Replace `PersianDateTime` with `HijriDateTime` for the Hijri equivalents.
+Replace `PersianDateTime` with `HijriDateTime` or `HebrewDateTime` for the other
+calendar equivalents. Hebrew numeric months are stable slots, with slot 6
+absent in common years; see [Hebrew month identity](docs/hebrew-calendar.md).
 Optional month/day default to 1; all optional clock fields default to 0.
 `fromDateTime` also accepts another supported calendar subclass and preserves
 its epoch rather than reinterpreting its exposed fields.
@@ -223,10 +229,16 @@ the operating system; date-time instances do not retain an IANA timezone ID.
 Do not assume a named-zone `TZDateTime` keeps its named-zone semantics when
 converted to these classes.
 
-`secondsSinceEpoch` rounds down to the containing Unix second, directly from
-microseconds. For example, -1 microsecond returns -1 second; -1000001 returns
+`secondsSinceEpoch` rounds down to the containing Unix second from the native
+instant. For example, -1 microsecond returns -1 second; -1000001 returns
 -2 seconds. Millisecond/microsecond epoch getters retain native behavior.
 Use microseconds or `CalendarInstant` storage when fractions matter.
+
+JavaScript aggregate epoch microseconds can exceed its exact-integer range.
+Conversions retain the native millisecond and microsecond components separately;
+use `toDateTime()`, `CalendarDateUtils.toGregorian`, or timestamp-string JSON
+for exact round trips. Dart 3.4's JavaScript backend itself rounds to milliseconds;
+full fractional precision requires a backend with native microsecond support.
 
 Useful instance fields include `name`, `monthLength`, `yearLength`,
 `isLeapYear`, `dayOfYear`, `julianDay`, and `hasOfficialCalendarData`.
@@ -667,7 +679,7 @@ flutter test --dart-define=CALENDAR_TEST_TZ=Asia/Tehran test/unit/calendar_criti
 ```
 
 CI is configured for minimum/current SDKs and UTC/Tehran/New York Linux jobs;
-dependencies resolve from pub.dev without local overrides. Windows local tests
+source-pair jobs select local cores. Windows local tests
 use the OS timezone. Browser JavaScript/Wasm, Android/iOS, minimum SDK execution,
 the full process-timezone matrix, and hosted dependency resolution were not
 certified by that local run. Coverage percentages were not recalculated.
@@ -676,7 +688,16 @@ Release dependency order is: `general_datetime_core` first, then
 `general_datetime` and `general_date_format_core`, then `general_date_format`.
 Before publishing wrappers, resolve and test the matching hosted core versions
 without development overrides. Local path success does not certify hosted
-resolution.
+resolution. See [release preparation](docs/release-preparation.md) for the
+aligned 4.0.0/3.0.0 wrapper and 2.0.0 core release matrix.
+
+Hebrew verification on **2026-10-12** used Flutter 3.47.6 / Dart 3.13.5.
+The chronology core passed 30 tests, the wrapper 328, and the demo 11.
+JavaScript and WebAssembly browser suites passed. An independent .NET oracle
+matched 239,612 Hebrew days in both directions. The
+[package validation report](docs/hebrew-package-validation-2026-10-12.md) and
+[Persian/Hijri regression review](docs/hebrew-existing-calendar-regression-2026-10-12.md)
+record coverage, size effects and remaining platform/release checks.
 
 ## Contributions and license
 

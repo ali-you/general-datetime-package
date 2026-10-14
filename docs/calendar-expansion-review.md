@@ -1,5 +1,10 @@
 # Calendar expansion review and implementation plan
 
+Historical review, before Hebrew implementation. Hebrew chronology is now
+implemented in core 2.0.0 / wrapper 4.0.0; see [Hebrew calendar](hebrew-calendar.md)
+and [migration](migration.md) for current APIs and release versions. The design
+assessment below records the source state on 2026-10-06.
+
 Reviewed: 2026-10-06. Scope: `lib/general_datetime.dart`, every Dart source file in `packages/general_datetime_core`, its tests, package metadata, example, README, changelog, and data provenance. Wrapper tests were inspected for integration and regression requirements. No calendar implementation was changed.
 
 ## Result

@@ -21,11 +21,18 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - run: dart pub get
       - if: matrix.sdk == 'stable'
         run: dart format --output=none --set-exit-if-changed lib test example
       - run: dart analyze
       - run: dart test
+      # Dart 3.4's JS DateTime rounds to milliseconds; precision tests require
+      # the current JS backend. The minimum SDK still runs the full VM suite.
+      - if: matrix.sdk == 'stable'
+        run: dart test --platform node test/calendar_date_test.dart test/calendar_system_test.dart test/hebrew_calendar_test.dart test/instant_precision_test.dart
       - run: dart compile exe example/cli.dart -o .dart_tool/calendar_cli
       - run: .dart_tool/calendar_cli
   test:

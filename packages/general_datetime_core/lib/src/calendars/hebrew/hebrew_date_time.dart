@@ -1,6 +1,7 @@
 import '../../general_date_time_interface.dart';
 import '../../shared/calendar_field_normalization.dart';
 import '../../shared/constants.dart';
+import '../../shared/native_date_time.dart';
 import 'hebrew_calendar_calculation.dart';
 
 /// A midnight-based civil date and time in the fixed Hebrew calendar.
@@ -90,6 +91,7 @@ class HebrewDateTime extends DateTime
   final int microsecond;
 
   final int _dayOffset;
+  final DateTime _nativeDateTime;
 
   HebrewDateTime._fromResolved(_ResolvedHebrewDateTime resolved)
       : year = resolved.year,
@@ -101,10 +103,27 @@ class HebrewDateTime extends DateTime
         millisecond = resolved.dateTime.millisecond,
         microsecond = resolved.dateTime.microsecond,
         _dayOffset = resolved.dayOffset,
+        _nativeDateTime = resolved.dateTime,
         super.fromMicrosecondsSinceEpoch(
           resolved.dateTime.microsecondsSinceEpoch,
           isUtc: resolved.dateTime.isUtc,
         );
+
+  // Keep the native split representation on JavaScript, where an aggregate
+  // microsecond epoch can round even though these components remain exact.
+  @override
+  int get millisecondsSinceEpoch => _nativeDateTime.millisecondsSinceEpoch;
+  @override
+  int get microsecondsSinceEpoch => _nativeDateTime.microsecondsSinceEpoch;
+  @override
+  String get timeZoneName => _nativeDateTime.timeZoneName;
+  @override
+  Duration get timeZoneOffset => _nativeDateTime.timeZoneOffset;
+  @override
+  int get hashCode => _nativeDateTime.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      other is DateTime && _nativeDateTime == other;
 
   /// Creates a local Hebrew date, normalizing overflowing components in
   /// the same style as [DateTime.new].
@@ -359,10 +378,7 @@ class HebrewDateTime extends DateTime
 
   /// Converts this value to a native Gregorian [DateTime].
   @override
-  DateTime toDateTime() => DateTime.fromMicrosecondsSinceEpoch(
-        microsecondsSinceEpoch,
-        isUtc: isUtc,
-      );
+  DateTime toDateTime() => _nativeDateTime;
 
   /// Adds an exact duration and converts the resulting instant to Hebrew.
   @override
@@ -405,15 +421,15 @@ class HebrewDateTime extends DateTime
   Duration difference(DateTime other) =>
       toDateTime().difference(_nativeComparisonValue(other));
 
-  /// Unix seconds, rounded down directly from [microsecondsSinceEpoch].
+  /// Unix seconds, rounded down from the precise native instant.
   ///
   /// This is the second containing the instant, independent of time zone.
   /// For example, -1 microsecond maps to -1 second, not zero.
   @override
   int get secondsSinceEpoch {
-    final micros = microsecondsSinceEpoch;
-    final seconds = micros ~/ Duration.microsecondsPerSecond;
-    return micros.remainder(Duration.microsecondsPerSecond) < 0
+    final millis = floorEpochMilliseconds(_nativeDateTime);
+    final seconds = millis ~/ Duration.millisecondsPerSecond;
+    return millis.remainder(Duration.millisecondsPerSecond) < 0
         ? seconds - 1
         : seconds;
   }
@@ -575,10 +591,7 @@ class HebrewDateTime extends DateTime
   }
 
   static DateTime _nativeCopy(DateTime dateTime) =>
-      DateTime.fromMicrosecondsSinceEpoch(
-        dateTime.microsecondsSinceEpoch,
-        isUtc: dateTime.isUtc,
-      );
+      copyNativeDateTime(dateTime);
 
   static DateTime _nativeComparisonValue(DateTime dateTime) {
     if (dateTime case final GeneralDateTimeInterface customDateTime) {

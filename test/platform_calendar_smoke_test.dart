@@ -25,6 +25,22 @@ void main() {
         PersianDateTime.fromMicrosecondsSinceEpoch(-1, isUtc: true)
             .secondsSinceEpoch,
         -1);
+    for (final year in [1600, 2300, 6000]) {
+      final native = DateTime.utc(year, 3, 20, 12, 34, 56, 123, 457);
+      for (final date in [
+        HebrewDateTime.fromDateTime(native),
+        if (PersianDateTime.isSupportedDateTime(native))
+          PersianDateTime.fromDateTime(native),
+      ]) {
+        expect(date.microsecond, 457);
+        expect(date, native);
+        expect(native, date);
+        expect(date.hashCode, native.hashCode);
+        expect(CalendarDateUtils.toGregorian(date), native);
+        expect(date.add(const Duration(microseconds: 1)),
+            native.add(const Duration(microseconds: 1)));
+      }
+    }
   });
   testWidgets('Persian picker renders and accepts a matching date',
       (tester) async {

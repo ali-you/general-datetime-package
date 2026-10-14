@@ -3,10 +3,13 @@
 This checkout supports the fixed Hebrew civil calendar in the pure Dart core
 and the Flutter wrapper. Import `general_datetime_core.dart` in Dart, or
 `general_datetime.dart` in Flutter; both expose the same `HebrewDateTime` class.
-When using this checkout, select the local core with the override documented in
-[development setup](development.md#dependency-resolution). The hosted core
-1.0.0 does not include these new APIs; publication and consumer minimum-version
-updates are separate release steps. CI selects the local core automatically.
+Hebrew support is included in the prepared `general_datetime_core` 2.0.0 and
+`general_datetime` 4.0.0 releases. Their hosted constraints are aligned.
+Until publication, select the local core using
+[development setup](development.md#dependency-resolution).
+CI selects the local core automatically. Translated Hebrew formatting and
+Material labels use formatter core 2.0.0 / wrapper 3.0.0; this chronology
+wrapper itself provides English labels.
 
 ```dart
 final native = DateTime.utc(2024, 3, 20, 12, 34, 56, 123, 456);
@@ -109,8 +112,10 @@ MaterialApp(
 
 The default localization supplies English Material strings and Hebrew month
 names. Compact input uses `dd/mm/yyyy` with the stable slots above. Hebrew-language
-localization and the neighboring `general_date_format` packages are not extended
-by this change. Supply custom `MaterialLocalizations` for additional languages.
+localization is provided by the companion formatter 3.0.0 release through
+`HebrewCalendarMaterialLocalizations.delegate`, with all 120 formatter locales
+and Flutter-supported Material translations. The chronology-only default
+remains English. Supply a matching localization delegate in each picker scope.
 The calendar application demo retains its existing formatter-supported calendars.
 
 The delegate requires `HebrewDateTime` inputs and parser results. Convert saved
@@ -127,6 +132,11 @@ all year types, large-offset bounds, parsing, conversion precision, arithmetic,
 serialization, and week/range operations. Flutter tests exercise leap/common month
 navigation, a leap-to-common year selection, invalid input, and range endpoints.
 The arithmetic is not independently compared against every supported day.
+The [package validation report](hebrew-package-validation-2026-10-12.md) records
+239,612 days compared against .NET in both directions, browser JavaScript/Wasm
+checks, and Android build coverage. See the
+[existing-calendar regression review](hebrew-existing-calendar-regression-2026-10-12.md)
+for Persian/Hijri isolation and compiled-size results.
 
 ICU source and license attribution are in the core's
 [third-party notices](../packages/general_datetime_core/THIRD_PARTY_NOTICES.md).

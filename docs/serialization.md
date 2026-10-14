@@ -13,9 +13,13 @@ an all-day calendar date. Both define strict version-1 JSON contracts in
 | `CalendarId.gregory` | `gregory` |
 | `CalendarId.persian` | `persian` |
 | `CalendarId.islamicUmalqura` | `islamic-umalqura` |
+| `CalendarId.hebrew` | `hebrew` |
 
 Use `CalendarId.identifier` for the wire value. Generic `hijri` or `islamic`
 strings are not aliases in this schema.
+Hebrew dates retain stable numeric month slots, including leap-only Adar I=6
+and Adar/Adar II=7. Older core 1.x decoders reject the new identifier; use
+core 2.0.0 or newer. The record schema version remains 1.
 
 ## Timed events
 

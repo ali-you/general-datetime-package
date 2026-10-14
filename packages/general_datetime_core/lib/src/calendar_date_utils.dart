@@ -1,4 +1,5 @@
 import 'calendars/hebrew/hebrew_date_time.dart';
+import 'shared/native_date_time.dart';
 import 'general_date_time_interface.dart';
 import 'calendars/hijri/hijri_date_time.dart';
 import 'calendars/persian/persian_date_time.dart';
@@ -110,12 +111,8 @@ abstract final class CalendarDateUtils {
 
   /// Returns a native Gregorian [DateTime] for the exact same instant and mode.
   ///
-  /// Reads epoch microseconds, never calendar year/month/day, so the result is
+  /// Copies split epoch milliseconds/microseconds, never calendar year/month/day, so the result is
   /// safe to pass to Gregorian field helpers. This conversion does not choose
   /// UTC or local time for the caller; use `toUtc()` or `toLocal()` as needed.
-  static DateTime toGregorian(DateTime date) =>
-      DateTime.fromMicrosecondsSinceEpoch(
-        date.microsecondsSinceEpoch,
-        isUtc: date.isUtc,
-      );
+  static DateTime toGregorian(DateTime date) => copyNativeDateTime(date);
 }

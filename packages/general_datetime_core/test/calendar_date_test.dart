@@ -57,8 +57,15 @@ void main() {
           calendar: id, year: max.year, month: max.month, day: max.day);
       expect(() => first.addDays(-1), throwsRangeError);
       expect(() => last.addDays(1), throwsRangeError);
-      expect(() => first.addMonths(9223372036854775807), throwsRangeError);
-      expect(() => first.addYears(9223372036854775807), throwsRangeError);
+      // Test both JS's exact-integer limit and the VM's int64 maximum.
+      // Parsing avoids an int64 literal that cannot compile to JavaScript.
+      for (final offset in [
+        9007199254740991,
+        int.parse('9223372036854775807')
+      ]) {
+        expect(() => first.addMonths(offset), throwsRangeError);
+        expect(() => first.addYears(offset), throwsRangeError);
+      }
     }
   });
 }

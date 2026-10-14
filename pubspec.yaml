@@ -1,10 +1,10 @@
 name: general_datetime
 description: "Gregorian, Persian, Hebrew and Umm al-Qura chronology, strict civil-date contracts and Flutter Material date-picker adapters."
-version: 3.0.0
+version: 4.0.0
 homepage: https://github.com/ali-you
-repository: https://github.com/ali-you/general-datetime-package
-documentation: https://github.com/ali-you/general-datetime-package
-issue_tracker: https://github.com/ali-you/general-datetime-package/issues
+repository: https://github.com/ali-you/general-date-package
+documentation: https://github.com/ali-you/general-date-package
+issue_tracker: https://github.com/ali-you/general-date-package/issues
 topics:
   - date
   - time
@@ -17,7 +17,7 @@ environment:
   flutter: ">=3.32.0"
 
 dependencies:
-  general_datetime_core: ^1.0.0
+  general_datetime_core: ^2.0.0
   flutter:
     sdk: flutter
 

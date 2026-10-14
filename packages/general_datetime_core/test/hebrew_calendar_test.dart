@@ -123,7 +123,14 @@ void main() {
     expect(() => HebrewDateTime.utc(10000), throwsRangeError);
     expect(() => h(1, 1, 1).addDays(-1), throwsRangeError);
     expect(() => h(9999, 13, 29).addDays(1), throwsRangeError);
-    for (final offset in [9223372036854775807, -9223372036854775807]) {
+    // The VM maximum is parsed at runtime so this test also compiles to JS.
+    final maximumNativeInt = int.parse('9223372036854775807');
+    for (final offset in [
+      9007199254740991,
+      -9007199254740991,
+      maximumNativeInt,
+      -maximumNativeInt
+    ]) {
       expect(() => h(5784, 1, 1).addMonths(offset), throwsRangeError);
       expect(() => h(5784, 1, 1).addYears(offset), throwsRangeError);
       expect(() => HebrewDateTime.utc(5784, offset), throwsRangeError);

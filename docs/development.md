@@ -11,8 +11,9 @@ new core APIs are tested together with their Flutter integrations.
 Running tests in
 `packages/general_datetime_core` checks local core source; running wrapper tests
 with its ordinary manifest checks the resolved hosted core.
-Hebrew support currently requires the local override below until the matching
-core release is published and consumer minimum constraints are updated.
+The prepared release matrix uses chronology core 2.0.0, chronology wrapper
+4.0.0, formatter core 2.0.0 and formatter wrapper 3.0.0. Consumer constraints
+are aligned; use local overrides until those hosted versions are published.
 
 When changing the core and wrapper together, a temporary root
 `pubspec_overrides.yaml` can select local chronology source:
@@ -24,7 +25,17 @@ dependency_overrides:
 ```
 
 Run `flutter pub get` after adding or changing the override. For the separate
-demo application, its own override uses `../../packages/general_datetime_core`.
+demo application, create `apps/calendar_demo/pubspec_overrides.yaml` with both
+cores:
+
+```yaml
+dependency_overrides:
+  general_datetime_core:
+    path: ../../packages/general_datetime_core
+  general_date_format_core:
+    path: ../../../general_date_format/packages/general_date_format_core
+```
+
 Each package root has its own dependency resolution; a root override does not
 automatically apply to independent demo commands.
 
@@ -133,7 +144,7 @@ resolved package versions, SDKs, platform/timezone, commands, and outcomes when
 reporting validation. Historical local results in the root README and validation
 reports apply to their recorded dates, not automatically to this checkout.
 
-Before publishing, align release metadata as described in [migration](migration.md),
+Before publishing, follow [release preparation](release-preparation.md),
 check hosted dependency resolution without development overrides, run minimum
 and current SDK checks, and review browser/device/timezone results. Preserve
 source attribution and licenses when updating calendar data.

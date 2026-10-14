@@ -1,4 +1,5 @@
 import 'calendars/hebrew/hebrew_date_time.dart';
+import 'shared/native_date_time.dart';
 import 'calendars/hebrew/hebrew_calendar_calculation.dart';
 import 'calendar_serialization.dart';
 import 'general_date_time_interface.dart';
@@ -262,9 +263,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
 
   @override
   DateTime fromInstant(DateTime instant, {bool isUtc = true}) {
-    final native = DateTime.fromMicrosecondsSinceEpoch(
-        instant.microsecondsSinceEpoch,
-        isUtc: isUtc);
+    final native = copyNativeDateTime(instant, isUtc: isUtc);
     return switch (id) {
       CalendarId.hebrew => HebrewDateTime.fromDateTime(native),
       CalendarId.gregory => native,
@@ -276,8 +275,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   @override
   DateTime toGregorianDay(int year, int month, int day) {
     final value = construct(year, month, day);
-    return DateTime.fromMicrosecondsSinceEpoch(value.microsecondsSinceEpoch,
-        isUtc: true);
+    return copyNativeDateTime(value, isUtc: true);
   }
 
   @override
