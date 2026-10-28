@@ -98,33 +98,34 @@ registrant migrations in the temporary exports were restored to committed bytes.
 | Package | Publication status |
 | --- | --- |
 | `general_datetime_core` 2.0.0 | Successfully uploaded and independently confirmed by the live registry and archive |
-| `general_datetime` 4.0.0 | Hosted core resolution and all 328 tests passed; upload rejected with HTTP 403 |
-| `general_date_format_core` 2.0.0 | Hosted chronology core resolution, all 76 tests, and warning-free dry run passed; upload rejected |
-| `general_date_format` 3.0.0 | Local validation passed; publication and clean hosted verification await its two dependencies |
+| `general_datetime` 4.0.0 | Published; hosted chronology core resolution and all 328 tests passed |
+| `general_date_format_core` 2.0.0 | Published; hosted chronology core resolution, all 76 tests, and warning-free dry run passed |
+| `general_date_format` 3.0.0 | Published; all 509 tests passed with hosted chronology wrapper/core and formatter core dependencies |
 | `general_calendar` 1.0.0 | Existing published archive has the same 11 library files as the validated checkout; no release needed |
 
-The chronology core archive SHA-256 is
-`4ddcf7ab133dcb8d30bc4406c34a59aa20418b5fe1ddbb54cbf002188d10134b`.
-It matches the registry's advertised checksum, and all 20 published library files
-match the validated source after newline normalization.
+All four exact version endpoints and archive checksums were verified after
+publication. All **57 published library files** match the validated source after
+newline normalization: 20 chronology core, 11 chronology wrapper, 19 formatter
+core, and 7 formatter wrapper files.
+
+| Package | Published archive SHA-256 |
+| --- | --- |
+| `general_datetime_core` 2.0.0 | `4ddcf7ab133dcb8d30bc4406c34a59aa20418b5fe1ddbb54cbf002188d10134b` |
+| `general_datetime` 4.0.0 | `250bc50792f2988d2e05d4566731d4efd819ed96b30f8c201a2c30d83628a7b9` |
+| `general_date_format_core` 2.0.0 | `4c61569fd7421e7a1aaa81b4b56bc745a060e87adabbd10edeb7efa2367c1b1c` |
+| `general_date_format` 3.0.0 | `1879319a67ec95f74d9db9935138724fcf0977e8af802a070ad615ab29ba08c2` |
 
 The chronology core and formatter core publication dry runs have no warnings.
-The chronology wrapper dry run reports only the existing `docs` versus `doc`
+Both Flutter wrapper dry runs report only the existing `docs` versus `doc`
 directory naming convention warning, which was reviewed before attempting upload.
 
-The formatter core upload returned `AccessDenied` with the message
-"We're sorry, but this service is not available in your location". A normal
-retry and the chronology wrapper upload returned HTTP 403 from
-`/api/packages/versions/new`. No network or location restrictions were bypassed.
-At this point package reads from the same connection also returned HTTP 403.
-The remaining releases require normal pub.dev access to be restored.
-
-After access is restored, publish the chronology wrapper and formatter core,
-then resolve and test the formatter wrapper against those hosted releases,
-inspect its publication archive, and publish it. Retain the versions above;
-do not attempt to republish the already accepted chronology core 2.0.0.
-Command records and temporary-export paths are retained in the local evidence
-directory for continuation.
+Earlier upload attempts encountered HTTP 403/location errors. After the user
+requested a retry, normal service access worked and the remaining three uploads
+succeeded. No network or location restrictions were bypassed. Normal registry
+propagation briefly delayed dependency resolution; the formatter wrapper was
+tested and published only after its dependencies resolved from pub.dev without
+overrides. Command records, checksum confirmations, source comparisons, and
+temporary-export paths are retained in the local evidence directory.
 
 Automatic approval review rejected direct pushes to `main` because branch-specific
 authorization was not explicit. Only the existing feature branches were pushed;
