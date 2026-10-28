@@ -1,5 +1,11 @@
 # Coordinated Hebrew release preparation
 
+Status on 2026-10-28: chronology core 2.0.0 has been published. The other three
+releases passed source validation but publication is incomplete because pub.dev
+rejected subsequent uploads with HTTP 403. See the current
+[validation and publication report](hebrew-release-validation-2026-10-28.md)
+for exhaustive reference checks, hosted-dependency checks, and continuation order.
+
 [Documentation index](README.md)
 
 The Hebrew source release is prepared with these aligned versions:

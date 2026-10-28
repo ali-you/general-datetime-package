@@ -81,3 +81,51 @@ The existing two uncommitted chronology example configuration edits were
 preserved and are excluded from the release commits. Physical-device execution,
 iOS, and a local Flutter 3.32 installation are not covered by these results;
 the repository CI defines the Flutter minimum-version and device jobs.
+
+## Publication outcome
+
+Validated release sources were committed and pushed to the existing
+`feature/hebrew-calendar` branches:
+
+- Chronology: `2f3d8e0e0e29cffaf0c68ba2018d878f0e78cddf`.
+- Formatter: `577f93321ead4b5377496192e6f5c5639902b544`; its CI source-pair
+  configuration pins the chronology revision above.
+
+Publication used clean Git archive exports outside the working repositories,
+without development overrides. Flutter-generated example configuration and
+registrant migrations in the temporary exports were restored to committed bytes.
+
+| Package | Publication status |
+| --- | --- |
+| `general_datetime_core` 2.0.0 | Successfully uploaded and independently confirmed by the live registry and archive |
+| `general_datetime` 4.0.0 | Hosted core resolution and all 328 tests passed; upload rejected with HTTP 403 |
+| `general_date_format_core` 2.0.0 | Hosted chronology core resolution, all 76 tests, and warning-free dry run passed; upload rejected |
+| `general_date_format` 3.0.0 | Local validation passed; publication and clean hosted verification await its two dependencies |
+| `general_calendar` 1.0.0 | Existing published archive has the same 11 library files as the validated checkout; no release needed |
+
+The chronology core archive SHA-256 is
+`4ddcf7ab133dcb8d30bc4406c34a59aa20418b5fe1ddbb54cbf002188d10134b`.
+It matches the registry's advertised checksum, and all 20 published library files
+match the validated source after newline normalization.
+
+The chronology core and formatter core publication dry runs have no warnings.
+The chronology wrapper dry run reports only the existing `docs` versus `doc`
+directory naming convention warning, which was reviewed before attempting upload.
+
+The formatter core upload returned `AccessDenied` with the message
+"We're sorry, but this service is not available in your location". A normal
+retry and the chronology wrapper upload returned HTTP 403 from
+`/api/packages/versions/new`. No network or location restrictions were bypassed.
+At this point package reads from the same connection also returned HTTP 403.
+The remaining releases require normal pub.dev access to be restored.
+
+After access is restored, publish the chronology wrapper and formatter core,
+then resolve and test the formatter wrapper against those hosted releases,
+inspect its publication archive, and publish it. Retain the versions above;
+do not attempt to republish the already accepted chronology core 2.0.0.
+Command records and temporary-export paths are retained in the local evidence
+directory for continuation.
+
+Automatic approval review rejected direct pushes to `main` because branch-specific
+authorization was not explicit. Only the existing feature branches were pushed;
+updating `main` remains a separate approval step.
