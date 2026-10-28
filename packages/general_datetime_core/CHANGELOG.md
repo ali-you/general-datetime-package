@@ -1,6 +1,10 @@
 # Changelog
 
-## 2.0.0 — release preparation
+## 2.0.0 — 2026-10-28
+
+- Validate all 3,652,078 supported Hebrew dates against an independent Hebcal
+  oracle, retain reproducible validation tools, and add postponement anchors
+  independently confirmed by .NET.
 
 - Preserve the native split millisecond/microsecond representation when copying
   instants; avoid JavaScript aggregate-epoch rounding in Hebrew and Persian

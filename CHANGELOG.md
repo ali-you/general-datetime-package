@@ -1,6 +1,9 @@
 # Changelog
 
-## [4.0.0] — release preparation
+## [4.0.0] — 2026-10-28
+
+- Independently validate every supported Hebrew date in both directions and
+  verify companion formatting and calendar widget integrations.
 
 - Preserve odd microseconds on JavaScript outside its exact epoch-integer
   range, including native conversion, equality/hash keys, arithmetic, system
