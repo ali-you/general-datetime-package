@@ -16,11 +16,12 @@ jobs:
         compiler: [javascript, wasm]
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/use-local-core
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
       - run: flutter pub get
-      - run: flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }} test/platform_calendar_smoke_test.dart
+      - run: flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }} test/platform_calendar_smoke_test.dart test/unit/hebrew_calendar_delegate_test.dart
       - run: flutter pub get && flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
         working-directory: apps/calendar_demo
       - run: flutter build web --release ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
@@ -33,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/use-local-core
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -55,6 +57,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/use-local-core
       - uses: subosito/flutter-action@v2
         with:
           channel: stable

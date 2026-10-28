@@ -10,8 +10,8 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  general_datetime_core: ^1.0.0
-  general_date_format_core: ^1.0.0
+  general_datetime_core: ^2.0.0
+  general_date_format_core: ^2.0.0
   timezone: '>=0.10.0 <0.12.0'
   intl: ^0.20.2
 dev_dependencies:

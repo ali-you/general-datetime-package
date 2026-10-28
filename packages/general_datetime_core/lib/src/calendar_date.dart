@@ -1,7 +1,11 @@
 import 'calendar_serialization.dart';
 import 'calendar_system.dart';
+import 'calendars/hebrew/hebrew_calendar_calculation.dart';
 
 enum CalendarOverflow { clamp, reject, overflow }
+
+/// Policy for an intercalary month absent from a destination year.
+enum MissingMonthPolicy { reject, regular }
 
 /// Immutable civil date. Equality includes the calendar; [compareTo] compares
 /// the civil-day position, so differently tagged dates can compare as zero.
@@ -74,6 +78,10 @@ final class CalendarDate implements Comparable<CalendarDate> {
   /// Clamping is not reversible. Recurrences must retain their original day.
   CalendarDate addMonths(int months,
       {CalendarOverflow policy = CalendarOverflow.clamp}) {
+    if (calendar == CalendarId.hebrew) {
+      final target = HebrewCalendarCalculation.addMonths(year, month, months);
+      return _withPeriodTarget(target.year, target.month, policy);
+    }
     final total = BigInt.from(year) * BigInt.from(12) +
         BigInt.from(month - 1) +
         BigInt.from(months);
@@ -102,14 +110,50 @@ final class CalendarDate implements Comparable<CalendarDate> {
         day: day > length ? length : day);
   }
 
+  /// Preserves month identity. For Hebrew Adar I in a common destination year,
+  /// [missingMonth] maps to ordinary Adar by default or explicitly rejects it.
+  /// [policy] independently controls a day absent from the resulting month.
   CalendarDate addYears(int years,
-      {CalendarOverflow policy = CalendarOverflow.clamp}) {
+      {CalendarOverflow policy = CalendarOverflow.clamp,
+      MissingMonthPolicy missingMonth = MissingMonthPolicy.regular}) {
+    if (calendar == CalendarId.hebrew) {
+      final target = BigInt.from(year) + BigInt.from(years);
+      if (target < BigInt.from(system.minimumDate.year) ||
+          target > BigInt.from(system.maximumDate.year)) {
+        throw RangeError('Year offset outside supported span');
+      }
+      final y = target.toInt();
+      var m = month;
+      if (m == 6 && !HebrewCalendarCalculation.isLeapYear(y)) {
+        if (missingMonth == MissingMonthPolicy.reject) {
+          throw ArgumentError('Adar I is absent in Hebrew year $y');
+        }
+        m = 7;
+      }
+      return _withPeriodTarget(y, m, policy);
+    }
     final months = BigInt.from(years) * BigInt.from(12);
     // All supported spans fit comfortably in this exact bound.
     if (months.abs() > BigInt.from(7000000)) {
       throw RangeError('Year offset outside supported span');
     }
     return addMonths(months.toInt(), policy: policy);
+  }
+
+  CalendarDate _withPeriodTarget(int year, int month, CalendarOverflow policy) {
+    final length = system.daysInMonth(year, month);
+    if (day > length && policy == CalendarOverflow.reject) {
+      throw ArgumentError('Destination month has no day $day');
+    }
+    if (policy == CalendarOverflow.overflow) {
+      return CalendarDate(calendar: calendar, year: year, month: month, day: 1)
+          .addDays(day - 1);
+    }
+    return CalendarDate(
+        calendar: calendar,
+        year: year,
+        month: month,
+        day: day > length ? length : day);
   }
 
   /// Signed number of civil days from this date to [other].

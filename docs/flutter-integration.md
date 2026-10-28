@@ -19,6 +19,7 @@ import 'package:general_datetime/default_localizations.dart';
 | Gregorian | Native `DateTime` | Flutter `GregorianCalendarDelegate` | App's ordinary Material localizations |
 | Persian | `PersianDateTime` | `PersianCalendarDelegate` | `DefaultPersianCalendarMaterialLocalizations.delegate` |
 | Umm al-Qura | `HijriDateTime` | `HijriCalendarDelegate` | `DefaultHijriCalendarMaterialLocalizations.delegate` |
+| Hebrew | `HebrewDateTime` | `HebrewCalendarDelegate` | `DefaultHebrewCalendarMaterialLocalizations.delegate` |
 
 The two built-in custom localizations support English (`en`). For translated
 labels and localized input, use the companion formatter's matching localization
@@ -109,8 +110,16 @@ calendar's finite bounds. `rangePickerDelegate` handles those comparison probes
 without allowing unsupported selectable dates. Use the ordinary delegate for
 single-date pickers and general calendar arithmetic.
 
-For Hijri, replace every date, delegate, and localization in the examples with
-its corresponding Hijri type. Keep all values within that chronology's bounds.
+For Hijri or Hebrew, replace every date, delegate and localization in the
+examples with the corresponding calendar type. Keep all values within that
+chronology's bounds. Hebrew month slots are stable across leap/common years;
+the delegate navigates actual months and maps Adar I when selecting a common
+year. See [Hebrew calendar](hebrew-calendar.md).
+
+The chronology wrapper provides English default labels. Companion formatter
+3.0.0 provides translated `HebrewCalendarMaterialLocalizations.delegate`, as
+well as Persian/Hijri translated adapters, and requires chronology wrapper
+4.0.0. Install the matching localization only in its calendar's picker scope.
 
 ## Switching calendars and diagnosing failures
 

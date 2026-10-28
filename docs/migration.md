@@ -2,22 +2,41 @@
 
 [Documentation index](README.md)
 
-## Version metadata in this checkout
+## Prepared release versions
 
-The [wrapper manifest](../pubspec.yaml) declares `general_datetime` **3.0.0**.
-The [root README](../README.md) and [changelog](../CHANGELOG.md) describe a
-**4.0.0** wrapper. The [core manifest](../packages/general_datetime_core/pubspec.yaml)
-declares `general_datetime_core` **1.0.0**. These guides document implemented
-source behavior without resolving that release-label discrepancy.
+The manifests, installation examples and changelogs now use this release matrix:
 
-Before publishing, align the wrapper manifest, README installation examples,
-changelog, and companion formatter constraint around the chosen release version.
-Check the actual hosted package contents before assuming checkout features are
-available in an existing version.
+| Package | Prepared version | Package dependencies |
+| --- | --- | --- |
+| `general_datetime_core` | **2.0.0** | No runtime dependencies |
+| `general_datetime` | **4.0.0** | `general_datetime_core ^2.0.0` |
+| `general_date_format_core` | **2.0.0** | `general_datetime_core ^2.0.0` |
+| `general_date_format` | **3.0.0** | Formatter core `^2.0.0`, chronology wrapper `^4.0.0` |
 
-The root README records that `general_date_format` 3.0.0 depends on
-`general_datetime ^3.0.0`, which excludes 4.0.0. If releasing the wrapper as
-4.0.0, update and validate the companion constraint in its own repository.
+Hebrew support is included throughout this pair. Dart remains `>=3.4.0 <4.0.0`;
+Flutter wrappers require Flutter `>=3.32.0`. Version alignment is complete in
+source; no publication is performed by this update. Until matching hosted
+versions are available, use the [local setup](development.md#dependency-resolution).
+See [release preparation](release-preparation.md) for release order and checks.
+
+## Hebrew and core 2.0.0 compatibility
+
+`CalendarId.hebrew` adds a fourth enum value. Update exhaustive switches and
+code that assumes `CalendarId.values` has three entries. Existing enum indices
+and Persian/Hijri version-1 JSON payloads stay unchanged. Older core 1.x decoders
+reject a Hebrew record; upgrade decoders before sharing records with Hebrew.
+
+Hebrew uses stable slots 1–13, with Adar I=6 absent in common years and
+Adar/Adar II=7. Use `CalendarSystems.monthsOfYear` for iteration. Civil month
+addition counts actual months, and `MissingMonthPolicy` handles Adar I when
+adding years. Keep day overflow policy separate. These changes preserve
+existing Persian/Hijri arithmetic and formatting behavior.
+
+The companion formatter core 2.0.0 also removes Gregorian selectors and the
+unused locale initialization hook. Use application-owned `intl.DateFormat`
+for Gregorian dates; bundled calendar symbols need no initialization call.
+Use `GeneralDateFormat.now` to control two-digit-year parsing. Hebrew quarter
+patterns are unsupported; Persian/Hijri quarters retain their existing behavior.
 
 ## Core extraction and imports
 

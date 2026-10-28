@@ -1,7 +1,7 @@
 # General DateTime Core
 
-Pure Dart date and time operations for Gregorian, Solar Hijri (Persian), and
-Umm al-Qura Hijri calendars. Use it in servers, command-line tools, web apps,
+Pure Dart date and time operations for Gregorian, Solar Hijri (Persian), Hebrew,
+and Umm al-Qura Hijri calendars. Use it in servers, command-line tools, web apps,
 and Flutter projects without depending on the Flutter SDK.
 
 Requires **Dart 3.4 or later** and has **no runtime dependencies**.
@@ -9,12 +9,35 @@ Requires **Dart 3.4 or later** and has **no runtime dependencies**.
 ## Features
 
 - Convert calendars while preserving the instant and microsecond precision.
-- Use `PersianDateTime` and `HijriDateTime` with the `DateTime` interface.
+- Use `PersianDateTime`, `HijriDateTime`, and `HebrewDateTime` with the `DateTime` interface.
 - Validate fields, inspect month lengths, and query calendar bounds and metadata.
 - Work with immutable civil dates, date ranges, and configurable week rules.
 - Choose clamp, reject, or overflow policies for month and year arithmetic.
 - Serialize instants and civil dates with explicit calendar identifiers.
 - Use UTC or the host's local timezone.
+
+## Hebrew calendar
+
+```dart
+final hebrew = HebrewDateTime.fromDateTime(DateTime.utc(2024, 3, 20));
+print((hebrew.year, hebrew.month, hebrew.day)); // (5784, 7, 10)
+final months = CalendarSystems.monthsOfYear(CalendarId.hebrew, 5785);
+print(months); // [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
+```
+
+The fixed Hebrew civil calendar supports AM 1–9999 with midnight day boundaries.
+Months use stable ICU slots: Tishri=1, Adar I=6 (leap years only),
+Adar/Adar II=7, Nisan=8, Elul=13. Use `monthsOfYear` to iterate valid months
+and `monthOrdinal` for position within a year. `CalendarDate.addMonths` counts
+actual months; `addYears` preserves month identity, mapping a missing Adar I
+by default or rejecting it with `MissingMonthPolicy.reject`. Day overflow is
+controlled separately by `CalendarOverflow`. Strict construction and parsing
+reject an explicit Adar I in common years.
+
+JSON uses calendar identifier `hebrew` in the existing version-1 schema.
+For full semantics, Flutter setup, and verification, see the repository's
+[Hebrew guide](../../docs/hebrew-calendar.md). Hebrew support is included in
+the prepared 2.0.0 release; it is not available through the old 1.0.0 core.
 
 ## Installation
 
@@ -22,12 +45,13 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^1.0.0
+  general_datetime_core: ^2.0.0
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.
-Version 1.0.0 is published and is re-exported by `general_datetime` 4.0.0.
-For development against a local core checkout, you can use a path dependency:
+The 2.0.0 core is re-exported by the prepared `general_datetime` 4.0.0 wrapper.
+Publication is a separate step. Before the matching hosted releases are
+available, use a local path dependency:
 
 ```yaml
 dependencies:
@@ -40,6 +64,12 @@ All public APIs are available from one import:
 ```dart
 import 'package:general_datetime_core/general_datetime_core.dart';
 ```
+
+When upgrading from 1.x, add `CalendarId.hebrew` to exhaustive switches and
+check code that iterates `CalendarId.values`. Existing enum indices and
+Persian/Hijri version-1 JSON remain unchanged. Hebrew month iteration and
+year arithmetic require the rules described above; do not assume twelve
+consecutive slots. See [migration](../../docs/migration.md).
 
 ## Quick start
 
@@ -60,6 +90,12 @@ void main() {
 
 `fromDateTime` preserves epoch microseconds and UTC/local mode, including
 when converting directly from another supported calendar date-time.
+
+On JavaScript, aggregate epoch microseconds can exceed the exact-integer range.
+Conversions preserve the native millisecond and microsecond parts separately;
+prefer `toDateTime()` or `CalendarInstant` timestamp strings over a large epoch
+integer for round trips. The SDK's own precision still applies: Dart 3.4's JS
+backend rounds to milliseconds; the current JS backend retains microseconds.
 
 ## Calendar date-times
 
@@ -200,6 +236,7 @@ calculations that require dates outside supported bounds can fail.
 | --- | --- | --- |
 | Gregorian | `CalendarSystems.gregorian` | `gregory` |
 | Persian | `CalendarSystems.persian` | `persian` |
+| Hebrew | `CalendarSystems.hebrew` | `hebrew` |
 | Umm al-Qura Hijri | `CalendarSystems.ummAlQura` | `islamic-umalqura` |
 
 ```dart
@@ -299,6 +336,7 @@ or `value.toDateTime().toUtc().toIso8601String()`.
 | --- | --- | --- |
 | Gregorian | Dart native date bounds: -271821-04-20 through 275760-09-13 | Proleptic Gregorian |
 | Persian | SH -61 through 3177, including year zero | Published University of Tehran leap data for SH 1206–1498; finite Borkowski calculation elsewhere |
+| Hebrew | AM 1 through 9999, no year zero | Fixed ICU-compatible arithmetic; midnight civil days; no annual published table |
 | Umm al-Qura Hijri | AH 1300 through 1600 | Finite month table derived from Unicode ICU; no fallback outside the table |
 
 Persian dates outside the published table are calculated dates and are not
@@ -333,6 +371,7 @@ Calendar-specific implementations and data live under `lib/src/calendars`:
 | --- | --- |
 | `calendars/gregorian/` | Gregorian calculation helper; Gregorian date-times use Dart's native `DateTime` |
 | `calendars/persian/` | `PersianDateTime`, Persian calendar calculation, and Iranian calendar data |
+| `calendars/hebrew/` | `HebrewDateTime` and fixed Hebrew calendar calculation |
 | `calendars/hijri/` | `HijriDateTime`, Umm al-Qura calendar calculation, and month data |
 | `shared/` | Common field normalization and parsing constants |
 

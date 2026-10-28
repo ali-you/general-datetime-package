@@ -1,3 +1,4 @@
+import 'calendars/hebrew/hebrew_date_time.dart';
 import 'calendar_date_utils.dart';
 import 'general_date_time_interface.dart';
 import 'calendars/hijri/hijri_date_time.dart';
@@ -7,7 +8,8 @@ import 'calendars/persian/persian_date_time.dart';
 enum CalendarId {
   gregory('gregory'),
   persian('persian'),
-  islamicUmalqura('islamic-umalqura');
+  islamicUmalqura('islamic-umalqura'),
+  hebrew('hebrew');
 
   const CalendarId(this.identifier);
 
@@ -21,6 +23,7 @@ enum CalendarId {
   }
 
   static CalendarId _of(DateTime date) {
+    if (date is HebrewDateTime) return hebrew;
     if (date is PersianDateTime) return persian;
     if (date is HijriDateTime) return islamicUmalqura;
     if (date is GeneralDateTimeInterface) {
@@ -208,6 +211,8 @@ Map<String, Object?> _readRecord(
 
 bool _validDate(CalendarId calendar, int year, int month, int day) {
   switch (calendar) {
+    case CalendarId.hebrew:
+      return HebrewDateTime.isValidDate(year, month, day);
     case CalendarId.persian:
       return PersianDateTime.isValidDate(year, month, day);
     case CalendarId.islamicUmalqura:

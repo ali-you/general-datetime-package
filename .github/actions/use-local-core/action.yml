@@ -1,0 +1,22 @@
+name: Use checkout chronology
+description: Resolve consumers against the core source being tested in this checkout.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        cat > pubspec_overrides.yaml <<'YAML'
+        dependency_overrides:
+          general_datetime_core:
+            path: packages/general_datetime_core
+        YAML
+        cat > example/pubspec_overrides.yaml <<'YAML'
+        dependency_overrides:
+          general_datetime_core:
+            path: ../packages/general_datetime_core
+        YAML
+        cat > apps/calendar_demo/pubspec_overrides.yaml <<'YAML'
+        dependency_overrides:
+          general_datetime_core:
+            path: ../../packages/general_datetime_core
+        YAML

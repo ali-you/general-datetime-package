@@ -8,6 +8,7 @@ void main() {
       test('strict construction and conversion share an independent day', () {
         final fields = system.fromGregorianDay(DateTime.utc(2024, 3, 20));
         final expected = switch (id) {
+          CalendarId.hebrew => (year: 5784, month: 7, day: 10),
           CalendarId.gregory => (year: 2024, month: 3, day: 20),
           CalendarId.persian => (year: 1403, month: 1, day: 1),
           CalendarId.islamicUmalqura => (year: 1445, month: 9, day: 10),
@@ -15,7 +16,10 @@ void main() {
         expect(fields, expected);
         expect(system.toGregorianDay(fields.year, fields.month, fields.day),
             DateTime.utc(2024, 3, 20));
-        expect(() => system.construct(fields.year, 13, 1), throwsArgumentError);
+        expect(
+            () => system.construct(
+                fields.year, id == CalendarId.hebrew ? 15 : 13, 1),
+            throwsArgumentError);
         expect(() => system.construct(fields.year, fields.month, 1, hour: 24),
             throwsArgumentError);
       });

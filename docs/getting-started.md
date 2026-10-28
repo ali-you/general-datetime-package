@@ -23,7 +23,7 @@ For a pure Dart application:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^1.0.0
+  general_datetime_core: ^2.0.0
 ```
 
 Run `dart pub get`, then import:
@@ -41,7 +41,7 @@ dependencies:
 ```
 
 Adjust the relative path to your application and run `flutter pub get`. The
-wrapper itself resolves `general_datetime_core: ^1.0.0` from the package host;
+wrapper itself declares `general_datetime_core: ^2.0.0` from the package host;
 this path dependency alone does not select the core source in this repository.
 See [development](development.md) for testing local core changes.
 
@@ -53,9 +53,10 @@ import 'package:general_datetime/delegates.dart';
 import 'package:general_datetime/default_localizations.dart';
 ```
 
-For hosted wrapper installation, choose a published version containing the
-features you need. The manifest/README version discrepancy is recorded in
-[migration](migration.md); the guides do not infer a published 4.0.0 release.
+The prepared hosted wrapper constraint is `general_datetime: ^4.0.0`.
+These release versions are aligned in source; they have not been published
+as part of this work. Use development overrides until hosted releases are
+available. See [migration](migration.md) for the complete package matrix.
 
 ## Convert an instant
 

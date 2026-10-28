@@ -1,8 +1,10 @@
+import 'calendars/hebrew/hebrew_date_time.dart';
 import 'calendars/hijri/hijri_date_time.dart';
 import 'calendars/persian/persian_date_time.dart';
 
 abstract class GeneralDateTimeInterface<T> {
   static T now<T extends GeneralDateTimeInterface>() {
+    if (T == HebrewDateTime) return HebrewDateTime.now() as T;
     if (T == PersianDateTime) return PersianDateTime.now() as T;
     if (T == HijriDateTime) return HijriDateTime.now() as T;
     throw TypeError();
@@ -77,10 +79,12 @@ abstract class GeneralDateTimeInterface<T> {
   /// Convert to UTC time
   T toUtc();
 
-  /// Unix seconds rounded down from [microsecondsSinceEpoch].
+  /// Unix seconds rounded down from the native instant.
   ///
   /// The containing second is independent of time zone; -1 microsecond maps
-  /// to -1 second. Use [microsecondsSinceEpoch] to retain fractional precision.
+  /// to -1 second. On JavaScript, aggregate epoch microseconds can exceed the
+  /// exact-integer range; use `toDateTime()` or split millisecond/microsecond
+  /// components to preserve full precision.
   int get secondsSinceEpoch;
 
   /// Milliseconds since epoch

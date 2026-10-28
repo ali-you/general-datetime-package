@@ -415,11 +415,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           isExpanded: true,
                                           value: controller.calendar,
                                           items: [
-                                            for (final id in CalendarId.values)
+                                            // The demo's formatter currently supports these calendars.
+                                            for (final id in [
+                                              CalendarId.gregory,
+                                              CalendarId.persian,
+                                              CalendarId.islamicUmalqura,
+                                            ])
                                               DropdownMenuItem(
                                                   value: id,
                                                   child: Text(
                                                       switch (id) {
+                                                        CalendarId.hebrew =>
+                                                          'Hebrew',
                                                         CalendarId.gregory =>
                                                           'Gregorian',
                                                         CalendarId.persian =>

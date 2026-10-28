@@ -1,3 +1,6 @@
+import 'calendars/hebrew/hebrew_date_time.dart';
+import 'shared/native_date_time.dart';
+import 'calendars/hebrew/hebrew_calendar_calculation.dart';
 import 'calendar_serialization.dart';
 import 'general_date_time_interface.dart';
 import 'calendars/hijri/hijri_date_time.dart';
@@ -40,10 +43,21 @@ abstract interface class CalendarSystem {
 
 /// Immutable built-in registry. Named-zone and formatter support are separate.
 abstract final class CalendarSystems {
+  static const hebrew = _BuiltInCalendarSystem(CalendarId.hebrew);
   static const gregorian = _BuiltInCalendarSystem(CalendarId.gregory);
   static const persian = _BuiltInCalendarSystem(CalendarId.persian);
   static const ummAlQura = _BuiltInCalendarSystem(CalendarId.islamicUmalqura);
+
+  /// Valid month slots in chronological order. Hebrew common years omit 6.
+  static List<int> monthsOfYear(CalendarId id, int year) {
+    final system = forId(id);
+    if (id == CalendarId.hebrew) return HebrewDateTime.monthsOfYear(year);
+    system.daysInYear(year); // Validate the year.
+    return List<int>.unmodifiable(List.generate(12, (i) => i + 1));
+  }
+
   static CalendarSystem forId(CalendarId id) => switch (id) {
+        CalendarId.hebrew => hebrew,
         CalendarId.gregory => gregorian,
         CalendarId.persian => persian,
         CalendarId.islamicUmalqura => ummAlQura,
@@ -56,12 +70,15 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   final CalendarId id;
   @override
   String get dataRevision => switch (id) {
+        CalendarId.hebrew => 'fixed-hebrew-icu78.3-v1',
         CalendarId.gregory => 'proleptic-gregorian-v1',
         CalendarId.persian => 'tehran-1206-1498-borkowski-v1',
         CalendarId.islamicUmalqura => 'icu-openjdk21-1300-1600-v1',
       };
   @override
   String get calculationPolicy => switch (id) {
+        CalendarId.hebrew =>
+          'Fixed Hebrew arithmetic; midnight civil days; AM 1–9999.',
         CalendarId.gregory => 'Proleptic Gregorian; Dart UTC date bounds.',
         CalendarId.persian => 'Published Tehran leap data for 1206–1498; '
             'finite Borkowski calculation elsewhere.',
@@ -69,6 +86,11 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   CalendarFields get minimumDate => switch (id) {
+        CalendarId.hebrew => (
+            year: HebrewDateTime.minimumYear,
+            month: 1,
+            day: 1
+          ),
         CalendarId.gregory => (year: -271821, month: 4, day: 20),
         CalendarId.persian => (
             year: PersianDateTime.minimumYear,
@@ -83,6 +105,11 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   CalendarFields get maximumDate => switch (id) {
+        CalendarId.hebrew => (
+            year: HebrewDateTime.maximumYear,
+            month: 13,
+            day: 29
+          ),
         CalendarId.gregory => (year: 275760, month: 9, day: 13),
         CalendarId.persian => (
             year: PersianDateTime.maximumYear,
@@ -97,6 +124,9 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   bool isValidDate(int year, int month, int day) {
+    if (id == CalendarId.hebrew) {
+      return HebrewDateTime.isValidDate(year, month, day);
+    }
     if (id == CalendarId.persian) {
       return PersianDateTime.isValidDate(year, month, day);
     }
@@ -128,6 +158,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   @override
   int daysInMonth(int year, int month) {
     _requireYear(year);
+    if (id == CalendarId.hebrew) return HebrewDateTime.daysInMonth(year, month);
     if (month < 1 || month > 12) throw RangeError.range(month, 1, 12, 'month');
     if (id == CalendarId.persian) {
       return PersianDateTime.daysInMonth(year, month);
@@ -153,12 +184,15 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   }
 
   @override
-  int daysInYear(int year) => List.generate(12, (i) => daysInMonth(year, i + 1))
-      .reduce((a, b) => a + b);
+  int daysInYear(int year) => id == CalendarId.hebrew
+      ? HebrewCalendarCalculation.yearLength(year)
+      : List.generate(12, (i) => daysInMonth(year, i + 1))
+          .reduce((a, b) => a + b);
   @override
   bool hasPublishedData(int year) {
     _requireYear(year);
     return switch (id) {
+      CalendarId.hebrew => false,
       CalendarId.gregory => false,
       CalendarId.persian => year >= PersianDateTime.minimumOfficialYear &&
           year <= PersianDateTime.maximumOfficialYear,
@@ -190,6 +224,11 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       throw ArgumentError('Invalid clock fields');
     }
     final DateTime result = switch (id) {
+      CalendarId.hebrew => isUtc
+          ? HebrewDateTime.utc(
+              year, month, day, hour, minute, second, millisecond, microsecond)
+          : HebrewDateTime(
+              year, month, day, hour, minute, second, millisecond, microsecond),
       CalendarId.gregory => isUtc
           ? DateTime.utc(
               year, month, day, hour, minute, second, millisecond, microsecond)
@@ -224,10 +263,9 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
 
   @override
   DateTime fromInstant(DateTime instant, {bool isUtc = true}) {
-    final native = DateTime.fromMicrosecondsSinceEpoch(
-        instant.microsecondsSinceEpoch,
-        isUtc: isUtc);
+    final native = copyNativeDateTime(instant, isUtc: isUtc);
     return switch (id) {
+      CalendarId.hebrew => HebrewDateTime.fromDateTime(native),
       CalendarId.gregory => native,
       CalendarId.persian => PersianDateTime.fromDateTime(native),
       CalendarId.islamicUmalqura => HijriDateTime.fromDateTime(native),
@@ -237,8 +275,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   @override
   DateTime toGregorianDay(int year, int month, int day) {
     final value = construct(year, month, day);
-    return DateTime.fromMicrosecondsSinceEpoch(value.microsecondsSinceEpoch,
-        isUtc: true);
+    return copyNativeDateTime(value, isUtc: true);
   }
 
   @override

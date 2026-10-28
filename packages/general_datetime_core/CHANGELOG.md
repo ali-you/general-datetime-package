@@ -1,5 +1,33 @@
 # Changelog
 
+## 2.0.0 — 2026-10-28
+
+- Validate all 3,652,078 supported Hebrew dates against an independent Hebcal
+  oracle, retain reproducible validation tools, and add postponement anchors
+  independently confirmed by .NET.
+
+- Preserve the native split millisecond/microsecond representation when copying
+  instants; avoid JavaScript aggregate-epoch rounding in Hebrew and Persian
+  extended ranges. Retain exact hash/equality, comparisons, fractions and
+  duration operations; share the same implementation with Hijri.
+- Test odd fractions and second-boundary carry in VM/Node across supported
+  endpoints, ancient/future dates, UTC/local mode, helpers and serialization.
+
+- Breaking: add `CalendarId.hebrew`. Exhaustive switches must handle the new
+  case; existing enum indices and Persian/Hijri serialization stay unchanged.
+
+- Add `HebrewDateTime` and `CalendarSystems.hebrew` for the fixed midnight-based
+  Hebrew civil calendar, AM 1–9999, using ICU-compatible stable month slots.
+- Support Hebrew through conversion, validation, field helpers, civil dates,
+  weeks, ranges, instant/civil JSON, and `GeneralDateTimeInterface.now`.
+- Add `CalendarId.hebrew`, `CalendarSystems.monthsOfYear`, actual-month
+  arithmetic, and `MissingMonthPolicy` for Adar I in common destination years.
+- Validate independent Hebcal anchors, every supported year and month boundary,
+  representative day round trips, arithmetic policies, serialization and bounds.
+- Add JavaScript-compatible extreme-offset tests and portable core Node CI.
+- Independently compare 239,612 Hebrew days with .NET and preserve pre-Hebrew
+  Persian/Hijri conversion, helpers, serialization and arithmetic results.
+
 ## 1.0.0
 
 - Extract the corrected pure Dart implementation from the Flutter package.

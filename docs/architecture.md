@@ -19,7 +19,7 @@ general_datetime_core
   |-- CalendarDate --> CalendarSystems --> native/calendar date-time values
   |-- CalendarDateUtils -----------------> calendar-preserving field operations
   |-- CalendarInstant / CalendarDateRecord -> version-1 JSON contracts
-  `-- PersianDateTime / HijriDateTime ----> calendar calculations and source data
+  `-- PersianDateTime / HijriDateTime / HebrewDateTime -> calculations and data
 ```
 
 This is the implemented dependency structure. The engine-based structure in the
@@ -42,6 +42,7 @@ Paths below are relative to the repository root.
 | [`general_date_time_interface.dart`](../packages/general_datetime_core/lib/src/general_date_time_interface.dart) | Shared calendar date-time contract |
 | [`calendars/persian/`](../packages/general_datetime_core/lib/src/calendars/persian/) | Persian date-time, calculation policy, and published leap data |
 | [`calendars/hijri/`](../packages/general_datetime_core/lib/src/calendars/hijri/) | Umm al-Qura date-time, calculations, and month table |
+| [`calendars/hebrew/`](../packages/general_datetime_core/lib/src/calendars/hebrew/) | Fixed Hebrew calculation, stable month slots and date-time compatibility |
 | [`lib/src/delegates/`](../lib/src/delegates/) | Calendar arithmetic, runtime guards, and bounded range-picker probes |
 | [`lib/src/localizations/`](../lib/src/localizations/) | English calendar-specific Material formatting and parsing |
 
@@ -67,13 +68,14 @@ Tests protect the core/wrapper identity boundary in
 
 ## Extending the package
 
-The built-in registry supports `gregory`, `persian`, and `islamic-umalqura`.
+The built-in registry supports `gregory`, `persian`, `islamic-umalqura`, and `hebrew`.
 Implementing `CalendarSystem` or `GeneralDateTimeInterface` does not register a
 new calendar with field utilities, version-1 storage, or formatter packages.
-`GeneralDateTimeInterface.now<T>()` selects the Persian and Hijri types explicitly.
+`GeneralDateTimeInterface.now<T>()` selects Persian, Hijri and Hebrew types explicitly.
 
-Current period arithmetic assumes twelve sequential months per year. Additional
-calendars with leap months, repeated month numbers, or different day boundaries
-need a richer model. Consult the [expansion review](calendar-expansion-review.md)
-before adding a chronology; Hebrew, Chinese, and Hindu implementations described
-there are not current features.
+Hebrew civil arithmetic counts actual months and preserves stable month identity;
+`CalendarSystems.monthsOfYear` exposes valid slots, and `MissingMonthPolicy`
+controls Adar I when adding years. Existing calendars retain twelve-month
+arithmetic. Chinese and Hindu calendars remain proposed extensions. The
+[expansion review](calendar-expansion-review.md) records the earlier design
+analysis; see the [Hebrew guide](hebrew-calendar.md) for implemented behavior.

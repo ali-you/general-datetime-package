@@ -1,6 +1,32 @@
 # Changelog
 
-## [4.0.0]
+## [4.0.0] — 2026-10-28
+
+- Independently validate every supported Hebrew date in both directions and
+  verify companion formatting and calendar widget integrations.
+
+- Preserve odd microseconds on JavaScript outside its exact epoch-integer
+  range, including native conversion, equality/hash keys, arithmetic, system
+  conversion and instant serialization across the custom calendars.
+- Correct package repository/documentation/issue URLs to the actual repository.
+
+- Require `general_datetime_core ^2.0.0` and align the companion formatter
+  release (`general_date_format 3.0.0`, formatter core 2.0.0).
+- Breaking: `CalendarId` now includes `hebrew`; update exhaustive switches.
+  Existing calendar indices and version-1 Persian/Hijri JSON remain unchanged.
+
+- Add fixed Hebrew civil chronology for AM 1–9999, preserving native instants
+  through `HebrewDateTime` and supporting calendar systems, field helpers,
+  civil arithmetic, weeks, ranges, and version-1 JSON with identifier `hebrew`.
+- Add `HebrewCalendarDelegate` and English Hebrew-calendar Material
+  localizations, including leap-month navigation and range-picker endpoints.
+- Expose actual month lists and an explicit missing-month policy for Hebrew
+  year arithmetic. Keep month slots stable across leap and common years.
+- Validate the source pair on Dart/Flutter, Node, Chrome JavaScript/Wasm and
+  Android builds. Compare 239,612 days against .NET's Hebrew calendar and
+  850,228 Persian/Hijri regression records against pre-Hebrew source.
+
+## [3.0.0]
 
 - Add `calendarDateRangePickerBuilder` to preserve the calendar delegate on
   Flutter 3.32, whose `showDateRangePicker` omits it when creating the dialog.
