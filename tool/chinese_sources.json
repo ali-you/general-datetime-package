@@ -1,0 +1,7 @@
+{
+  "url": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Private.CoreLib/src/System/Globalization/ChineseLunisolarCalendar.cs",
+  "sha256": "f6a6a3e586571e6afeaa347ad26d7b9ade0a2a160667b62539feac4c6cf7ada6",
+  "license": "MIT",
+  "minimumYear": 1901,
+  "maximumYear": 2099
+}
