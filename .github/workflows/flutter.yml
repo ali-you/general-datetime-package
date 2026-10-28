@@ -32,7 +32,11 @@ jobs:
       # Dart 3.4's JS DateTime rounds to milliseconds; precision tests require
       # the current JS backend. The minimum SDK still runs the full VM suite.
       - if: matrix.sdk == 'stable'
-        run: dart test --platform node test/calendar_date_test.dart test/calendar_system_test.dart test/hebrew_calendar_test.dart test/instant_precision_test.dart
+        run: dart test --platform node
+      - if: matrix.sdk == 'stable'
+        run: python ../../tool/validate_chinese_timezones.py --dart dart
+      - if: matrix.sdk == 'stable'
+        run: python ../../tool/test_chinese_validators.py
       - run: dart compile exe example/cli.dart -o .dart_tool/calendar_cli
       - run: .dart_tool/calendar_cli
   test:

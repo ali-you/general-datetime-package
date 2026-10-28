@@ -35,3 +35,6 @@ build/
 # Keep the example application's checked-in dependency lockfile tracked.
 !/example/pubspec.lock
 **/pubspec_overrides.yaml
+
+# Download cache for reproducible HKO calendar generation.
+tool/.chinese-cache/

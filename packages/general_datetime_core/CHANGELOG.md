@@ -2,6 +2,19 @@
 
 ## 2.0.0 — 2026-10-28
 
+- Extend Chinese validation to every supported day coordinate, month identity,
+  period overflow policy and cross-year leap-month mapping. Verify exact large
+  cancellations on VM/JavaScript, native executable behavior, and five process
+  timezones; add non-overwriting oracle/baseline checks.
+
+
+- Add Chinese civil chronology for lunar years 1901–2099, with pinned MIT .NET
+  tables, explicit leap-month identity, actual-month arithmetic, JSON storage,
+  English Material adapters, and independent exhaustive runtime validation.
+- Append `CalendarId.chinese`; exhaustive enum switches must handle the new case.
+  Document intentional differences from HKO and ICU reference chronologies.
+
+
 - Validate all 3,652,078 supported Hebrew dates against an independent Hebcal
   oracle, retain reproducible validation tools, and add postponement anchors
   independently confirmed by .NET.

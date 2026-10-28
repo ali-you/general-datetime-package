@@ -2,6 +2,19 @@
 
 ## [4.0.0] — 2026-10-28
 
+- Audit Chinese chronology and picker integration; reject non-decimal English
+  picker input and align carried-month weekday offsets with month clamping.
+- Add exhaustive period, JSON, endpoint, timezone, native executable, and
+  keyboard/range coverage; retain portable VM/Node test separation.
+
+
+- Add Chinese civil chronology for lunar years 1901–2099, with pinned MIT .NET
+  tables, explicit leap-month identity, actual-month arithmetic, JSON storage,
+  English Material adapters, and independent exhaustive runtime validation.
+- Append `CalendarId.chinese`; exhaustive enum switches must handle the new case.
+  Document intentional differences from HKO and ICU reference chronologies.
+
+
 - Independently validate every supported Hebrew date in both directions and
   verify companion formatting and calendar widget integrations.
 

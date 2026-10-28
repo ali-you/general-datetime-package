@@ -1,6 +1,6 @@
+import 'calendars/chinese/chinese_date_time.dart';
 import 'calendars/hebrew/hebrew_date_time.dart';
 import 'shared/native_date_time.dart';
-import 'calendars/hebrew/hebrew_calendar_calculation.dart';
 import 'calendar_serialization.dart';
 import 'general_date_time_interface.dart';
 import 'calendars/hijri/hijri_date_time.dart';
@@ -37,26 +37,29 @@ abstract interface class CalendarSystem {
       int microsecond = 0,
       bool isUtc = true});
 
-  /// Returns native/calendar fields for the same instant in UTC or host local.
+  /// Same instant in UTC or host local mode, exposed in this calendar.
   DateTime fromInstant(DateTime instant, {bool isUtc = true});
 }
 
-/// Immutable built-in registry. Named-zone and formatter support are separate.
+/// Immutable built-in registry. Chinese months are chronological ordinals;
+/// Hebrew uses stable slots. Always enumerate months with [monthsOfYear].
 abstract final class CalendarSystems {
+  static const chinese = _BuiltInCalendarSystem(CalendarId.chinese);
   static const hebrew = _BuiltInCalendarSystem(CalendarId.hebrew);
   static const gregorian = _BuiltInCalendarSystem(CalendarId.gregory);
   static const persian = _BuiltInCalendarSystem(CalendarId.persian);
   static const ummAlQura = _BuiltInCalendarSystem(CalendarId.islamicUmalqura);
 
-  /// Valid month slots in chronological order. Hebrew common years omit 6.
+  /// Valid month slots in chronological order, including intercalary months.
   static List<int> monthsOfYear(CalendarId id, int year) {
-    final system = forId(id);
+    if (id == CalendarId.chinese) return ChineseDateTime.monthsOfYear(year);
     if (id == CalendarId.hebrew) return HebrewDateTime.monthsOfYear(year);
-    system.daysInYear(year); // Validate the year.
+    forId(id).daysInYear(year);
     return List<int>.unmodifiable(List.generate(12, (i) => i + 1));
   }
 
   static CalendarSystem forId(CalendarId id) => switch (id) {
+        CalendarId.chinese => chinese,
         CalendarId.hebrew => hebrew,
         CalendarId.gregory => gregorian,
         CalendarId.persian => persian,
@@ -70,6 +73,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   final CalendarId id;
   @override
   String get dataRevision => switch (id) {
+        CalendarId.chinese => 'dotnet10-1901-2099-v1',
         CalendarId.hebrew => 'fixed-hebrew-icu78.3-v1',
         CalendarId.gregory => 'proleptic-gregorian-v1',
         CalendarId.persian => 'tehran-1206-1498-borkowski-v1',
@@ -77,6 +81,8 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   String get calculationPolicy => switch (id) {
+        CalendarId.chinese =>
+          '.NET Chinese civil tables; related Gregorian years 1901-2099; ordinal months; no fallback.',
         CalendarId.hebrew =>
           'Fixed Hebrew arithmetic; midnight civil days; AM 1–9999.',
         CalendarId.gregory => 'Proleptic Gregorian; Dart UTC date bounds.',
@@ -86,6 +92,11 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   CalendarFields get minimumDate => switch (id) {
+        CalendarId.chinese => (
+            year: ChineseDateTime.minimumYear,
+            month: 1,
+            day: 1
+          ),
         CalendarId.hebrew => (
             year: HebrewDateTime.minimumYear,
             month: 1,
@@ -105,6 +116,12 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   CalendarFields get maximumDate => switch (id) {
+        CalendarId.chinese => (
+            year: ChineseDateTime.maximumYear,
+            month: ChineseDateTime.monthsInYear(ChineseDateTime.maximumYear),
+            day: ChineseDateTime.daysInMonth(ChineseDateTime.maximumYear,
+                ChineseDateTime.monthsInYear(ChineseDateTime.maximumYear))
+          ),
         CalendarId.hebrew => (
             year: HebrewDateTime.maximumYear,
             month: 13,
@@ -124,6 +141,9 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   bool isValidDate(int year, int month, int day) {
+    if (id == CalendarId.chinese) {
+      return ChineseDateTime.isValidDate(year, month, day);
+    }
     if (id == CalendarId.hebrew) {
       return HebrewDateTime.isValidDate(year, month, day);
     }
@@ -158,6 +178,9 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   @override
   int daysInMonth(int year, int month) {
     _requireYear(year);
+    if (id == CalendarId.chinese) {
+      return ChineseDateTime.daysInMonth(year, month);
+    }
     if (id == CalendarId.hebrew) return HebrewDateTime.daysInMonth(year, month);
     if (month < 1 || month > 12) throw RangeError.range(month, 1, 12, 'month');
     if (id == CalendarId.persian) {
@@ -184,14 +207,21 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   }
 
   @override
-  int daysInYear(int year) => id == CalendarId.hebrew
-      ? HebrewCalendarCalculation.yearLength(year)
-      : List.generate(12, (i) => daysInMonth(year, i + 1))
-          .reduce((a, b) => a + b);
+  int daysInYear(int year) {
+    _requireYear(year);
+    final months = id == CalendarId.chinese
+        ? ChineseDateTime.monthsOfYear(year)
+        : id == CalendarId.hebrew
+            ? HebrewDateTime.monthsOfYear(year)
+            : List.generate(12, (i) => i + 1);
+    return months.fold(0, (total, month) => total + daysInMonth(year, month));
+  }
+
   @override
   bool hasPublishedData(int year) {
     _requireYear(year);
     return switch (id) {
+      CalendarId.chinese => false,
       CalendarId.hebrew => false,
       CalendarId.gregory => false,
       CalendarId.persian => year >= PersianDateTime.minimumOfficialYear &&
@@ -224,6 +254,11 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       throw ArgumentError('Invalid clock fields');
     }
     final DateTime result = switch (id) {
+      CalendarId.chinese => isUtc
+          ? ChineseDateTime.utc(
+              year, month, day, hour, minute, second, millisecond, microsecond)
+          : ChineseDateTime(
+              year, month, day, hour, minute, second, millisecond, microsecond),
       CalendarId.hebrew => isUtc
           ? HebrewDateTime.utc(
               year, month, day, hour, minute, second, millisecond, microsecond)
@@ -265,6 +300,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
   DateTime fromInstant(DateTime instant, {bool isUtc = true}) {
     final native = copyNativeDateTime(instant, isUtc: isUtc);
     return switch (id) {
+      CalendarId.chinese => ChineseDateTime.fromDateTime(native),
       CalendarId.hebrew => HebrewDateTime.fromDateTime(native),
       CalendarId.gregory => native,
       CalendarId.persian => PersianDateTime.fromDateTime(native),

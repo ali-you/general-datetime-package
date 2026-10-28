@@ -1,3 +1,4 @@
+import 'calendars/chinese/chinese_calendar_calculation.dart';
 import 'calendar_serialization.dart';
 import 'calendar_system.dart';
 import 'calendars/hebrew/hebrew_calendar_calculation.dart';
@@ -33,6 +34,18 @@ final class CalendarDate implements Comparable<CalendarDate> {
       CalendarDate.fromRecord(CalendarDateRecord.fromDateTime(value));
   final CalendarId calendar;
   final int year, month, day;
+
+  /// Stable Chinese month identity; other calendars retain their numeric slot.
+  String get monthCode {
+    final number = calendar == CalendarId.chinese
+        ? ChineseCalendarCalculation.lunarMonth(year, month)
+        : month;
+    return 'M${number.toString().padLeft(2, '0')}${isLeapMonth ? 'L' : ''}';
+  }
+
+  bool get isLeapMonth => calendar == CalendarId.chinese
+      ? ChineseCalendarCalculation.isLeapMonth(year, month)
+      : calendar == CalendarId.hebrew && month == 6;
   CalendarSystem get system => CalendarSystems.forId(calendar);
   CalendarDateRecord toRecord() => CalendarDateRecord(
       calendar: calendar, year: year, month: month, day: day);
@@ -78,6 +91,10 @@ final class CalendarDate implements Comparable<CalendarDate> {
   /// Clamping is not reversible. Recurrences must retain their original day.
   CalendarDate addMonths(int months,
       {CalendarOverflow policy = CalendarOverflow.clamp}) {
+    if (calendar == CalendarId.chinese) {
+      final target = ChineseCalendarCalculation.addMonths(year, month, months);
+      return _withPeriodTarget(target.year, target.month, policy);
+    }
     if (calendar == CalendarId.hebrew) {
       final target = HebrewCalendarCalculation.addMonths(year, month, months);
       return _withPeriodTarget(target.year, target.month, policy);
@@ -110,12 +127,35 @@ final class CalendarDate implements Comparable<CalendarDate> {
         day: day > length ? length : day);
   }
 
-  /// Preserves month identity. For Hebrew Adar I in a common destination year,
+  /// Preserves Chinese lunar month number and leap identity; an absent leap
+  /// month follows [missingMonth]. For Hebrew Adar I in a common destination year,
   /// [missingMonth] maps to ordinary Adar by default or explicitly rejects it.
   /// [policy] independently controls a day absent from the resulting month.
   CalendarDate addYears(int years,
       {CalendarOverflow policy = CalendarOverflow.clamp,
       MissingMonthPolicy missingMonth = MissingMonthPolicy.regular}) {
+    if (calendar == CalendarId.chinese) {
+      final target = BigInt.from(year) + BigInt.from(years);
+      if (target < BigInt.from(system.minimumDate.year) ||
+          target > BigInt.from(system.maximumDate.year)) {
+        throw RangeError('Year offset outside supported span');
+      }
+      final y = target.toInt();
+      final number = ChineseCalendarCalculation.lunarMonth(year, month);
+      var leap = ChineseCalendarCalculation.isLeapMonth(year, month);
+      if (leap && ChineseCalendarCalculation.leapMonth(y) != number) {
+        if (missingMonth == MissingMonthPolicy.reject) {
+          throw ArgumentError(
+              'Chinese leap month $number is absent in year $y');
+        }
+        leap = false;
+      }
+      return _withPeriodTarget(
+          y,
+          ChineseCalendarCalculation.monthForLunar(y, number,
+              isLeapMonth: leap),
+          policy);
+    }
     if (calendar == CalendarId.hebrew) {
       final target = BigInt.from(year) + BigInt.from(years);
       if (target < BigInt.from(system.minimumDate.year) ||

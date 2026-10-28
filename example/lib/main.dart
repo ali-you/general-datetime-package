@@ -83,6 +83,23 @@ class AppStartup extends StatelessWidget {
                       calendarDelegate: const HijriCalendarDelegate(),
                     ),
                   ),
+                  const Divider(),
+                  const Text('Chinese Calendar'),
+                  Localizations.override(
+                    context: context,
+                    delegates: const <LocalizationsDelegate<dynamic>>[
+                      DefaultChineseCalendarMaterialLocalizations.delegate,
+                    ],
+                    child: CalendarDatePicker(
+                      initialDate: ChineseDateTime.now(),
+                      firstDate: ChineseDateTime(2020),
+                      lastDate: ChineseDateTime(2030, 12, 29),
+                      currentDate: ChineseDateTime.now(),
+                      calendarDelegate: const ChineseCalendarDelegate(),
+                      onDateChanged: (value) =>
+                          debugPrint('Chinese selected: $value'),
+                    ),
+                  ),
                 ],
               ),
             ),

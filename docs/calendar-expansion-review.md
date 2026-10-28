@@ -1,6 +1,8 @@
 # Calendar expansion review and implementation plan
 
-Historical review, before Hebrew implementation. Hebrew chronology is now
+Historical review, before Hebrew and Chinese implementation. Chinese chronology
+is now implemented with ordinal months and separate leap identity; see
+[Chinese calendar](chinese-calendar.md). Hebrew chronology is now
 implemented in core 2.0.0 / wrapper 4.0.0; see [Hebrew calendar](hebrew-calendar.md)
 and [migration](migration.md) for current APIs and release versions. The design
 assessment below records the source state on 2026-10-06.

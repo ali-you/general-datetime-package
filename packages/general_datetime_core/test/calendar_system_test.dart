@@ -8,6 +8,7 @@ void main() {
       test('strict construction and conversion share an independent day', () {
         final fields = system.fromGregorianDay(DateTime.utc(2024, 3, 20));
         final expected = switch (id) {
+          CalendarId.chinese => (year: 2024, month: 2, day: 11),
           CalendarId.hebrew => (year: 5784, month: 7, day: 10),
           CalendarId.gregory => (year: 2024, month: 3, day: 20),
           CalendarId.persian => (year: 1403, month: 1, day: 1),

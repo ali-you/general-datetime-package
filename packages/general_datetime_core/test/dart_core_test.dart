@@ -17,7 +17,7 @@ void main() {
     expect(names, isNot(contains('flutter')));
     expect(names, isNot(contains('flutter_test')));
     expect(names, isNot(contains('general_datetime')));
-  });
+  }, testOn: 'vm');
 
   test('calendars retain one independent Gregorian instant and precision', () {
     final instant = DateTime.utc(2024, 3, 20, 13, 5, 6, 123, 456);

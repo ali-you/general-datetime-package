@@ -3,6 +3,12 @@ import 'package:test/test.dart';
 
 void main() {
   final fixtures = <CalendarId, List<DateTime>>{
+    CalendarId.chinese: [
+      DateTime.utc(1902),
+      DateTime.utc(1969),
+      DateTime.utc(2025),
+      DateTime.utc(2099)
+    ],
     CalendarId.persian: [
       DateTime.utc(600),
       DateTime.utc(1600),

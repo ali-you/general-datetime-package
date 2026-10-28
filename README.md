@@ -1,6 +1,6 @@
 # General DateTime
 
-Gregorian, Persian (Jalali), Hebrew, and Hijri (Umm al-Qura) chronology for Dart and
+Gregorian, Persian (Jalali), Hebrew, Chinese, and Hijri (Umm al-Qura) chronology for Dart and
 Flutter. Convert exact instants, work with calendar fields and all-day dates,
 serialize values safely, and use Persian, Hebrew, or Hijri calendars in Material
 date pickers.
@@ -11,6 +11,10 @@ validation reports, and the calendar expansion review.
 
 [![pub.dev](https://img.shields.io/pub/v/general_datetime.svg)](https://pub.dev/packages/general_datetime)
 [![Calendar CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml)
+
+Chinese calendar support includes explicit leap-month identity and bounded
+1901–2099 lunar years. See the [Chinese calendar guide](docs/chinese-calendar.md)
+for month numbering, related-year semantics, data policy, and picker setup.
 
 ## Contents
 
@@ -118,6 +122,7 @@ implementation.
 | --- | --- | --- | --- |
 | Gregorian | Native Dart date bounds | -271821-04-20 through 275760-09-13 | Proleptic Gregorian |
 | Persian | SH -61-01-01 through 3177-12-29 | 0560-03-20 through 3799-03-19 | Published Tehran leap data for SH 1206–1498; finite Borkowski calculation elsewhere |
+| Chinese | Related year 1901-01-01 through the final day of lunar year 2099 | 1901-02-19 through 2100-02-08 | Pinned .NET 10 table; ordinal months and explicit leap identity |
 | Hebrew | AM 1-01-01 through 9999-13-29 | Query `CalendarSystems.hebrew` bounds | Fixed Hebrew arithmetic; midnight civil days |
 | Umm al-Qura | AH 1300-01-01 through 1600-12-30 | 1882-11-12 through 2174-11-25 | Finite verified month table; no arithmetic fallback |
 

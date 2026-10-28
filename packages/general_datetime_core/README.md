@@ -1,10 +1,14 @@
 # General DateTime Core
 
-Pure Dart date and time operations for Gregorian, Solar Hijri (Persian), Hebrew,
+Pure Dart date and time operations for Gregorian, Solar Hijri (Persian), Hebrew, Chinese,
 and Umm al-Qura Hijri calendars. Use it in servers, command-line tools, web apps,
 and Flutter projects without depending on the Flutter SDK.
 
 Requires **Dart 3.4 or later** and has **no runtime dependencies**.
+
+Chinese calendar support includes explicit leap-month identity and bounded
+1901–2099 lunar years. See the [Chinese calendar guide](../../docs/chinese-calendar.md)
+for month numbering, related-year semantics, data policy, and picker setup.
 
 ## Features
 

@@ -420,11 +420,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                               CalendarId.gregory,
                                               CalendarId.persian,
                                               CalendarId.islamicUmalqura,
+                                              CalendarId.chinese,
                                             ])
                                               DropdownMenuItem(
                                                   value: id,
                                                   child: Text(
                                                       switch (id) {
+                                                        CalendarId.chinese =>
+                                                          'Chinese',
                                                         CalendarId.hebrew =>
                                                           'Hebrew',
                                                         CalendarId.gregory =>

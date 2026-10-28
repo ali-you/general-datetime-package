@@ -1,3 +1,4 @@
+import 'calendars/chinese/chinese_date_time.dart';
 import 'calendars/hebrew/hebrew_date_time.dart';
 import 'shared/native_date_time.dart';
 import 'general_date_time_interface.dart';
@@ -9,11 +10,11 @@ import 'calendars/persian/persian_date_time.dart';
 /// Dart's `DateTime.copyWith` extension and Flutter's `DateUtils` reconstruct
 /// Gregorian dates from the exposed fields. Use [copyWith] and [dateOnly] for
 /// calendar fields, or [toGregorian] before passing a date to Gregorian helpers.
-/// Supported calendars are native Gregorian, Persian, Umm al-Qura Hijri, and Hebrew.
+/// Supported calendars are native Gregorian, Persian, Umm al-Qura Hijri, Hebrew, and Chinese.
 abstract final class CalendarDateUtils {
   /// Replaces wall-clock fields in the input's calendar.
   ///
-  /// Persian, Hijri, and Hebrew inputs retain their calendar type even when [date] is
+  /// Persian, Hijri, Hebrew, and Chinese inputs retain their calendar type even when [date] is
   /// statically typed as [DateTime]. Native inputs produce native Gregorian
   /// dates. Omitted fields retain their values, including microsecond precision
   /// and UTC/local mode. Overflow normalization and calendar bounds follow the
@@ -37,6 +38,19 @@ abstract final class CalendarDateUtils {
     int? microsecond,
     bool? isUtc,
   }) {
+    if (date is ChineseDateTime) {
+      return date.copyWith(
+        year: year,
+        month: month,
+        day: day,
+        hour: hour,
+        minute: minute,
+        second: second,
+        millisecond: millisecond,
+        microsecond: microsecond,
+        isUtc: isUtc,
+      );
+    }
     if (date is HebrewDateTime) {
       return date.copyWith(
         year: year,
