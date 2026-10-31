@@ -2,9 +2,21 @@
 
 [Documentation index](README.md)
 
-## Prepared release versions
+## Chinese chronology releases
 
-The manifests, installation examples and changelogs now use this release matrix:
+`general_datetime_core` 3.0.0 and `general_datetime` 5.0.0 add Chinese chronology
+and English Material picker adapters. The wrapper requires core `^3.0.0`.
+Update exhaustive `CalendarId` switches to handle `chinese`; existing enum
+indices and version-1 storage payloads remain unchanged. Chinese lunar years
+are bounded to 1901–2099, and ordinal month numbering preserves leap identity.
+
+The published formatter versions in the Hebrew matrix below require core 2.x
+and wrapper 4.x. They cannot be combined with the new chronology majors; use
+local companion sources until compatible formatter releases are available.
+
+## Hebrew release versions
+
+The previous coordinated Hebrew release uses this matrix:
 
 | Package | Prepared version | Package dependencies |
 | --- | --- | --- |

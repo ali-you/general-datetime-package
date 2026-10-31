@@ -1,4 +1,17 @@
-# Coordinated Hebrew release preparation
+# Chronology release preparation
+
+## Chinese releases — 2026-10-31
+
+Publish `general_datetime_core` 3.0.0 first, followed by `general_datetime` 5.0.0
+against hosted core `^3.0.0`. Chinese support adds `CalendarId.chinese`, so these
+are major releases for consumers with exhaustive switches. Verify the wrapper
+without local core overrides, then release `general_calendar` 1.1.0 against
+hosted `general_datetime ^5.0.0`.
+
+The formatter releases listed below remain on the previous chronology majors.
+They need separate compatible releases before use with the new chronology pair.
+
+## Coordinated Hebrew release
 
 Status on 2026-10-28: all four coordinated releases below have been published
 and their hosted archives verified. See the current

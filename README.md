@@ -696,7 +696,7 @@ Release dependency order is: `general_datetime_core` first, then
 Before publishing wrappers, resolve and test the matching hosted core versions
 without development overrides. Local path success does not certify hosted
 resolution. See [release preparation](docs/release-preparation.md) for the
-aligned 4.0.0/3.0.0 wrapper and 2.0.0 core release matrix.
+current Chinese release order and the previous Hebrew release matrix.
 
 Hebrew verification on **2026-10-12** used Flutter 3.47.6 / Dart 3.13.5.
 The chronology core passed 30 tests, the wrapper 328, and the demo 11.

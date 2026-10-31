@@ -75,11 +75,12 @@ packages:
     source: path
     version: "5.0.0"
   general_datetime_core:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../packages/general_datetime_core"
-      relative: true
-    source: path
+      name: general_datetime_core
+      sha256: e6264e933ceb7598e43eaadf934fe3e7445957bda243a6462415c09e06aa72ff
+      url: "https://pub.dev"
+    source: hosted
     version: "3.0.0"
   leak_tracker:
     dependency: transitive
