@@ -62,8 +62,8 @@ import 'package:general_datetime_core/general_datetime_core.dart';
 
 ## Installation and local setup
 
-The prepared wrapper version is `general_datetime` **4.0.0**, with
-`general_datetime_core` **2.0.0**. The Flutter wrapper requires Dart
+The wrapper version is `general_datetime` **5.0.0**, with
+`general_datetime_core` **3.0.0**. The Flutter wrapper requires Dart
 `>=3.4.0 <4.0.0` and Flutter `>=3.32.0`; the core requires only Dart
 `>=3.4.0 <4.0.0`.
 
@@ -71,20 +71,22 @@ Add the Flutter wrapper to your application:
 
 ```yaml
 dependencies:
-  general_datetime: ^4.0.0
+  general_datetime: ^5.0.0
 ```
 
 Run `flutter pub get`. For a pure Dart application, use
-`general_datetime_core: ^2.0.0` and run `dart pub get` instead.
+`general_datetime_core: ^3.0.0` and run `dart pub get` instead.
 
-These versions are prepared in source; publication has not been performed.
-Until matching hosted releases are available, use the local overrides in
+When developing against the local checkout, use the overrides in
 [development setup](docs/development.md#dependency-resolution).
-The picker example uses the local wrapper; the calendar demo declares both
-2.0.0 cores and needs its own overrides during development.
+The picker example uses the local wrapper; the calendar demo uses local
+chronology and formatter overrides during development.
 
 The companion `general_date_format` **3.0.0** requires
 `general_datetime ^4.0.0` and `general_date_format_core ^2.0.0`.
+That formatter release cannot be combined with this major chronology release;
+use local companion sources until a compatible formatter version is published.
+Version 5 adds `CalendarId.chinese`; update exhaustive enum switches.
 See [migration](docs/migration.md) for the version matrix and compatibility
 changes, and [release preparation](docs/release-preparation.md) for publish order.
 

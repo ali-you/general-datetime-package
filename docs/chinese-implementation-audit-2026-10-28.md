@@ -107,6 +107,32 @@ From `general_date_format`, regenerate-check symbols with
 Run the Flutter suites from both companion package roots and their example
 directories against the local dependency overrides used for this audit.
 
+## Follow-up recheck — 2026-10-31
+
+Three further formatter defects were reproduced and corrected:
+
+- Numeric fields before digit-leading Chinese month names could greedily consume
+  the month and day. Adjacent named-month metadata now bounds those numeric fields.
+- Quoted numeric literals after month names could be consumed as part of a longer
+  month name. Matching now checks the literal and the following numeric suffix.
+- Loose narrow-month parsing omitted narrow variants; regular numeric names could
+  also hide longer leap names. It now selects the longest valid name across full,
+  abbreviated, and narrow variants, retaining existing loose-name compatibility.
+
+Four regression groups exercise all bundled locales, formatting and standalone
+month contexts, strict/loose parsing, quoted digits, whitespace, and regular/leap
+months. Compatibility cases also cover Persian, Hijri, and Hebrew loose parsing.
+
+Final formatter validation passed: core and Flutter analysis, **90 VM tests**, **89 Node
+JavaScript tests**, and **515 Flutter tests**. The chronology recheck passed
+**16 Chinese core tests** (including every supported day), **24 Chinese picker
+tests**, **8 generic Chinese widget tests**, and the combined-calendar picker
+case. Pinned table generation, .NET fixtures, all five real-process timezone
+checks, and three validator failure tests passed. HKO/ICU baselines were unchanged.
+
+These follow-up counts supplement the complete suite snapshot above; they do not
+represent a rerun of every chronology or example suite from the original audit.
+
 ## Remaining limits and release gate
 
 - The calendar remains bounded to lunar years **1901–2099** and follows the

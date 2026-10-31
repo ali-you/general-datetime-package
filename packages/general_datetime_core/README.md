@@ -49,11 +49,12 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^2.0.0
+  general_datetime_core: ^3.0.0
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.
-The 2.0.0 core is re-exported by the prepared `general_datetime` 4.0.0 wrapper.
+The 3.0.0 core is re-exported by the `general_datetime` 5.0.0 wrapper.
+Version 3 adds `CalendarId.chinese`; update exhaustive enum switches.
 Publication is a separate step. Before the matching hosted releases are
 available, use a local path dependency:
 

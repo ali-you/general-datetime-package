@@ -73,14 +73,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "4.0.0"
+    version: "5.0.0"
   general_datetime_core:
     dependency: "direct overridden"
     description:
       path: "../packages/general_datetime_core"
       relative: true
     source: path
-    version: "2.0.0"
+    version: "3.0.0"
   leak_tracker:
     dependency: transitive
     description:

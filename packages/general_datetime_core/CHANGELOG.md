@@ -1,6 +1,8 @@
 # Changelog
 
-## 2.0.0 — 2026-10-28
+## 3.0.0 — 2026-10-31
+
+- Breaking: `CalendarId` includes `chinese`; update exhaustive enum switches.
 
 - Extend Chinese validation to every supported day coordinate, month identity,
   period overflow policy and cross-year leap-month mapping. Verify exact large
@@ -13,6 +15,8 @@
   English Material adapters, and independent exhaustive runtime validation.
 - Append `CalendarId.chinese`; exhaustive enum switches must handle the new case.
   Document intentional differences from HKO and ICU reference chronologies.
+
+## 2.0.0 — 2026-10-28
 
 
 - Validate all 3,652,078 supported Hebrew dates against an independent Hebcal

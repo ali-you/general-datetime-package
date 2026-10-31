@@ -1,6 +1,9 @@
 # Changelog
 
-## [4.0.0] — 2026-10-28
+## [5.0.0] — 2026-10-31
+
+- Require `general_datetime_core ^3.0.0` for Chinese chronology.
+- Breaking: `CalendarId` includes `chinese`; update exhaustive enum switches.
 
 - Audit Chinese chronology and picker integration; reject non-decimal English
   picker input and align carried-month weekday offsets with month clamping.
@@ -13,6 +16,8 @@
   English Material adapters, and independent exhaustive runtime validation.
 - Append `CalendarId.chinese`; exhaustive enum switches must handle the new case.
   Document intentional differences from HKO and ICU reference chronologies.
+
+## [4.0.0] — 2026-10-28
 
 
 - Independently validate every supported Hebrew date in both directions and

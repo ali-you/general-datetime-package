@@ -70,7 +70,7 @@ must not consume those calendar-specific strings.
 
 `CalendarId.chinese` is appended to the enum, preserving existing enum indices.
 Consumers with exhaustive switches must handle the new case. These changes are
-part of the prepared, unpublished core 2.0.0 / Flutter wrapper 4.0.0 sources.
+included in core 3.0.0 / Flutter wrapper 5.0.0.
 
 ## Formatting and Flutter pickers
 
