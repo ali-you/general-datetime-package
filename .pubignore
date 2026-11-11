@@ -42,3 +42,6 @@ apps/
 
 # Maintainer guides and validation reports are linked on GitHub.
 docs/
+
+# Temporary hosted-release verification overrides are never distributed.
+**/pubspec_overrides.release-backup.yaml

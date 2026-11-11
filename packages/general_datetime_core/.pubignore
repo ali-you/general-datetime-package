@@ -12,3 +12,6 @@ coverage/
 *.log
 .idea/
 .vscode/
+
+# Temporary hosted-release verification overrides are never distributed.
+**/pubspec_overrides.release-backup.yaml
