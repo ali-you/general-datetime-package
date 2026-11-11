@@ -1,5 +1,10 @@
 # Chinese calendar completion — 2026-11-11
 
+Publication was subsequently authorized and completed. See the
+[publication record](chinese-publication-2026-11-11.md) for released versions,
+archive hashes, hosted checks and merge pull requests. The preparation and
+validation history below describes the work before that publication.
+
 Chinese chronology, formatting, parsing, Material adapters and generic calendar
 integration are implemented in the five local packages. The new formatter
 releases are **general_date_format_core 3.1.0** and **general_date_format 4.1.0**.

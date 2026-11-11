@@ -1,5 +1,10 @@
 # Chronology release preparation
 
+The coordinated Chinese releases are now published: chronology core **3.0.1**,
+chronology wrapper **5.0.1**, formatter core **3.1.0**, formatter wrapper **4.1.0**,
+and calendar **1.1.1**. See the [publication record](chinese-publication-2026-11-11.md).
+The historical preparation steps below have been superseded by that record.
+
 ## Chinese completion — 2026-11-11
 
 Chronology core 3.0.0 / wrapper 5.0.0 and general_calendar 1.1.0 are already
