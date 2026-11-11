@@ -73,15 +73,15 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "5.0.0"
+    version: "5.0.1"
   general_datetime_core:
     dependency: transitive
     description:
       name: general_datetime_core
-      sha256: e6264e933ceb7598e43eaadf934fe3e7445957bda243a6462415c09e06aa72ff
+      sha256: "5a8da4c6630fdecb7f757211eeffcbcf79fedb8a15c9d00949e71183a7ceefcd"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   leak_tracker:
     dependency: transitive
     description:

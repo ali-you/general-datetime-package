@@ -74,7 +74,7 @@ included in core 3.0.0 / Flutter wrapper 5.0.0.
 
 ## Formatting and Flutter pickers
 
-The companion formatter supports Chinese dates with CLDR 48 month names in all
+Companion formatter core **3.1.0** / wrapper **4.1.0** support Chinese dates with CLDR 48 month names in all
 bundled locales. Numeric `M`/`MM`/`L`/`LL` use **ordinal months**, matching the
 constructors and storage. Named month patterns display traditional month names
 with CLDR's leap marker; for example, English `MMMM` uses `Sixth Monthbis` and
@@ -145,7 +145,7 @@ publication, so `hasOfficialCalendarData` and `hasPublishedData` are false.
 Future astronomical dates can differ across reference implementations. This
 civil API does not compute solar terms, observance times, or Panchanga fields.
 
-## Verification on 2026-10-28
+## Historical verification on 2026-10-28
 
 All three Flutter package analyses passed. Chronology core passed 57 VM tests
 and 51 JavaScript tests; formatter core passed 86 VM tests and 85 JavaScript
@@ -156,3 +156,5 @@ The pinned .NET and CLDR Chinese generators reproduced their generated output.
 See the [complete implementation audit](chinese-implementation-audit-2026-10-28.md)
 for native executable tests, five real process timezones, regression fixes,
 coverage, and the remaining remote CI source-pin requirement.
+
+Current completion checks are recorded in [the 2026-11-11 report](chinese-release-readiness-2026-11-11.md).

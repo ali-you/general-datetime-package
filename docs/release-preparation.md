@@ -1,15 +1,31 @@
 # Chronology release preparation
 
-## Chinese releases — 2026-10-31
+The coordinated Chinese releases are now published: chronology core **3.0.1**,
+chronology wrapper **5.0.1**, formatter core **3.1.0**, formatter wrapper **4.1.0**,
+and calendar **1.1.1**. See the [publication record](chinese-publication-2026-11-11.md).
+The historical preparation steps below have been superseded by that record.
 
-Publish `general_datetime_core` 3.0.0 first, followed by `general_datetime` 5.0.0
-against hosted core `^3.0.0`. Chinese support adds `CalendarId.chinese`, so these
-are major releases for consumers with exhaustive switches. Verify the wrapper
-without local core overrides, then release `general_calendar` 1.1.0 against
-hosted `general_datetime ^5.0.0`.
+## Chinese completion — 2026-11-11
 
-The formatter releases listed below remain on the previous chronology majors.
-They need separate compatible releases before use with the new chronology pair.
+Chronology core 3.0.0 / wrapper 5.0.0 and general_calendar 1.1.0 are already
+published. Prepare formatter core 3.1.0 followed by formatter wrapper 4.1.0
+for Chinese localized formatting/parsing and translated Material adapters.
+Formatter core 3.0.0 / wrapper 4.0.0 are compatible with this chronology but
+explicitly reject Chinese formatting.
+
+Verify the formatter core against hosted chronology 3.0.0, publish it, then
+resolve/test the wrapper without formatter-core overrides before publication.
+The demo requires formatter core ^3.1.0. Pre-publication CI uses the reviewed
+Chinese formatter commit da1013d1aceb4ae82ffe8c6c50fbe2885551e2c7 through
+`.github/actions/use-local-core`; advance that immutable bootstrap pin to the
+new formatter release commit after it is available remotely.
+
+Chinese support appends CalendarId.chinese, uses related years 1901-2099,
+ordinal numeric months and explicit leap identity. Documented HKO/ICU
+differences remain unchanged. See [the completion report](chinese-release-readiness-2026-11-11.md)
+for current verification and [the guide](chinese-calendar.md) for API semantics.
+
+The historical Hebrew release information below records the previous majors.
 
 ## Coordinated Hebrew release
 

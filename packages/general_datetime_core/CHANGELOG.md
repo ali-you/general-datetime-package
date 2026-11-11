@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.1 — 2026-11-11
+
+- Complete Chinese release documentation, archive preparation and validation.
+- Verify calendar boundaries, leap-month identity and supported SDK behavior.
+
 ## 3.0.0 — 2026-10-31
 
 - Breaking: `CalendarId` includes `chinese`; update exhaustive enum switches.

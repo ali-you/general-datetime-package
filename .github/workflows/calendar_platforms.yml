@@ -21,7 +21,7 @@ jobs:
         with:
           channel: stable
       - run: flutter pub get
-      - run: flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }} test/platform_calendar_smoke_test.dart test/unit/hebrew_calendar_delegate_test.dart
+      - run: flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }} test/platform_calendar_smoke_test.dart test/unit/hebrew_calendar_delegate_test.dart test/unit/chinese_calendar_delegate_test.dart test/unit/chinese_input_validation_test.dart test/unit/chinese_picker_critical_test.dart
       - run: flutter pub get && flutter test --platform chrome ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
         working-directory: apps/calendar_demo
       - run: flutter build web --release ${{ matrix.compiler == 'wasm' && '--wasm' || '' }}
