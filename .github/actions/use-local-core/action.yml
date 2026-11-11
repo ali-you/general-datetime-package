@@ -3,14 +3,6 @@ description: Resolve consumers against the core source being tested in this chec
 runs:
   using: composite
   steps:
-    # Bootstrap the demo from the reviewed Chinese formatter source until
-    # formatter core 3.1.0 is hosted. Keep this immutable source reproducible.
-    - uses: actions/checkout@v4
-      with:
-        repository: ali-you/general-date-format-package
-        ref: da1013d1aceb4ae82ffe8c6c50fbe2885551e2c7
-        path: .dart_tool/calendar_dependencies/general_date_format
-        persist-credentials: false
     - shell: bash
       run: |
         cat > pubspec_overrides.yaml <<'YAML'
@@ -27,6 +19,4 @@ runs:
         dependency_overrides:
           general_datetime_core:
             path: ../../packages/general_datetime_core
-          general_date_format_core:
-            path: ../../.dart_tool/calendar_dependencies/general_date_format/packages/general_date_format_core
         YAML

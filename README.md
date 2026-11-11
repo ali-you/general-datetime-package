@@ -83,11 +83,10 @@ When developing against the local checkout, use the overrides in
 The picker example uses the local wrapper; the calendar demo uses local
 chronology and formatter overrides during development.
 
-The prepared companion `general_date_format` **4.1.0** uses
+The companion `general_date_format` **4.1.0** uses
 `general_datetime ^5.0.0` and `general_date_format_core ^3.1.0`, including Chinese
 formatting and translated picker localizations. Formatter 4.0.0 / core 3.0.0
-coexist with this chronology but do not format Chinese dates. Use local companion
-sources until the new formatter releases are published.
+coexist with this chronology but do not format Chinese dates. The compatible formatter releases are now hosted on pub.dev.
 Version 5 adds `CalendarId.chinese`; update exhaustive enum switches.
 See [migration](https://github.com/ali-you/general-datetime-package/blob/main/docs/migration.md) for the version matrix and compatibility
 changes, and [release preparation](https://github.com/ali-you/general-datetime-package/blob/main/docs/release-preparation.md) for publish order.
