@@ -49,7 +49,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^3.0.0
+  general_datetime_core: ^3.0.1
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.

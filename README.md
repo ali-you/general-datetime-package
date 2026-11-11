@@ -63,8 +63,8 @@ import 'package:general_datetime_core/general_datetime_core.dart';
 
 ## Installation and local setup
 
-The wrapper version is `general_datetime` **5.0.0**, with
-`general_datetime_core` **3.0.0**. The Flutter wrapper requires Dart
+The wrapper version is `general_datetime` **5.0.1**, with
+`general_datetime_core` **3.0.1**. The Flutter wrapper requires Dart
 `>=3.4.0 <4.0.0` and Flutter `>=3.32.0`; the core requires only Dart
 `>=3.4.0 <4.0.0`.
 
@@ -72,11 +72,11 @@ Add the Flutter wrapper to your application:
 
 ```yaml
 dependencies:
-  general_datetime: ^5.0.0
+  general_datetime: ^5.0.1
 ```
 
 Run `flutter pub get`. For a pure Dart application, use
-`general_datetime_core: ^3.0.0` and run `dart pub get` instead.
+`general_datetime_core: ^3.0.1` and run `dart pub get` instead.
 
 When developing against the local checkout, use the overrides in
 [development setup](https://github.com/ali-you/general-datetime-package/blob/main/docs/development.md#dependency-resolution).
