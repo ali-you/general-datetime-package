@@ -2,18 +2,18 @@
 
 Gregorian, Persian (Jalali), Hebrew, Chinese, and Hijri (Umm al-Qura) chronology for Dart and
 Flutter. Convert exact instants, work with calendar fields and all-day dates,
-serialize values safely, and use Persian, Hebrew, or Hijri calendars in Material
+serialize values safely, and use Persian, Hebrew, Chinese, or Hijri calendars in Material
 date pickers.
 
-See the [Hebrew calendar guide](docs/hebrew-calendar.md) for the new calendar's
-month slots, arithmetic, storage, and picker setup. See the [documentation index](docs/README.md) for focused guides, calendar
+See the [Hebrew calendar guide](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-calendar.md) for the new calendar's
+month slots, arithmetic, storage, and picker setup. See the [documentation index](https://github.com/ali-you/general-datetime-package/blob/main/docs/README.md) for focused guides, calendar
 validation reports, and the calendar expansion review.
 
 [![pub.dev](https://img.shields.io/pub/v/general_datetime.svg)](https://pub.dev/packages/general_datetime)
 [![Calendar CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml)
 
 Chinese calendar support includes explicit leap-month identity and bounded
-1901–2099 lunar years. See the [Chinese calendar guide](docs/chinese-calendar.md)
+1901–2099 lunar years. See the [Chinese calendar guide](https://github.com/ali-you/general-datetime-package/blob/main/docs/chinese-calendar.md)
 for month numbering, related-year semantics, data policy, and picker setup.
 
 ## Contents
@@ -38,8 +38,9 @@ for month numbering, related-year semantics, data policy, and picker setup.
 | --- | --- | --- |
 | `general_datetime` | Chronology core re-exports and Material calendar/localization delegates | Yes |
 | [`general_datetime_core`](packages/general_datetime_core/README.md) | Calendar date-times, strict calendar systems, civil dates, and JSON storage | No |
-| `general_date_format` | Localized Persian/Hebrew/Hijri formatting and multilingual Material adapters, in the neighboring repository | Yes |
-| `general_date_format_core` | Localized Persian/Hebrew/Hijri formatting and parsing for servers and CLIs | No |
+| `general_date_format` | Localized Persian/Hebrew/Chinese/Hijri formatting and multilingual Material adapters, in the neighboring repository | Yes |
+| `general_date_format_core` | Localized Persian/Hebrew/Chinese/Hijri formatting and parsing for servers and CLIs | No |
+| `general_calendar` | Delegate-driven calendar, range, time, and date-time picker widgets | Yes |
 
 The Flutter wrapper re-exports the core's exact classes. A `PersianDateTime`
 created through either import has the same runtime type; there are no competing
@@ -78,17 +79,18 @@ Run `flutter pub get`. For a pure Dart application, use
 `general_datetime_core: ^3.0.0` and run `dart pub get` instead.
 
 When developing against the local checkout, use the overrides in
-[development setup](docs/development.md#dependency-resolution).
+[development setup](https://github.com/ali-you/general-datetime-package/blob/main/docs/development.md#dependency-resolution).
 The picker example uses the local wrapper; the calendar demo uses local
 chronology and formatter overrides during development.
 
-The companion `general_date_format` **3.0.0** requires
-`general_datetime ^4.0.0` and `general_date_format_core ^2.0.0`.
-That formatter release cannot be combined with this major chronology release;
-use local companion sources until a compatible formatter version is published.
+The prepared companion `general_date_format` **4.1.0** uses
+`general_datetime ^5.0.0` and `general_date_format_core ^3.1.0`, including Chinese
+formatting and translated picker localizations. Formatter 4.0.0 / core 3.0.0
+coexist with this chronology but do not format Chinese dates. Use local companion
+sources until the new formatter releases are published.
 Version 5 adds `CalendarId.chinese`; update exhaustive enum switches.
-See [migration](docs/migration.md) for the version matrix and compatibility
-changes, and [release preparation](docs/release-preparation.md) for publish order.
+See [migration](https://github.com/ali-you/general-datetime-package/blob/main/docs/migration.md) for the version matrix and compatibility
+changes, and [release preparation](https://github.com/ali-you/general-datetime-package/blob/main/docs/release-preparation.md) for publish order.
 
 ## Quick start
 
@@ -150,12 +152,12 @@ mode or adding a duration near an endpoint can throw `RangeError` if the new
 wall date falls outside that calendar's bounds.
 
 Data sources, hashes, independent fixtures, and source decisions are documented
-in [Persian validation](docs/persian-calendar-validation.md) and
-[Umm al-Qura validation](docs/hijri-calendar-validation.md).
+in [Persian validation](https://github.com/ali-you/general-datetime-package/blob/main/docs/persian-calendar-validation.md) and
+[Umm al-Qura validation](https://github.com/ali-you/general-datetime-package/blob/main/docs/hijri-calendar-validation.md).
 
 ## Construction, validation, and parsing
 
-All three calendar classes provide the same constructor family:
+All four calendar classes provide the same constructor family:
 
 | Constructor | Behavior |
 | --- | --- |
@@ -169,7 +171,7 @@ All three calendar classes provide the same constructor family:
 
 Replace `PersianDateTime` with `HijriDateTime` or `HebrewDateTime` for the other
 calendar equivalents. Hebrew numeric months are stable slots, with slot 6
-absent in common years; see [Hebrew month identity](docs/hebrew-calendar.md).
+absent in common years; see [Hebrew month identity](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-calendar.md).
 Optional month/day default to 1; all optional clock fields default to 0.
 `fromDateTime` also accepts another supported calendar subclass and preserves
 its epoch rather than reinterpreting its exposed fields.
@@ -284,7 +286,8 @@ matching calendar delegate.
 
 `CalendarDate` is an immutable, strictly validated calendar date without a
 clock or timezone. Its calendar identifiers are `CalendarId.gregory`,
-`CalendarId.persian`, and `CalendarId.islamicUmalqura`.
+`CalendarId.persian`, `CalendarId.hebrew`, `CalendarId.chinese`, and
+`CalendarId.islamicUmalqura`.
 
 ```dart
 final date = CalendarDate(
@@ -339,7 +342,7 @@ bounds.
 
 ## Calendar system API
 
-Use `CalendarSystems.gregorian`, `.persian`, `.ummAlQura`, or
+Use `CalendarSystems.gregorian`, `.persian`, `.hebrew`, `.chinese`, `.ummAlQura`, or
 `CalendarSystems.forId(id)` for strict operations without switching on classes:
 
 ```dart
@@ -370,7 +373,8 @@ Choose the record that matches your domain:
 | Timed event | `CalendarInstant` | `version: 1`, `kind: "instant"`, `timestamp`, `calendar` | `timeZone` |
 | All-day calendar date | `CalendarDateRecord` | `version: 1`, `kind: "calendar-date"`, `calendar`, integer `year`, `month`, `day` | None |
 
-Identifiers are `gregory`, `persian`, and `islamic-umalqura`, available through
+Identifiers are `gregory`, `persian`, `hebrew`, `chinese`, and
+`islamic-umalqura`, available through
 `CalendarId.identifier`. Other Islamic algorithms are not aliases for Umm al-Qura.
 
 ```dart
@@ -695,15 +699,15 @@ Release dependency order is: `general_datetime_core` first, then
 `general_datetime` and `general_date_format_core`, then `general_date_format`.
 Before publishing wrappers, resolve and test the matching hosted core versions
 without development overrides. Local path success does not certify hosted
-resolution. See [release preparation](docs/release-preparation.md) for the
+resolution. See [release preparation](https://github.com/ali-you/general-datetime-package/blob/main/docs/release-preparation.md) for the
 current Chinese release order and the previous Hebrew release matrix.
 
 Hebrew verification on **2026-10-12** used Flutter 3.47.6 / Dart 3.13.5.
 The chronology core passed 30 tests, the wrapper 328, and the demo 11.
 JavaScript and WebAssembly browser suites passed. An independent .NET oracle
 matched 239,612 Hebrew days in both directions. The
-[package validation report](docs/hebrew-package-validation-2026-10-12.md) and
-[Persian/Hijri regression review](docs/hebrew-existing-calendar-regression-2026-10-12.md)
+[package validation report](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-package-validation-2026-10-12.md) and
+[Persian/Hijri regression review](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-existing-calendar-regression-2026-10-12.md)
 record coverage, size effects and remaining platform/release checks.
 
 ## Contributions and license

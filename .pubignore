@@ -39,3 +39,6 @@ build/
 packages/*/*
 apps/
 **/pubspec_overrides.yaml.example
+
+# Maintainer guides and validation reports are linked on GitHub.
+docs/

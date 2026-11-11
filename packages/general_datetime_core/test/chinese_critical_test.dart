@@ -228,8 +228,9 @@ void main() {
           ChineseDateTime.fromMillisecondsSinceEpoch(
                   native.millisecondsSinceEpoch,
                   isUtc: true)
-              .millisecond,
-          native.millisecond);
+              .toDateTime(),
+          DateTime.fromMillisecondsSinceEpoch(native.millisecondsSinceEpoch,
+              isUtc: true));
       expect(native == date && date == native, isTrue);
       expect({native: 'same instant'}[date], 'same instant');
       for (final id in CalendarId.values) {
