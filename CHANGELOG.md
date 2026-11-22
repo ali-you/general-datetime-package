@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.1.0
+
+- Add `AmantaCalendarDelegate` for Material date and range pickers.
+- Preserve Amanta civil days when the host timezone skips midnight or a day.
+- Require `general_datetime_core ^3.1.0`.
+
 ## 5.0.1 — 2026-11-11
 
 - Complete Chinese release documentation, archive preparation and validation.

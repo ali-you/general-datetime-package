@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0
+
+- Add `AmantaDate` and `AmantaDateTime` for the Ujjain Amanta calendar, covering Vikrama years 2057–2107.
+- Expose Gregorian conversion, leap-month identity, and the tithi at traditional Ujjain sunrise.
+- Support `AmantaDateTime` in the existing calendar field helpers. Amanta storage uses a Gregorian civil date or day index.
+
 ## 3.0.1 — 2026-11-11
 
 - Complete Chinese release documentation, archive preparation and validation.

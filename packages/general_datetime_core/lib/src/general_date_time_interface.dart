@@ -1,3 +1,4 @@
+import 'calendars/amanta/amanta_date_time.dart';
 import 'calendars/chinese/chinese_date_time.dart';
 import 'calendars/hebrew/hebrew_date_time.dart';
 import 'calendars/hijri/hijri_date_time.dart';
@@ -5,6 +6,7 @@ import 'calendars/persian/persian_date_time.dart';
 
 abstract class GeneralDateTimeInterface<T> {
   static T now<T extends GeneralDateTimeInterface>() {
+    if (T == AmantaDateTime) return AmantaDateTime.now() as T;
     if (T == ChineseDateTime) return ChineseDateTime.now() as T;
     if (T == HebrewDateTime) return HebrewDateTime.now() as T;
     if (T == PersianDateTime) return PersianDateTime.now() as T;

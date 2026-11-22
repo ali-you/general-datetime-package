@@ -1,23 +1,27 @@
 name: general_datetime
-description: "Gregorian, Persian, Hebrew, Chinese and Umm al-Qura chronology, strict civil-date contracts and Flutter Material date-picker adapters."
-version: 5.0.1
+description: "Convert Gregorian, Persian (Jalali), Hebrew, Chinese, Amanta, and Umm al-Qura (Hijri) dates. Use calendar delegates with Flutter Material date pickers."
+version: 5.1.0
 homepage: https://github.com/ali-you
 repository: https://github.com/ali-you/general-date-package
 documentation: https://github.com/ali-you/general-date-package
 issue_tracker: https://github.com/ali-you/general-date-package/issues
 topics:
-  - date
-  - time
   - calendar
-  - utils
-  - service
+  - datetime
+  - date-conversion
+  - date-arithmetic
+  - date-picker
+
+screenshots:
+  - description: "General DateTime logo"
+    path: images/general_datetime.png
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
   flutter: ">=3.32.0"
 
 dependencies:
-  general_datetime_core: ^3.0.1
+  general_datetime_core: ^3.1.0
   flutter:
     sdk: flutter
 

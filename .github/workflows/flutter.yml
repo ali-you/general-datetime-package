@@ -36,6 +36,13 @@ jobs:
       - if: matrix.sdk == 'stable'
         run: python ../../tool/validate_chinese_timezones.py --dart dart
       - if: matrix.sdk == 'stable'
+        name: Verify Amanta picker dates across local clock changes
+        run: |
+          for zone in UTC America/Sao_Paulo Pacific/Apia; do
+            dart compile js --packages=.dart_tool/package_config.json "-DAMANTA_TEST_TZ=$zone" ../../tool/validate_amanta_picker_timezones.dart -o .dart_tool/amanta-picker.js
+            TZ="$zone" node .dart_tool/amanta-picker.js
+          done
+      - if: matrix.sdk == 'stable'
         run: python ../../tool/test_chinese_validators.py
       - run: dart compile exe example/cli.dart -o .dart_tool/calendar_cli
       - run: .dart_tool/calendar_cli

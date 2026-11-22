@@ -1,3 +1,5 @@
+import 'calendars/amanta/amanta_date.dart';
+import 'calendars/amanta/amanta_date_time.dart';
 import 'calendars/chinese/chinese_date_time.dart';
 import 'calendars/hebrew/hebrew_date_time.dart';
 import 'shared/native_date_time.dart';
@@ -10,11 +12,11 @@ import 'calendars/persian/persian_date_time.dart';
 /// Dart's `DateTime.copyWith` extension and Flutter's `DateUtils` reconstruct
 /// Gregorian dates from the exposed fields. Use [copyWith] and [dateOnly] for
 /// calendar fields, or [toGregorian] before passing a date to Gregorian helpers.
-/// Supported calendars are native Gregorian, Persian, Umm al-Qura Hijri, Hebrew, and Chinese.
+/// Supported calendars are native Gregorian, Persian, Umm al-Qura Hijri, Hebrew, Chinese, and Amanta.
 abstract final class CalendarDateUtils {
   /// Replaces wall-clock fields in the input's calendar.
   ///
-  /// Persian, Hijri, Hebrew, and Chinese inputs retain their calendar type even when [date] is
+  /// Persian, Hijri, Hebrew, Chinese, and Amanta inputs retain their calendar type even when [date] is
   /// statically typed as [DateTime]. Native inputs produce native Gregorian
   /// dates. Omitted fields retain their values, including microsecond precision
   /// and UTC/local mode. Overflow normalization and calendar bounds follow the
@@ -22,7 +24,8 @@ abstract final class CalendarDateUtils {
   ///
   /// Changing [isUtc] reinterprets the wall-clock fields in that mode; it does
   /// not preserve the instant. Use `toUtc()` or `toLocal()` for instant-preserving
-  /// timezone conversion. Local DST gaps/folds follow native constructor rules.
+  /// timezone conversion. Amanta rejects nonexistent local times. Other
+  /// supported calendars follow their constructor's local DST behavior.
   ///
   /// Other [GeneralDateTimeInterface] implementations throw [UnsupportedError]
   /// rather than interpreting their calendar fields as Gregorian.
@@ -38,6 +41,17 @@ abstract final class CalendarDateUtils {
     int? microsecond,
     bool? isUtc,
   }) {
+    if (date is AmantaDateTime) {
+      return AmantaDateTime.fromCivilDate(
+        AmantaDate(year ?? date.year, month ?? date.month, day ?? date.day),
+        hour: hour ?? date.hour,
+        minute: minute ?? date.minute,
+        second: second ?? date.second,
+        millisecond: millisecond ?? date.millisecond,
+        microsecond: microsecond ?? date.microsecond,
+        isUtc: isUtc ?? date.isUtc,
+      );
+    }
     if (date is ChineseDateTime) {
       return date.copyWith(
         year: year,
@@ -114,14 +128,19 @@ abstract final class CalendarDateUtils {
   /// This is a date-time, not a timezone-free civil-date value. Unlike Flutter's
   /// `DateUtils.dateOnly`, UTC inputs remain UTC. For a Material picker use its
   /// matching calendar delegate, which supplies the picker's local-date policy.
-  static DateTime dateOnly(DateTime date) => copyWith(
-        date,
-        hour: 0,
-        minute: 0,
-        second: 0,
-        millisecond: 0,
-        microsecond: 0,
-      );
+  static DateTime dateOnly(DateTime date) {
+    if (date is AmantaDateTime) {
+      return AmantaDateTime.atStartOfDay(date.civilDate, isUtc: date.isUtc);
+    }
+    return copyWith(
+      date,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+      microsecond: 0,
+    );
+  }
 
   /// Returns a native Gregorian [DateTime] for the exact same instant and mode.
   ///

@@ -1,20 +1,24 @@
 # General DateTime
 
-Gregorian, Persian (Jalali), Hebrew, Chinese, and Hijri (Umm al-Qura) chronology for Dart and
-Flutter. Convert exact instants, work with calendar fields and all-day dates,
-serialize values safely, and use Persian, Hebrew, Chinese, or Hijri calendars in Material
-date pickers.
+![General DateTime banner](https://raw.githubusercontent.com/ali-you/general-date-package/v5.1.0/images/general_datetime-banner.png)
 
-See the [Hebrew calendar guide](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-calendar.md) for the new calendar's
-month slots, arithmetic, storage, and picker setup. See the [documentation index](https://github.com/ali-you/general-datetime-package/blob/main/docs/README.md) for focused guides, calendar
-validation reports, and the calendar expansion review.
+Convert instants, work with civil dates, and use calendar delegates in Flutter
+Material date pickers. Supported calendars include Gregorian, Persian (Jalali),
+Hebrew, Chinese, Amanta, and Umm al-Qura (Hijri).
+
+[API reference](https://pub.dev/documentation/general_datetime/latest/) ·
+[Calendar guides and validation reports](https://github.com/ali-you/general-date-package/blob/main/docs/README.md)
 
 [![pub.dev](https://img.shields.io/pub/v/general_datetime.svg)](https://pub.dev/packages/general_datetime)
 [![Calendar CI](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml/badge.svg)](https://github.com/ali-you/general-date-package/actions/workflows/flutter.yml)
 
 Chinese calendar support includes explicit leap-month identity and bounded
-1901–2099 lunar years. See the [Chinese calendar guide](https://github.com/ali-you/general-datetime-package/blob/main/docs/chinese-calendar.md)
+1901–2099 lunar years. See the [Chinese calendar guide](https://github.com/ali-you/general-date-package/blob/main/docs/chinese-calendar.md)
 for month numbering, related-year semantics, data policy, and picker setup.
+
+Amanta lunisolar dates are available through `AmantaDate` and
+`AmantaDateTime`. See the [Amanta calendar guide](https://github.com/ali-you/general-date-package/blob/v5.1.0/docs/amanta-calendar.md)
+for the Ujjain convention, date bounds, and picker setup.
 
 ## Contents
 
@@ -37,10 +41,10 @@ for month numbering, related-year semantics, data policy, and picker setup.
 | Package | Role | Requires Flutter |
 | --- | --- | --- |
 | `general_datetime` | Chronology core re-exports and Material calendar/localization delegates | Yes |
-| [`general_datetime_core`](packages/general_datetime_core/README.md) | Calendar date-times, strict calendar systems, civil dates, and JSON storage | No |
-| `general_date_format` | Localized Persian/Hebrew/Chinese/Hijri formatting and multilingual Material adapters, in the neighboring repository | Yes |
-| `general_date_format_core` | Localized Persian/Hebrew/Chinese/Hijri formatting and parsing for servers and CLIs | No |
-| `general_calendar` | Delegate-driven calendar, range, time, and date-time picker widgets | Yes |
+| [`general_datetime_core`](https://pub.dev/packages/general_datetime_core) | Calendar conversion, civil date arithmetic, and JSON storage in Dart | No |
+| [`general_date_format`](https://pub.dev/packages/general_date_format) | Localized formatting and parsing with Flutter Material localizations | Yes |
+| [`general_date_format_core`](https://pub.dev/packages/general_date_format_core) | Localized formatting and parsing for Dart applications | No |
+| [`general_calendar`](https://pub.dev/packages/general_calendar) | Inline calendars and pickers for dates, ranges, times, and date-times | Yes |
 
 The Flutter wrapper re-exports the core's exact classes. A `PersianDateTime`
 created through either import has the same runtime type; there are no competing
@@ -63,8 +67,8 @@ import 'package:general_datetime_core/general_datetime_core.dart';
 
 ## Installation and local setup
 
-The wrapper version is `general_datetime` **5.0.1**, with
-`general_datetime_core` **3.0.1**. The Flutter wrapper requires Dart
+The Amanta release pairs `general_datetime` **5.1.0** with
+`general_datetime_core` **3.1.0**. The Flutter wrapper requires Dart
 `>=3.4.0 <4.0.0` and Flutter `>=3.32.0`; the core requires only Dart
 `>=3.4.0 <4.0.0`.
 
@@ -72,24 +76,22 @@ Add the Flutter wrapper to your application:
 
 ```yaml
 dependencies:
-  general_datetime: ^5.0.1
+  general_datetime: ^5.1.0
 ```
 
 Run `flutter pub get`. For a pure Dart application, use
-`general_datetime_core: ^3.0.1` and run `dart pub get` instead.
+`general_datetime_core: ^3.1.0` and run `dart pub get` instead.
 
 When developing against the local checkout, use the overrides in
-[development setup](https://github.com/ali-you/general-datetime-package/blob/main/docs/development.md#dependency-resolution).
+[development setup](https://github.com/ali-you/general-date-package/blob/main/docs/development.md#dependency-resolution).
 The picker example uses the local wrapper; the calendar demo uses local
 chronology and formatter overrides during development.
 
-The companion `general_date_format` **4.1.0** uses
-`general_datetime ^5.0.0` and `general_date_format_core ^3.1.0`, including Chinese
-formatting and translated picker localizations. Formatter 4.0.0 / core 3.0.0
-coexist with this chronology but do not format Chinese dates. The compatible formatter releases are now hosted on pub.dev.
+The companion `general_date_format` **4.2.0** and formatter core **3.2.0**
+provide traditional Amanta labels in English and Hindi.
 Version 5 adds `CalendarId.chinese`; update exhaustive enum switches.
-See [migration](https://github.com/ali-you/general-datetime-package/blob/main/docs/migration.md) for the version matrix and compatibility
-changes, and [release preparation](https://github.com/ali-you/general-datetime-package/blob/main/docs/release-preparation.md) for publish order.
+See [migration](https://github.com/ali-you/general-date-package/blob/main/docs/migration.md) for the version matrix and compatibility
+changes, and [release preparation](https://github.com/ali-you/general-date-package/blob/main/docs/release-preparation.md) for publish order.
 
 ## Quick start
 
@@ -126,8 +128,13 @@ implementation.
 | Gregorian | Native Dart date bounds | -271821-04-20 through 275760-09-13 | Proleptic Gregorian |
 | Persian | SH -61-01-01 through 3177-12-29 | 0560-03-20 through 3799-03-19 | Published Tehran leap data for SH 1206–1498; finite Borkowski calculation elsewhere |
 | Chinese | Related year 1901-01-01 through the final day of lunar year 2099 | 1901-02-19 through 2100-02-08 | Pinned .NET 10 table; ordinal months and explicit leap identity |
-| Hebrew | AM 1-01-01 through 9999-13-29 | Query `CalendarSystems.hebrew` bounds | Fixed Hebrew arithmetic; midnight civil days |
+| Hebrew | AM 1-01-01 through 9999-13-29 | Query `CalendarSystems.hebrew` bounds | Fixed Hebrew arithmetic with midnight civil days |
+| Amanta | Vikrama 2057–2107 | 2000-04-05 through 2051-04-11 | [Traditional sunrise calculation at Ujjain](https://github.com/ali-you/general-date-package/blob/v5.1.0/docs/amanta-calendar.md) |
 | Umm al-Qura | AH 1300-01-01 through 1600-12-30 | 1882-11-12 through 2174-11-25 | Finite verified month table; no arithmetic fallback |
+
+Amanta exposes `AmantaDate` for civil dates and `AmantaDateTime` for instants.
+Its civil date API exposes the ordinal day and the tithi separately. See the
+Amanta guide for leap months, picker input, and persistence.
 
 Persian years include zero. Calculated Persian dates outside SH 1206–1498 are
 not a guarantee of official historical usage or future astronomical decisions.
@@ -151,12 +158,13 @@ mode or adding a duration near an endpoint can throw `RangeError` if the new
 wall date falls outside that calendar's bounds.
 
 Data sources, hashes, independent fixtures, and source decisions are documented
-in [Persian validation](https://github.com/ali-you/general-datetime-package/blob/main/docs/persian-calendar-validation.md) and
-[Umm al-Qura validation](https://github.com/ali-you/general-datetime-package/blob/main/docs/hijri-calendar-validation.md).
+in [Persian validation](https://github.com/ali-you/general-date-package/blob/main/docs/persian-calendar-validation.md) and
+[Umm al-Qura validation](https://github.com/ali-you/general-date-package/blob/main/docs/hijri-calendar-validation.md).
 
 ## Construction, validation, and parsing
 
-All four calendar classes provide the same constructor family:
+The Persian, Hebrew, Chinese, and Umm al-Qura date-time classes share this
+constructor family:
 
 | Constructor | Behavior |
 | --- | --- |
@@ -170,7 +178,7 @@ All four calendar classes provide the same constructor family:
 
 Replace `PersianDateTime` with `HijriDateTime` or `HebrewDateTime` for the other
 calendar equivalents. Hebrew numeric months are stable slots, with slot 6
-absent in common years; see [Hebrew month identity](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-calendar.md).
+absent in common years; see [Hebrew month identity](https://github.com/ali-you/general-date-package/blob/main/docs/hebrew-calendar.md).
 Optional month/day default to 1; all optional clock fields default to 0.
 `fromDateTime` also accepts another supported calendar subclass and preserves
 its epoch rather than reinterpreting its exposed fields.
@@ -435,12 +443,15 @@ A picker needs both a calendar delegate (date arithmetic) and matching
 | --- | --- | --- |
 | Persian | `PersianCalendarDelegate` | `DefaultPersianCalendarMaterialLocalizations.delegate` |
 | Hebrew | `HebrewCalendarDelegate` | `DefaultHebrewCalendarMaterialLocalizations.delegate` |
+| Chinese | `ChineseCalendarDelegate` | `DefaultChineseCalendarMaterialLocalizations.delegate` |
+| Amanta | `AmantaCalendarDelegate` | Flutter Material UI with calendar labels supplied by the delegate |
 | Umm al-Qura | `HijriCalendarDelegate` | `DefaultHijriCalendarMaterialLocalizations.delegate` |
 
 The built-in localizations support English (`en`) only and use the legacy
 `dd/mm/yyyy` compact input format with ASCII digits. For translated labels,
-locale-specific date order, RTL languages, and native digits, use the Material
-localizations from `general_date_format`.
+locale-specific date order, RTL languages, and native digits, see the
+[Material localization setup](https://pub.dev/packages/general_date_format#flutter-material-integration)
+for Persian, Hebrew, Chinese, and Umm al-Qura.
 
 ### Complete Persian picker example
 
@@ -637,19 +648,25 @@ delegate. This package exports no `CalendarYearPicker` wrapper.
 
 ## Formatting and examples
 
-Use the neighboring `general_date_format` / `general_date_format_core`
-packages for localized patterns, names, digits, and strict parsing. Chronology
-ISO-like output is intended for its matching calendar parser.
+Use the companion formatters for localized patterns, names, digits, and
+parsing. `AmantaDateFormat` handles traditional English and Hindi labels for
+`AmantaDate`. Chronology ISO-like output is intended for its matching calendar
+parser. [Flutter formatter](https://pub.dev/packages/general_date_format) ·
+[Pure Dart formatter](https://pub.dev/packages/general_date_format_core)
+
+For inline calendars and custom selection modes, use the regular arithmetic
+delegates with [`general_calendar`](https://pub.dev/packages/general_calendar#calendars-and-localization).
 
 The calendar application demo uses `timezone` directly for named-zone event
 presentation and explicit missing/repeated wall-time policies. Timezone handling
 is local to the demo; the chronology packages have no zone dependency.
 
-- [Picker example](example/README.md): three calendar pickers with separate scopes.
-- [Calendar application demo](apps/calendar_demo/README.md): month/week/day/agenda
-  event views, calendar switching, named zones, and selection/rescheduling.
-- [Pure Dart core](packages/general_datetime_core/README.md): CLI example and
-  Flutter-free setup.
+- The [picker example](https://github.com/ali-you/general-date-package/blob/main/example/README.md) demonstrates separate
+  localization scopes for Material pickers.
+- The [calendar application demo](https://github.com/ali-you/general-date-package/blob/main/apps/calendar_demo/README.md) shows
+  event views, calendar switching, named time zones, and rescheduling.
+- The [pure Dart core](https://pub.dev/packages/general_datetime_core) includes a command-line
+  example for conversion and JSON storage.
 
 ## Development and testing
 
@@ -698,15 +715,15 @@ Release dependency order is: `general_datetime_core` first, then
 `general_datetime` and `general_date_format_core`, then `general_date_format`.
 Before publishing wrappers, resolve and test the matching hosted core versions
 without development overrides. Local path success does not certify hosted
-resolution. See [release preparation](https://github.com/ali-you/general-datetime-package/blob/main/docs/release-preparation.md) for the
-current Chinese release order and the previous Hebrew release matrix.
+resolution. See [release preparation](https://github.com/ali-you/general-date-package/blob/main/docs/release-preparation.md) for the
+current release order and previous compatibility matrices.
 
 Hebrew verification on **2026-10-12** used Flutter 3.47.6 / Dart 3.13.5.
 The chronology core passed 30 tests, the wrapper 328, and the demo 11.
 JavaScript and WebAssembly browser suites passed. An independent .NET oracle
 matched 239,612 Hebrew days in both directions. The
-[package validation report](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-package-validation-2026-10-12.md) and
-[Persian/Hijri regression review](https://github.com/ali-you/general-datetime-package/blob/main/docs/hebrew-existing-calendar-regression-2026-10-12.md)
+[package validation report](https://github.com/ali-you/general-date-package/blob/main/docs/hebrew-package-validation-2026-10-12.md) and
+[Persian/Hijri regression review](https://github.com/ali-you/general-date-package/blob/main/docs/hebrew-existing-calendar-regression-2026-10-12.md)
 record coverage, size effects and remaining platform/release checks.
 
 ## Contributions and license

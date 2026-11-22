@@ -1,5 +1,34 @@
 # Chronology release preparation
 
+## Amanta release candidates
+
+Use local overrides to test these versions together before publication:
+
+| Stage | Package | Version |
+| --- | --- | --- |
+| 1 | `general_datetime_core` | 3.1.0 |
+| 2 | `general_datetime` | 5.1.0 |
+| 2 | `general_date_format_core` | 3.2.0 |
+| 3 | `general_date_format` | 4.2.0 |
+| 3 | `general_calendar` | 1.1.2 |
+
+Local checks passed for the chronology and formatter suites, the Amanta
+calendar widget tests, and the Node picker probe in UTC, São Paulo, and Apia.
+All five candidates passed publish dry runs with zero warnings. The dry runs
+used path overrides where a dependency version was still unpublished.
+
+Before releasing the formatter, update its `.github/calendar_pair.json` to the
+exact reviewed chronology commit once that commit is available remotely. Verify
+CI at the minimum supported SDKs. After each dependency becomes available on
+pub.dev, resolve its consumers in clean checkouts without path overrides, run
+analysis and tests, and run the publish dry run. The calendar release includes
+the Amanta playground example and tests.
+
+The [Amanta guide](amanta-calendar.md) describes the bounded chronology and the
+picker's policy for dates affected by local clock changes.
+
+## Published Chinese releases
+
 The coordinated Chinese releases are now published: chronology core **3.0.1**,
 chronology wrapper **5.0.1**, formatter core **3.1.0**, formatter wrapper **4.1.0**,
 and calendar **1.1.1**. See the [publication record](chinese-publication-2026-11-11.md).
