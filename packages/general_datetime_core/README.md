@@ -13,7 +13,7 @@ for month numbering, related-year semantics, data policy, and picker setup.
 ## Features
 
 - Convert calendars while preserving the instant and microsecond precision.
-- Use `PersianDateTime`, `HijriDateTime`, and `HebrewDateTime` with the `DateTime` interface.
+- Use `PersianDateTime`, `HijriDateTime`, `HebrewDateTime`, and `ChineseDateTime` with the `DateTime` interface.
 - Validate fields, inspect month lengths, and query calendar bounds and metadata.
 - Work with immutable civil dates, date ranges, and configurable week rules.
 - Choose clamp, reject, or overflow policies for month and year arithmetic.
@@ -49,7 +49,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^3.0.0
+  general_datetime_core: ^3.0.1
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.
