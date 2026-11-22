@@ -23,7 +23,8 @@ for month numbering, related-year semantics, data policy, and picker setup.
 - Validate fields, inspect month lengths, and query calendar bounds and metadata.
 - Work with immutable civil dates, date ranges, and configurable week rules.
 - Choose clamp, reject, or overflow policies for month and year arithmetic.
-- Serialize instants and civil dates with explicit calendar identifiers.
+- Serialize instants and civil dates with registered calendar identifiers.
+  Store Amanta civil dates as a Gregorian date or day index.
 - Use UTC or the host's local timezone.
 
 ## Installation
@@ -32,11 +33,11 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^3.1.0
+  general_datetime_core: ^3.1.1
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.
-The [`general_datetime`](https://pub.dev/packages/general_datetime) 5.1.0 wrapper re-exports
+The [`general_datetime`](https://pub.dev/packages/general_datetime) 5.1.1 wrapper re-exports
 this core. For development against a local checkout, use a path dependency:
 
 ```yaml

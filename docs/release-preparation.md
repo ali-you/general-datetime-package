@@ -1,28 +1,21 @@
 # Chronology release preparation
 
-## Amanta release candidates
+## Amanta releases
 
-Use local overrides to test these versions together before publication:
+The original Amanta versions are published. Use this order for the patch versions released from `main`:
 
-| Stage | Package | Version |
-| --- | --- | --- |
-| 1 | `general_datetime_core` | 3.1.0 |
-| 2 | `general_datetime` | 5.1.0 |
-| 2 | `general_date_format_core` | 3.2.0 |
-| 3 | `general_date_format` | 4.2.0 |
-| 3 | `general_calendar` | 1.1.2 |
+| Stage | Package | Original Amanta version | Patch from `main` |
+| --- | --- | --- | --- |
+| 1 | `general_datetime_core` | 3.1.0 | 3.1.1 |
+| 2 | `general_datetime` | 5.1.0 | 5.1.1 |
+| 2 | `general_date_format_core` | 3.2.0 | 3.2.1 |
+| 3 | `general_date_format` | 4.2.0 | 4.2.1 |
+| 3 | `general_calendar` | 1.1.2 | 1.1.3 |
 
-Local checks passed for the chronology and formatter suites, the Amanta
-calendar widget tests, and the Node picker probe in UTC, São Paulo, and Apia.
-All five candidates passed publish dry runs with zero warnings. The dry runs
-used path overrides where a dependency version was still unpublished.
-
-Before releasing the formatter, update its `.github/calendar_pair.json` to the
-exact reviewed chronology commit once that commit is available remotely. Verify
-CI at the minimum supported SDKs. After each dependency becomes available on
-pub.dev, resolve its consumers in clean checkouts without path overrides, run
-analysis and tests, and run the publish dry run. The calendar release includes
-the Amanta playground example and tests.
+The patch versions retain the existing dependency minimums. Test from clean
+checkouts with hosted dependencies and run the publish dry run before each
+upload. After the packages appear on pub.dev, verify that a fresh consumer can
+resolve and use the new versions together without overrides.
 
 The [Amanta guide](amanta-calendar.md) describes the bounded chronology and the
 picker's policy for dates affected by local clock changes.

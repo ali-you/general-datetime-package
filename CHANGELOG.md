@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.1.1
+
+- Release the Amanta wrapper from `main` with the updated Flutter CI checks.
+- Refresh installation examples for the Amanta patch release.
+
 ## 5.1.0
 
 - Add `AmantaCalendarDelegate` for Material date and range pickers.

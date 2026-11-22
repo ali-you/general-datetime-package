@@ -67,8 +67,8 @@ import 'package:general_datetime_core/general_datetime_core.dart';
 
 ## Installation and local setup
 
-The Amanta release pairs `general_datetime` **5.1.0** with
-`general_datetime_core` **3.1.0**. The Flutter wrapper requires Dart
+The Amanta patch release pairs `general_datetime` **5.1.1** with
+`general_datetime_core` **3.1.1**. The Flutter wrapper requires Dart
 `>=3.4.0 <4.0.0` and Flutter `>=3.32.0`; the core requires only Dart
 `>=3.4.0 <4.0.0`.
 
@@ -76,18 +76,18 @@ Add the Flutter wrapper to your application:
 
 ```yaml
 dependencies:
-  general_datetime: ^5.1.0
+  general_datetime: ^5.1.1
 ```
 
 Run `flutter pub get`. For a pure Dart application, use
-`general_datetime_core: ^3.1.0` and run `dart pub get` instead.
+`general_datetime_core: ^3.1.1` and run `dart pub get` instead.
 
 When developing against the local checkout, use the overrides in
 [development setup](https://github.com/ali-you/general-date-package/blob/main/docs/development.md#dependency-resolution).
 The picker example uses the local wrapper; the calendar demo uses local
 chronology and formatter overrides during development.
 
-The companion `general_date_format` **4.2.0** and formatter core **3.2.0**
+The companion `general_date_format` **4.2.1** and formatter core **3.2.1**
 provide traditional Amanta labels in English and Hindi.
 Version 5 adds `CalendarId.chinese`; update exhaustive enum switches.
 See [migration](https://github.com/ali-you/general-date-package/blob/main/docs/migration.md) for the version matrix and compatibility

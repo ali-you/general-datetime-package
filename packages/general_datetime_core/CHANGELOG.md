@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1
+
+- Clarify the storage options for Amanta dates and refresh installation examples.
+
 ## 3.1.0
 
 - Add `AmantaDate` and `AmantaDateTime` for the Ujjain Amanta calendar, covering Vikrama years 2057–2107.
