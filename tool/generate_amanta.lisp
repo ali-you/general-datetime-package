@@ -1,0 +1,15 @@
+;;; Run with ABCL --load tool/generate_amanta.lisp -- calendar.l output.csv
+(defpackage "CC4" (:use "COMMON-LISP"))
+(load (first ext:*command-line-argument-list*))
+(in-package "CC4")
+(with-open-file (out (second ext:*command-line-argument-list*)
+                     :direction :output :if-exists :supersede)
+  (let ((epoch (fixed-from-gregorian '(1970 1 1))))
+    (loop for rd from (fixed-from-gregorian '(1999 1 1))
+          below (fixed-from-gregorian '(2052 1 1))
+          do (destructuring-bind (year month leap tithi repeated)
+                 (hindu-lunar-from-fixed rd)
+               (format out "~d,~d,~d,~d,~d,~d~%"
+                       (- rd epoch) year month (if leap 1 0)
+                       tithi (if repeated 1 0))))))
+(ext:quit)

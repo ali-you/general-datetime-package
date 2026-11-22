@@ -1,47 +1,30 @@
 # General DateTime Core
 
-Pure Dart date and time operations for Gregorian, Solar Hijri (Persian), Hebrew, Chinese,
-and Umm al-Qura Hijri calendars. Use it in servers, command-line tools, web apps,
-and Flutter projects without depending on the Flutter SDK.
+![General DateTime Core banner](https://raw.githubusercontent.com/ali-you/general-date-package/v5.1.0/docs/general_datetime_core-banner.png)
+
+Convert dates and instants across Gregorian, Persian (Jalali), Hebrew,
+Chinese, Amanta, and Umm al-Qura (Hijri) calendars in pure Dart. The core
+supports servers, command-line tools, web apps, and Flutter projects.
 
 Requires **Dart 3.4 or later** and has **no runtime dependencies**.
 
+[API reference](https://pub.dev/documentation/general_datetime_core/latest/) ·
+[Changelog](https://pub.dev/packages/general_datetime_core/changelog)
+
 Chinese calendar support includes explicit leap-month identity and bounded
-1901–2099 lunar years. See the [Chinese calendar guide](../../docs/chinese-calendar.md)
+1901–2099 lunar years. See the [Chinese calendar guide](https://github.com/ali-you/general-date-package/blob/main/docs/chinese-calendar.md)
 for month numbering, related-year semantics, data policy, and picker setup.
 
 ## Features
 
 - Convert calendars while preserving the instant and microsecond precision.
-- Use `PersianDateTime`, `HijriDateTime`, `HebrewDateTime`, and `ChineseDateTime` with the `DateTime` interface.
+- Use `PersianDateTime`, `HijriDateTime`, `HebrewDateTime`, `ChineseDateTime`,
+  and `AmantaDateTime` through Dart's `DateTime` interface.
 - Validate fields, inspect month lengths, and query calendar bounds and metadata.
 - Work with immutable civil dates, date ranges, and configurable week rules.
 - Choose clamp, reject, or overflow policies for month and year arithmetic.
 - Serialize instants and civil dates with explicit calendar identifiers.
 - Use UTC or the host's local timezone.
-
-## Hebrew calendar
-
-```dart
-final hebrew = HebrewDateTime.fromDateTime(DateTime.utc(2024, 3, 20));
-print((hebrew.year, hebrew.month, hebrew.day)); // (5784, 7, 10)
-final months = CalendarSystems.monthsOfYear(CalendarId.hebrew, 5785);
-print(months); // [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
-```
-
-The fixed Hebrew civil calendar supports AM 1–9999 with midnight day boundaries.
-Months use stable ICU slots: Tishri=1, Adar I=6 (leap years only),
-Adar/Adar II=7, Nisan=8, Elul=13. Use `monthsOfYear` to iterate valid months
-and `monthOrdinal` for position within a year. `CalendarDate.addMonths` counts
-actual months; `addYears` preserves month identity, mapping a missing Adar I
-by default or rejecting it with `MissingMonthPolicy.reject`. Day overflow is
-controlled separately by `CalendarOverflow`. Strict construction and parsing
-reject an explicit Adar I in common years.
-
-JSON uses calendar identifier `hebrew` in the existing version-1 schema.
-For full semantics, Flutter setup, and verification, see the repository's
-[Hebrew guide](../../docs/hebrew-calendar.md). Hebrew support is included in
-the prepared 2.0.0 release; it is not available through the old 1.0.0 core.
 
 ## Installation
 
@@ -49,14 +32,12 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^3.0.1
+  general_datetime_core: ^3.1.0
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.
-The 3.0.0 core is re-exported by the `general_datetime` 5.0.0 wrapper.
-Version 3 adds `CalendarId.chinese`; update exhaustive enum switches.
-Publication is a separate step. Before the matching hosted releases are
-available, use a local path dependency:
+The [`general_datetime`](https://pub.dev/packages/general_datetime) 5.1.0 wrapper re-exports
+this core. For development against a local checkout, use a path dependency:
 
 ```yaml
 dependencies:
@@ -70,11 +51,10 @@ All public APIs are available from one import:
 import 'package:general_datetime_core/general_datetime_core.dart';
 ```
 
-When upgrading from 1.x, add `CalendarId.hebrew` to exhaustive switches and
-check code that iterates `CalendarId.values`. Existing enum indices and
-Persian/Hijri version-1 JSON remain unchanged. Hebrew month iteration and
-year arithmetic require the rules described above; do not assume twelve
-consecutive slots. See [migration](../../docs/migration.md).
+When upgrading from earlier versions, review exhaustive `CalendarId` switches
+and code that iterates `CalendarId.values`. Hebrew and Chinese added enum cases
+in versions 2 and 3. The [migration guide](https://github.com/ali-you/general-date-package/blob/main/docs/migration.md)
+covers compatibility and month identity.
 
 ## Quick start
 
@@ -101,6 +81,28 @@ Conversions preserve the native millisecond and microsecond parts separately;
 prefer `toDateTime()` or `CalendarInstant` timestamp strings over a large epoch
 integer for round trips. The SDK's own precision still applies: Dart 3.4's JS
 backend rounds to milliseconds; the current JS backend retains microseconds.
+
+## Hebrew calendar
+
+```dart
+final hebrew = HebrewDateTime.fromDateTime(DateTime.utc(2024, 3, 20));
+print((hebrew.year, hebrew.month, hebrew.day)); // (5784, 7, 10)
+final months = CalendarSystems.monthsOfYear(CalendarId.hebrew, 5785);
+print(months); // [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13]
+```
+
+The fixed Hebrew civil calendar supports AM 1–9999 with midnight day boundaries.
+Months use stable ICU slots: Tishri=1, Adar I=6 (leap years only),
+Adar/Adar II=7, Nisan=8, Elul=13. Use `monthsOfYear` to iterate valid months
+and `monthOrdinal` for position within a year. `CalendarDate.addMonths` counts
+actual months; `addYears` preserves month identity, mapping a missing Adar I
+by default or rejecting it with `MissingMonthPolicy.reject`. Day overflow is
+controlled separately by `CalendarOverflow`. Strict construction and parsing
+reject an explicit Adar I in common years.
+
+JSON uses calendar identifier `hebrew` in the existing version-1 schema.
+For full semantics, Flutter setup, and verification, see the repository's
+[Hebrew guide](https://github.com/ali-you/general-date-package/blob/main/docs/hebrew-calendar.md).
 
 ## Calendar date-times
 
@@ -341,14 +343,21 @@ or `value.toDateTime().toUtc().toIso8601String()`.
 | --- | --- | --- |
 | Gregorian | Dart native date bounds: -271821-04-20 through 275760-09-13 | Proleptic Gregorian |
 | Persian | SH -61 through 3177, including year zero | Published University of Tehran leap data for SH 1206–1498; finite Borkowski calculation elsewhere |
-| Hebrew | AM 1 through 9999, no year zero | Fixed ICU-compatible arithmetic; midnight civil days; no annual published table |
+| Hebrew | AM 1 through 9999, no year zero | Fixed ICU-compatible arithmetic with midnight civil days |
+| Chinese | Related years 1901–2099 | Pinned .NET 10 table with ordinal months and explicit leap-month identity |
+| Amanta | Vikrama 2057–2107 (Gregorian 2000-04-05 through 2051-04-11) | Traditional sunrise calculation at Ujjain |
 | Umm al-Qura Hijri | AH 1300 through 1600 | Finite month table derived from Unicode ICU; no fallback outside the table |
 
 Persian dates outside the published table are calculated dates and are not
 guaranteed official civil dates. Umm al-Qura dates can differ from
 observational or other Islamic calendars.
 
-The date-time classes expose `minimumYear`, `maximumYear`,
+Use `AmantaDate` for ordinal days, tithi, and leap-month identity. Store its
+Gregorian civil date or `dayIndex` with an application-defined calendar ID.
+See the [Amanta guide](https://github.com/ali-you/general-date-package/blob/v5.1.0/docs/amanta-calendar.md) for the date model
+and version-1 JSON scope.
+
+The Persian and Umm al-Qura date-time classes expose `minimumYear`, `maximumYear`,
 `minimumGregorianDate`, `maximumGregorianDate`, `isValidDate`, and
 `isSupportedDateTime`. Calendar conversions and arithmetic must stay within
 the target calendar's bounds. Instant serialization has the narrower
@@ -360,13 +369,13 @@ this package's API.
 
 ## Flutter and formatting integration
 
-The Flutter `general_datetime` package re-exports these core types and adds
-Material calendar delegates and default localizations. Shared class identities
-allow values to cross between the core and wrapper APIs without conversion.
-
-Use `general_date_format_core` for localized formatting in pure Dart. Named
-zone handling in the repository's calendar demo uses the `timezone` package
-in the application.
+- Use [`general_datetime`](https://pub.dev/packages/general_datetime) for Flutter Material
+  calendar delegates and default localizations. It re-exports the same core
+  types, so date values can pass directly between the two packages.
+- Use [`general_date_format_core`](https://pub.dev/packages/general_date_format_core) for
+  localized formatting and parsing, including traditional Amanta labels.
+- Use [`general_date_format`](https://pub.dev/packages/general_date_format) when you also need
+  translated Flutter Material calendar localizations.
 
 ## Source organization
 
@@ -377,6 +386,8 @@ Calendar-specific implementations and data live under `lib/src/calendars`:
 | `calendars/gregorian/` | Gregorian calculation helper; Gregorian date-times use Dart's native `DateTime` |
 | `calendars/persian/` | `PersianDateTime`, Persian calendar calculation, and Iranian calendar data |
 | `calendars/hebrew/` | `HebrewDateTime` and fixed Hebrew calendar calculation |
+| `calendars/chinese/` | `ChineseDateTime` and the Chinese lunar calendar table |
+| `calendars/amanta/` | `AmantaDate`, `AmantaDateTime`, and Amanta calendar data |
 | `calendars/hijri/` | `HijriDateTime`, Umm al-Qura calendar calculation, and month data |
 | `shared/` | Common field normalization and parsing constants |
 
@@ -397,7 +408,7 @@ dart test
 dart run example/cli.dart
 ```
 
-The [CLI example](example/cli.dart) demonstrates conversion and JSON storage.
+The [CLI example](https://github.com/ali-you/general-date-package/blob/main/packages/general_datetime_core/example/cli.dart) demonstrates conversion and JSON storage.
 Dart tests cover calendar fixtures, civil arithmetic, serialization, supported
 bounds, and the absence of Flutter in the dependency graph. The parent
 repository also includes reference tests through the Flutter wrapper.
