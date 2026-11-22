@@ -22,9 +22,6 @@ general_datetime_core
   `-- PersianDateTime / HijriDateTime / HebrewDateTime -> calculations and data
 ```
 
-This is the implemented dependency structure. The engine-based structure in the
-[expansion review](calendar-expansion-review.md) is a proposal.
-
 ## Source map
 
 Paths below are relative to the repository root.
@@ -68,14 +65,14 @@ Tests protect the core/wrapper identity boundary in
 
 ## Extending the package
 
-The built-in registry supports `gregory`, `persian`, `islamic-umalqura`, and `hebrew`.
-Implementing `CalendarSystem` or `GeneralDateTimeInterface` does not register a
-new calendar with field utilities, version-1 storage, or formatter packages.
-`GeneralDateTimeInterface.now<T>()` selects Persian, Hijri and Hebrew types explicitly.
+The built-in registry supports `gregory`, `persian`, `islamic-umalqura`,
+`hebrew`, and `chinese`. Implementing `CalendarSystem` or
+`GeneralDateTimeInterface` alone leaves registration to the package.
+`GeneralDateTimeInterface.now<T>()` handles Persian, Hijri, Hebrew, Chinese,
+and Amanta date-times.
 
-Hebrew civil arithmetic counts actual months and preserves stable month identity;
+Hebrew civil arithmetic counts actual months and preserves stable month identity.
 `CalendarSystems.monthsOfYear` exposes valid slots, and `MissingMonthPolicy`
-controls Adar I when adding years. Existing calendars retain twelve-month
-arithmetic. Chinese and Hindu calendars remain proposed extensions. The
-[expansion review](calendar-expansion-review.md) records the earlier design
-analysis; see the [Hebrew guide](hebrew-calendar.md) for implemented behavior.
+controls Adar I when adding years. See the [Hebrew guide](hebrew-calendar.md),
+[Chinese guide](chinese-calendar.md), and [Amanta guide](amanta-calendar.md)
+for their month and storage contracts.
