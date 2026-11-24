@@ -4,6 +4,7 @@ import 'calendar_date_utils.dart';
 import 'general_date_time_interface.dart';
 import 'calendars/hijri/hijri_date_time.dart';
 import 'calendars/persian/persian_date_time.dart';
+import 'calendars/saka/saka_date_time.dart';
 
 /// Unicode calendar identifiers supported by the version-1 storage schema.
 enum CalendarId {
@@ -11,7 +12,8 @@ enum CalendarId {
   persian('persian'),
   islamicUmalqura('islamic-umalqura'),
   hebrew('hebrew'),
-  chinese('chinese');
+  chinese('chinese'),
+  indian('indian');
 
   const CalendarId(this.identifier);
 
@@ -29,6 +31,7 @@ enum CalendarId {
     if (date is HebrewDateTime) return hebrew;
     if (date is PersianDateTime) return persian;
     if (date is HijriDateTime) return islamicUmalqura;
+    if (date is SakaDateTime) return indian;
     if (date is GeneralDateTimeInterface) {
       throw UnsupportedError(
         'Serialization is not registered for ${date.runtimeType}.',
@@ -222,6 +225,8 @@ bool _validDate(CalendarId calendar, int year, int month, int day) {
       return PersianDateTime.isValidDate(year, month, day);
     case CalendarId.islamicUmalqura:
       return HijriDateTime.isValidDate(year, month, day);
+    case CalendarId.indian:
+      return SakaDateTime.isValidDate(year, month, day);
     case CalendarId.gregory:
       // Check before native construction, including extreme integer inputs.
       if (year < -271821 ||

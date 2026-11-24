@@ -284,8 +284,14 @@ void main() {
     expect(restored.instant, value.toDateTime());
     expect(restored.timeZone, 'Asia/Shanghai');
     expect(ChineseDateTime.fromDateTime(restored.instant).monthCode, 'M06L');
-    expect(CalendarId.values.map((id) => id.identifier),
-        ['gregory', 'persian', 'islamic-umalqura', 'hebrew', 'chinese']);
+    expect(CalendarId.values.map((id) => id.identifier), [
+      'gregory',
+      'persian',
+      'islamic-umalqura',
+      'hebrew',
+      'chinese',
+      'indian'
+    ]);
   });
 
   test('VM storage rejects double-typed fields even when integer-valued', () {

@@ -1,5 +1,21 @@
 # Chronology release preparation
 
+## Saka release candidates
+
+| Stage | Package | Version |
+| --- | --- | --- |
+| 1 | `general_datetime_core` | 4.0.0 |
+| 2 | `general_datetime` | 6.0.0 |
+| 2 | `general_date_format_core` | 4.0.0 |
+| 3 | `general_date_format` | 5.0.0 |
+| 3 | `general_calendar` | 1.1.4 |
+
+The new `CalendarId.indian` case can break exhaustive switches. The wrapper
+and formatter require the new chronology versions. Before publication, resolve
+the pair from the Saka source checkouts using the development overrides and
+CI pins. After publishing each upstream release, verify its consumers against
+hosted packages without overrides before publishing the next stage.
+
 ## Amanta releases
 
 The original Amanta versions are published. Use this order for the patch versions released from `main`:

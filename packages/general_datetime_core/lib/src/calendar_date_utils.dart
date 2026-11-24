@@ -6,18 +6,20 @@ import 'shared/native_date_time.dart';
 import 'general_date_time_interface.dart';
 import 'calendars/hijri/hijri_date_time.dart';
 import 'calendars/persian/persian_date_time.dart';
+import 'calendars/saka/saka_date_time.dart';
 
 /// Calendar field operations that are safe for values typed as [DateTime].
 ///
 /// Dart's `DateTime.copyWith` extension and Flutter's `DateUtils` reconstruct
 /// Gregorian dates from the exposed fields. Use [copyWith] and [dateOnly] for
 /// calendar fields, or [toGregorian] before passing a date to Gregorian helpers.
-/// Supported calendars are native Gregorian, Persian, Umm al-Qura Hijri, Hebrew, Chinese, and Amanta.
+/// Supports native Gregorian, Persian, Umm al-Qura Hijri, Hebrew, Chinese,
+/// Amanta, and Saka.
 abstract final class CalendarDateUtils {
   /// Replaces wall-clock fields in the input's calendar.
   ///
-  /// Persian, Hijri, Hebrew, Chinese, and Amanta inputs retain their calendar type even when [date] is
-  /// statically typed as [DateTime]. Native inputs produce native Gregorian
+  /// Supported calendar inputs retain their type even when [date] is statically
+  /// typed as [DateTime]. Native inputs produce native Gregorian
   /// dates. Omitted fields retain their values, including microsecond precision
   /// and UTC/local mode. Overflow normalization and calendar bounds follow the
   /// corresponding constructor.
@@ -41,6 +43,19 @@ abstract final class CalendarDateUtils {
     int? microsecond,
     bool? isUtc,
   }) {
+    if (date is SakaDateTime) {
+      return date.copyWith(
+        year: year,
+        month: month,
+        day: day,
+        hour: hour,
+        minute: minute,
+        second: second,
+        millisecond: millisecond,
+        microsecond: microsecond,
+        isUtc: isUtc,
+      );
+    }
     if (date is AmantaDateTime) {
       return AmantaDateTime.fromCivilDate(
         AmantaDate(year ?? date.year, month ?? date.month, day ?? date.day),
@@ -129,6 +144,10 @@ abstract final class CalendarDateUtils {
   /// `DateUtils.dateOnly`, UTC inputs remain UTC. For a Material picker use its
   /// matching calendar delegate, which supplies the picker's local-date policy.
   static DateTime dateOnly(DateTime date) {
+    if (date is SakaDateTime) {
+      return SakaDateTime.atStartOfDay(date.year, date.month, date.day,
+          isUtc: date.isUtc);
+    }
     if (date is AmantaDateTime) {
       return AmantaDateTime.atStartOfDay(date.civilDate, isUtc: date.isUtc);
     }

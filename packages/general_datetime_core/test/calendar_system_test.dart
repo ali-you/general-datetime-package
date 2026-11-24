@@ -13,6 +13,7 @@ void main() {
           CalendarId.gregory => (year: 2024, month: 3, day: 20),
           CalendarId.persian => (year: 1403, month: 1, day: 1),
           CalendarId.islamicUmalqura => (year: 1445, month: 9, day: 10),
+          CalendarId.indian => (year: 1945, month: 12, day: 30),
         };
         expect(fields, expected);
         expect(system.toGregorianDay(fields.year, fields.month, fields.day),

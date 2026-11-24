@@ -5,6 +5,7 @@ import 'calendar_serialization.dart';
 import 'general_date_time_interface.dart';
 import 'calendars/hijri/hijri_date_time.dart';
 import 'calendars/persian/persian_date_time.dart';
+import 'calendars/saka/saka_date_time.dart';
 
 /// Calendar fields describe a civil date, without assigning a timezone.
 typedef CalendarFields = ({int year, int month, int day});
@@ -48,6 +49,7 @@ abstract final class CalendarSystems {
   static const hebrew = _BuiltInCalendarSystem(CalendarId.hebrew);
   static const gregorian = _BuiltInCalendarSystem(CalendarId.gregory);
   static const persian = _BuiltInCalendarSystem(CalendarId.persian);
+  static const saka = _BuiltInCalendarSystem(CalendarId.indian);
   static const ummAlQura = _BuiltInCalendarSystem(CalendarId.islamicUmalqura);
 
   /// Valid month slots in chronological order, including intercalary months.
@@ -63,6 +65,7 @@ abstract final class CalendarSystems {
         CalendarId.hebrew => hebrew,
         CalendarId.gregory => gregorian,
         CalendarId.persian => persian,
+        CalendarId.indian => saka,
         CalendarId.islamicUmalqura => ummAlQura,
       };
 }
@@ -77,6 +80,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
         CalendarId.hebrew => 'fixed-hebrew-icu78.3-v1',
         CalendarId.gregory => 'proleptic-gregorian-v1',
         CalendarId.persian => 'tehran-1206-1498-borkowski-v1',
+        CalendarId.indian => 'indian-national-civil-v1',
         CalendarId.islamicUmalqura => 'icu-openjdk21-1300-1600-v1',
       };
   @override
@@ -88,6 +92,8 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
         CalendarId.gregory => 'Proleptic Gregorian; Dart UTC date bounds.',
         CalendarId.persian => 'Published Tehran leap data for 1206–1498; '
             'finite Borkowski calculation elsewhere.',
+        CalendarId.indian =>
+          'Arithmetic Indian National Calendar; proleptic civil rules; Saka 1–9920.',
         CalendarId.islamicUmalqura => 'Finite Umm al-Qura table; no fallback.',
       };
   @override
@@ -103,6 +109,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
             day: 1
           ),
         CalendarId.gregory => (year: -271821, month: 4, day: 20),
+        CalendarId.indian => (year: SakaDateTime.minimumYear, month: 1, day: 1),
         CalendarId.persian => (
             year: PersianDateTime.minimumYear,
             month: 1,
@@ -128,6 +135,11 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
             day: 29
           ),
         CalendarId.gregory => (year: 275760, month: 9, day: 13),
+        CalendarId.indian => (
+            year: SakaDateTime.maximumYear,
+            month: 12,
+            day: 30
+          ),
         CalendarId.persian => (
             year: PersianDateTime.maximumYear,
             month: 12,
@@ -141,6 +153,9 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       };
   @override
   bool isValidDate(int year, int month, int day) {
+    if (id == CalendarId.indian) {
+      return SakaDateTime.isValidDate(year, month, day);
+    }
     if (id == CalendarId.chinese) {
       return ChineseDateTime.isValidDate(year, month, day);
     }
@@ -182,6 +197,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       return ChineseDateTime.daysInMonth(year, month);
     }
     if (id == CalendarId.hebrew) return HebrewDateTime.daysInMonth(year, month);
+    if (id == CalendarId.indian) return SakaDateTime.daysInMonth(year, month);
     if (month < 1 || month > 12) throw RangeError.range(month, 1, 12, 'month');
     if (id == CalendarId.persian) {
       return PersianDateTime.daysInMonth(year, month);
@@ -224,6 +240,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       CalendarId.chinese => false,
       CalendarId.hebrew => false,
       CalendarId.gregory => false,
+      CalendarId.indian => false,
       CalendarId.persian => year >= PersianDateTime.minimumOfficialYear &&
           year <= PersianDateTime.maximumOfficialYear,
       CalendarId.islamicUmalqura => true,
@@ -274,6 +291,11 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
               year, month, day, hour, minute, second, millisecond, microsecond)
           : PersianDateTime(
               year, month, day, hour, minute, second, millisecond, microsecond),
+      CalendarId.indian => isUtc
+          ? SakaDateTime.utc(
+              year, month, day, hour, minute, second, millisecond, microsecond)
+          : SakaDateTime(
+              year, month, day, hour, minute, second, millisecond, microsecond),
       CalendarId.islamicUmalqura => isUtc
           ? HijriDateTime.utc(
               year, month, day, hour, minute, second, millisecond, microsecond)
@@ -304,6 +326,7 @@ final class _BuiltInCalendarSystem implements CalendarSystem {
       CalendarId.hebrew => HebrewDateTime.fromDateTime(native),
       CalendarId.gregory => native,
       CalendarId.persian => PersianDateTime.fromDateTime(native),
+      CalendarId.indian => SakaDateTime.fromDateTime(native),
       CalendarId.islamicUmalqura => HijriDateTime.fromDateTime(native),
     };
   }

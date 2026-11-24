@@ -416,28 +416,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                           value: controller.calendar,
                                           items: [
                                             // The demo's formatter currently supports these calendars.
-                                            for (final id in [
-                                              CalendarId.gregory,
-                                              CalendarId.persian,
-                                              CalendarId.islamicUmalqura,
-                                              CalendarId.chinese,
-                                            ])
+                                            for (final entry in const {
+                                              CalendarId.gregory: 'Gregorian',
+                                              CalendarId.persian: 'Persian',
+                                              CalendarId.islamicUmalqura:
+                                                  'Umm al-Qura',
+                                              CalendarId.chinese: 'Chinese',
+                                            }.entries)
                                               DropdownMenuItem(
-                                                  value: id,
-                                                  child: Text(
-                                                      switch (id) {
-                                                        CalendarId.chinese =>
-                                                          'Chinese',
-                                                        CalendarId.hebrew =>
-                                                          'Hebrew',
-                                                        CalendarId.gregory =>
-                                                          'Gregorian',
-                                                        CalendarId.persian =>
-                                                          'Persian',
-                                                        CalendarId
-                                                              .islamicUmalqura =>
-                                                          'Umm al-Qura'
-                                                      },
+                                                  value: entry.key,
+                                                  child: Text(entry.value,
                                                       maxLines: 1,
                                                       overflow: TextOverflow
                                                           .ellipsis))
