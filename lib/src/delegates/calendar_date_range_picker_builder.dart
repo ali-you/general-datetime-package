@@ -1,3 +1,5 @@
+// Flutter 3.32 uses the SDK design libraries.
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
 /// Keeps [calendarDelegate] on the dialog created by [showDateRangePicker].

@@ -4,11 +4,11 @@
 
 | Stage | Package | Version |
 | --- | --- | --- |
-| 1 | `general_datetime_core` | 4.0.0 |
-| 2 | `general_datetime` | 6.0.0 |
-| 2 | `general_date_format_core` | 4.0.0 |
-| 3 | `general_date_format` | 5.0.0 |
-| 3 | `general_calendar` | 1.1.4 |
+| 1 | `general_datetime_core` | 5.0.0 |
+| 2 | `general_datetime` | 7.0.0 |
+| 2 | `general_date_format_core` | 5.0.0 |
+| 3 | `general_date_format` | 6.0.0 |
+| 3 | `general_calendar` | 2.0.0 |
 
 The new `CalendarId.indian` case can break exhaustive switches. The wrapper
 and formatter require the new chronology versions. Before publication, resolve

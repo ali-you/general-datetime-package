@@ -1,3 +1,5 @@
+// Flutter 3.32 uses the SDK design libraries.
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:general_datetime_core/general_datetime_core.dart';
 

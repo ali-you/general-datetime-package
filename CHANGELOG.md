@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.0.0
+
+- Require `general_datetime_core ^5.0.0` and include the Saka picker APIs.
+- Handle the legacy Material import deprecation while retaining Flutter 3.32 support.
+
 ## 6.0.0
 
 - Add `SakaCalendarDelegate` and English Material localizations for the Indian

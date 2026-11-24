@@ -137,7 +137,7 @@ The committed workflow configuration specifies:
 | Workflow | Configured checks |
 | --- | --- |
 | [`flutter.yml`](../.github/workflows/flutter.yml) | Dart 3.4.0/current core checks and CLI; Flutter 3.32.0/current checks; three process timezones; demo analysis/tests |
-| [`calendar_platforms.yml`](../.github/workflows/calendar_platforms.yml) | Browser JavaScript/Wasm smoke and demo checks/builds; Android emulator and iOS simulator integration smoke |
+| [`calendar_platforms.yml`](../.github/workflows/calendar_platforms.yml) | Browser JavaScript/Wasm smoke tests and demo builds, plus Android emulator integration smoke tests |
 
 Workflow configuration is not evidence of a passing run. Record the commit,
 resolved package versions, SDKs, platform/timezone, commands, and outcomes when

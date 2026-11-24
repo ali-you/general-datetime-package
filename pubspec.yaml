@@ -1,6 +1,6 @@
 name: general_datetime
 description: "Convert Gregorian, Persian (Jalali), Hebrew, Chinese, Amanta, Saka, and Umm al-Qura (Hijri) dates. Use calendar delegates with Flutter Material date pickers."
-version: 6.0.0
+version: 7.0.0
 homepage: https://github.com/ali-you
 repository: https://github.com/ali-you/general-date-package
 documentation: https://github.com/ali-you/general-date-package
@@ -21,7 +21,7 @@ environment:
   flutter: ">=3.32.0"
 
 dependencies:
-  general_datetime_core: ^4.0.0
+  general_datetime_core: ^5.0.0
   flutter:
     sdk: flutter
 

@@ -33,11 +33,11 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  general_datetime_core: ^3.1.1
+  general_datetime_core: ^5.0.0
 ```
 
 Run `dart pub get`, or `flutter pub get` in a Flutter project.
-The [`general_datetime`](https://pub.dev/packages/general_datetime) 5.1.1 wrapper re-exports
+The [`general_datetime`](https://pub.dev/packages/general_datetime) 7.0.0 wrapper re-exports
 this core. For development against a local checkout, use a path dependency:
 
 ```yaml

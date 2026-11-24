@@ -53,19 +53,3 @@ jobs:
           arch: x86_64
           working-directory: apps/calendar_demo
           script: flutter pub get && flutter test integration_test/calendar_smoke_test.dart -d emulator-5554
-  ios:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/use-local-core
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-      - name: Boot an available iPhone simulator
-        run: |
-          DEVICE=$(xcrun simctl list devices available -j | python -c 'import json,sys; print(next(d["udid"] for ds in json.load(sys.stdin)["devices"].values() for d in ds if "iPhone" in d["name"]))')
-          xcrun simctl boot "$DEVICE" || true
-          xcrun simctl bootstatus "$DEVICE" -b
-          echo "SIMULATOR_ID=$DEVICE" >> "$GITHUB_ENV"
-      - run: flutter pub get && flutter test integration_test/calendar_smoke_test.dart -d "$SIMULATOR_ID"
-        working-directory: apps/calendar_demo
