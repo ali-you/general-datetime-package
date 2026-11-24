@@ -3,6 +3,7 @@ import 'calendars/chinese/chinese_date_time.dart';
 import 'calendars/hebrew/hebrew_date_time.dart';
 import 'calendars/hijri/hijri_date_time.dart';
 import 'calendars/persian/persian_date_time.dart';
+import 'calendars/saka/saka_date_time.dart';
 
 abstract class GeneralDateTimeInterface<T> {
   static T now<T extends GeneralDateTimeInterface>() {
@@ -11,6 +12,7 @@ abstract class GeneralDateTimeInterface<T> {
     if (T == HebrewDateTime) return HebrewDateTime.now() as T;
     if (T == PersianDateTime) return PersianDateTime.now() as T;
     if (T == HijriDateTime) return HijriDateTime.now() as T;
+    if (T == SakaDateTime) return SakaDateTime.now() as T;
     throw TypeError();
   }
 

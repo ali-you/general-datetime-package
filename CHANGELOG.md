@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.0.0
+
+- Add `SakaCalendarDelegate` and English Material localizations for the Indian
+  National Calendar.
+- Require `general_datetime_core ^4.0.0`, including `CalendarId.indian`.
+
 ## 5.1.1
 
 - Release the Amanta wrapper from `main` with the updated Flutter CI checks.

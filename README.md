@@ -4,7 +4,7 @@
 
 Convert instants, work with civil dates, and use calendar delegates in Flutter
 Material date pickers. Supported calendars include Gregorian, Persian (Jalali),
-Hebrew, Chinese, Amanta, and Umm al-Qura (Hijri).
+Hebrew, Chinese, Amanta, Indian National Calendar (Saka), and Umm al-Qura (Hijri).
 
 [API reference](https://pub.dev/documentation/general_datetime/latest/) ·
 [Calendar guides and validation reports](https://github.com/ali-you/general-date-package/blob/main/docs/README.md)
@@ -19,6 +19,9 @@ for month numbering, related-year semantics, data policy, and picker setup.
 Amanta lunisolar dates are available through `AmantaDate` and
 `AmantaDateTime`. See the [Amanta calendar guide](https://github.com/ali-you/general-date-package/blob/v5.1.0/docs/amanta-calendar.md)
 for the Ujjain convention, date bounds, and picker setup.
+
+See the [Saka calendar guide](docs/saka-calendar.md) for the Indian National
+Calendar's civil rules, supported dates, storage, and Material integration.
 
 ## Contents
 
@@ -131,6 +134,7 @@ implementation.
 | Hebrew | AM 1-01-01 through 9999-13-29 | Query `CalendarSystems.hebrew` bounds | Fixed Hebrew arithmetic with midnight civil days |
 | Amanta | Vikrama 2057–2107 | 2000-04-05 through 2051-04-11 | [Traditional sunrise calculation at Ujjain](https://github.com/ali-you/general-date-package/blob/v5.1.0/docs/amanta-calendar.md) |
 | Umm al-Qura | AH 1300-01-01 through 1600-12-30 | 1882-11-12 through 2174-11-25 | Finite verified month table; no arithmetic fallback |
+| Saka | 1-01-01 through 9920-12-30 | 0079-03-22 through 9999-03-21 | Arithmetic Indian National Calendar |
 
 Amanta exposes `AmantaDate` for civil dates and `AmantaDateTime` for instants.
 Its civil date API exposes the ordinal day and the tithi separately. See the
@@ -293,7 +297,7 @@ matching calendar delegate.
 
 `CalendarDate` is an immutable, strictly validated calendar date without a
 clock or timezone. Its calendar identifiers are `CalendarId.gregory`,
-`CalendarId.persian`, `CalendarId.hebrew`, `CalendarId.chinese`, and
+`CalendarId.persian`, `CalendarId.hebrew`, `CalendarId.chinese`, `CalendarId.indian`, and
 `CalendarId.islamicUmalqura`.
 
 ```dart
@@ -445,6 +449,7 @@ A picker needs both a calendar delegate (date arithmetic) and matching
 | Hebrew | `HebrewCalendarDelegate` | `DefaultHebrewCalendarMaterialLocalizations.delegate` |
 | Chinese | `ChineseCalendarDelegate` | `DefaultChineseCalendarMaterialLocalizations.delegate` |
 | Amanta | `AmantaCalendarDelegate` | Flutter Material UI with calendar labels supplied by the delegate |
+| Saka | `SakaCalendarDelegate` | `DefaultSakaCalendarMaterialLocalizations.delegate` |
 | Umm al-Qura | `HijriCalendarDelegate` | `DefaultHijriCalendarMaterialLocalizations.delegate` |
 
 The built-in localizations support English (`en`) only and use the legacy

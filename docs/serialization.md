@@ -14,6 +14,8 @@ an all-day calendar date. Both define strict version-1 JSON contracts in
 | `CalendarId.persian` | `persian` |
 | `CalendarId.islamicUmalqura` | `islamic-umalqura` |
 | `CalendarId.hebrew` | `hebrew` |
+| `CalendarId.chinese` | `chinese` |
+| `CalendarId.indian` | `indian` |
 
 Use `CalendarId.identifier` for the wire value. Generic `hijri` or `islamic`
 strings are not aliases in this schema.

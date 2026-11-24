@@ -1,6 +1,6 @@
 name: general_datetime_core
-description: "Pure Dart conversion and civil date arithmetic for Gregorian, Persian, Hebrew, Chinese, Amanta, and Umm al-Qura dates. Store Amanta by Gregorian day or day index."
-version: 3.1.1
+description: "Pure Dart conversion and civil date arithmetic for Gregorian, Persian, Hebrew, Chinese, Amanta, Saka, and Umm al-Qura dates. Store Amanta by Gregorian day or day index."
+version: 4.0.0
 repository: https://github.com/ali-you/general-date-package
 issue_tracker: https://github.com/ali-you/general-date-package/issues
 topics:

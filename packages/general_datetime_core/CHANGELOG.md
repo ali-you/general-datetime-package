@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.0
+
+- Add Indian National Calendar conversion, civil arithmetic, and storage using
+  `SakaDateTime`, `CalendarSystems.saka`, and `CalendarId.indian`.
+- Breaking change for exhaustive `CalendarId` switches. Handle
+  `CalendarId.indian` when upgrading.
+
 ## 3.1.1
 
 - Clarify the storage options for Amanta dates and refresh installation examples.

@@ -9,6 +9,52 @@ import 'package:general_datetime/general_datetime.dart';
 import '../support/calendar_test_case.dart';
 
 void main() {
+  for (final (year, month, length) in [
+    (SakaDateTime.minimumYear, 1, 30),
+    (SakaDateTime.maximumYear, 12, 30),
+  ]) {
+    testWidgets('Saka range renders and saves at boundary year $year',
+        (tester) async {
+      const localizations = DefaultSakaCalendarMaterialLocalizations();
+      final delegate = const SakaCalendarDelegate().rangePickerDelegate;
+      final first = delegate.getDay(year, month, 1);
+      final last = delegate.getDay(year, month, length);
+      final expected = DateTimeRange(start: first, end: last);
+      DateTimeRange<DateTime>? selected;
+      await tester.pumpWidget(MaterialApp(
+        localizationsDelegates: const [
+          DefaultSakaCalendarMaterialLocalizations.delegate,
+        ],
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                selected = await showDateRangePicker(
+                  context: context,
+                  firstDate: first,
+                  lastDate: last,
+                  currentDate: first,
+                  initialDateRange: expected,
+                  calendarDelegate: delegate,
+                  builder: calendarDateRangePickerBuilder(delegate),
+                );
+              },
+              child: const Text('Open Saka range'),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.text('Open Saka range'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text(localizations.saveButtonLabel));
+      await tester.pumpAndSettle();
+      expect(selected, expected);
+      expect(selected?.start, isA<SakaDateTime>());
+      expect(selected?.end, isA<SakaDateTime>());
+    });
+  }
+
   testWidgets(
       'range builder repairs an omitted delegate and preserves wrappers',
       (tester) async {

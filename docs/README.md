@@ -19,6 +19,7 @@ application.
 | [Chinese calendar](chinese-calendar.md) | Related years, ordinal/leap months, .NET table provenance, formatting, pickers, and validation differences |
 | [Chinese implementation audit](chinese-implementation-audit-2026-10-28.md) | Reproduced fixes, exhaustive periods, VM/JavaScript/native executable tests, DST checks, coverage, and the CI peer-pin gate |
 | [Hebrew calendar](hebrew-calendar.md) | Stable month slots, leap-month arithmetic, storage, English Material pickers, and verification |
+| [Indian National Calendar (Saka)](saka-calendar.md) | Civil rules, date bounds, serialization, and Flutter picker setup |
 | [Hebrew release validation](hebrew-release-validation-2026-10-28.md) | Exhaustive independent comparison of all supported Hebrew dates and current package checks |
 | [Hebrew package validation](hebrew-package-validation-2026-10-12.md) | Full package suites, independent Hebrew comparison, browser and Android checks, and remaining release gates |
 | [Persian/Hijri regression review](hebrew-existing-calendar-regression-2026-10-12.md) | Before/after checks for existing calendars, shared formatter state, enum compatibility and compiled size |
